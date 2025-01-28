@@ -5,7 +5,7 @@ class ProjectsDashboard {
                 title: "#5 miss penny: get daily 8 AM texts to stay on budget",
                 image: "miss-penny.gif",
                 date: new Date(2025, 0), // January 2025
-                why: '<p>Month after month, we decimated our budget by spending too much on restaurants and silly Amazon purchases.</p></br><p>"We\'ll spend more mindfully next month," we\'d declare. Well... that rarely worked.</p></br><p>A big reason why was that we had no real-time insight into where we stood against our budget. What we needed was a simple daily expense report. Yet, I couldn\'t find a personal finance app that would send alerts about just a few custom, discretionary categories.</p></br><p>So I built a simple solution called Miss Penny: It sends a text daily at 8 AM showing how we\'re tracking against our eating and shopping budgets.',
+                why: '<p>Month after month, we decimated our budget by spending too much on restaurants and silly Amazon purchases.</p></br><p>"We\'ll spend more mindfully next month," we\'d declare. Well... that rarely worked.</p></br><p>A big reason why was that we had no real-time insight into where we stood against our budget. What we needed was a simple daily expense report. Yet, I couldn\'t find a personal finance app that would send alerts about just a few custom, discretionary categories.</p></br><p>So I built a simple solution called Miss Penny: It sends a text daily at 8 AM showing how we\'re tracking against our eating and shopping budgets.</p></br><p>Improvement plans:</p><ul><li>I noticed that if we had already gone over budget for the month, we tended to just give up and overspend even more. So, Miss Penny v2 will track expenses on a rolling 30-day basis rather than by calendar month.</li><li>The current version only tracks expenses that have posted to our bank accounts, so there\'s a 2-3 day lag in the updates. I\'d like to explore ways to include pending transactions as well.</li></ul>',
                 tools: ["GitHub Actions", "Google Apps Script", "Google Sheets", "OpenAI", "Python", "Sheet SMS", "Tiller Money"],
                 calcMethod: "cumulative reduction in expenses\n~$500/month",
                 savings: {
@@ -36,10 +36,10 @@ class ProjectsDashboard {
                 }
             },
             {
-                title: "#3 turn emails into a google sheet",
+                title: "#3 turn emails into a spreadsheet",
                 image: "jdp.gif",
                 date: new Date(2024, 7), // August 2024           
-                why: '<p>The tennis club <a href="#project-2">I previously mentioned</a> runs a sizeable after-school program. Their application process involved a web form that converted submissions into emails, which were then printed and stored in a filing cabinet.</p></br><p>The program director had two options:</p><ol><li>He could manage everything (scheduling, refunds, attendance, instructor assignments, transportation, and a dozen other things) using the hard copies, or</li><li>he could manually transfer information from hundreds of application forms to a spreadsheet and go from there.</li></ol><p>Neither option was exactly a winner.</p></br><p>To streamline the program director\'s workflow, I created a script to transfer application data from emails to Google Sheets automatically. The resulting spreadsheet:<ul><li>organizes students by program semester, type, and schedule,</li><li>creates clear audit trails with timestamps for all changes,</li><li>tracks each student\'s dismissal times and transportation needs,</li><li>handles staff assignments and automatically pulls in staff information,</li><li>maintains comprehensive family contact details in one place,</li><li>compiles and categorizes program revenues by source.</li></ul>',
+                why: '<p>The tennis club <a href="#project-2">I previously mentioned</a> runs a sizeable after-school program. Their application process involved a web form that converted submissions into emails, which were then printed and stored in a filing cabinet.</p></br><p>The program director had two options:</p><ol><li>He could manage everything (scheduling, refunds, attendance, instructor assignments, transportation, and a dozen other things) using the hard copies, or</li><li>he could manually transfer information from hundreds of application forms to a spreadsheet and go from there.</li></ol><p>Neither option was exactly a winner.</p></br><p>To streamline the program director\'s workflow, I created a script to transfer application data from emails to Google Sheets automatically. The resulting spreadsheet:</p><ul><li>organizes students by program semester, type, and schedule,</li><li>creates clear audit trails with timestamps for all changes,</li><li>tracks each student\'s dismissal times and transportation needs,</li><li>handles staff assignments and automatically pulls in staff information,</li><li>maintains comprehensive family contact details in one place,</li><li>compiles and categorizes program revenues by source.</li></ul>',
                 tools: ["Google Apps Script", "Google Sheets"],
                 calcMethod: "cumulative time saved × $30 hourly rate\n\nDigital record-keeping saves the club ~60 minutes/week on average, accounting for seasonal variations.",
                 savings: {
@@ -53,10 +53,10 @@ class ProjectsDashboard {
                 }
             },
             {
-                title: "#2 post tennis lessons on google calendar",
+                title: "#2 custom google calendar auto-updates",
                 image: "joe-calendar.gif",
                 date: new Date(2024, 7), // August 2024           
-                why: '<p>The tennis instructors at a club near me call the club\'s receptionists several times a day to check their lesson schedules. (While they can theoretically check their schedules online, the website isn\'t mobile-friendly.)</p></br><p>I modified the <a href="#project-1">court schedule monitor</a> to automatically post each instructor\'s lesson schedule to their Google Calendar. As a bonus, they can also instantly see which court they\'re assigned to.',
+                why: '<p>The tennis instructors at a club near me call the club\'s receptionists several times a day to check their lesson schedules. (In theory, they can check their schedules online, but the website isn\'t mobile-friendly.)</p></br><p>I modified the <a href="#project-1">court schedule monitor</a> to automatically post each instructor\'s lesson schedule to their Google Calendar. As a bonus, they can also instantly see which court they\'re assigned to.',
                 tools: ["Google Calendar", "Node.js"],
                 calcMethod: "cumulative time saved × $30 hourly rate\n\nAutomatically updated Google Calendar saves an instructor ~10 minutes/day.",
                 savings: {
@@ -70,7 +70,7 @@ class ProjectsDashboard {
                 }
             },
             {
-                title: "#1 monitor tennis club court schedules",
+                title: "#1 tennis club court schedule monitor",
                 image: "scraper.gif",
                 date: new Date(2024, 4), // May 2024           
                 why: '<p><a href="https://www.ocamsclub.com" target="_blank">My company</a> records and sends videos to tennis players automatically every time they play. Our workflow requires monitoring each tennis club\'s court schedule to determine when to send videos, which courts they\'re from, and who should receive them.</p></br><p>We used to have to check the court schedules manually several times a day, which was definitely not ideal.</p></br><p>I wrote a web scraper to automate this process. The script sends updates to Google Sheets and sends email notifications.</p></br><p>PS: This was my first weekend (coding) project! 🥳',
@@ -98,6 +98,7 @@ class ProjectsDashboard {
         const projectsHTML = this.projects.map(project => {
             // Extract project number from title (e.g., "#5" -> "5")
             const projectId = project.title.split(' ')[0].replace('#', '');
+            const likes = localStorage.getItem(`project-${projectId}-likes`) || 0;
             
             return `
                 <div id="project-${projectId}" class="project-card">
@@ -133,6 +134,16 @@ class ProjectsDashboard {
                                         </div>
                                     </div>
                                     <p class="savings-explanation">${project.calcMethod.replace(/\n/g, '<br>')}</p>
+                                    <div class="action-buttons">
+                                        <button class="like-button" data-project-id="${projectId}">
+                                            <span class="heart-icon">♥</span>
+                                            <span class="like-count">${likes}</span>
+                                        </button>
+                                        <button class="share-button" data-project-id="${projectId}">
+                                            <span class="share-icon">↗</span>Share
+                                        </button>
+                                        <a href="mailto:your@email.com" class="write-me-link">Write me</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -144,6 +155,27 @@ class ProjectsDashboard {
         }).join('');
 
         projectsContainer.innerHTML = projectsHTML;
+        this.initializeLikeButtons();
+    }
+
+    initializeLikeButtons() {
+        document.querySelectorAll('.like-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const projectId = e.currentTarget.dataset.projectId;
+                const storageKey = `project-${projectId}-likes`;
+                const currentLikes = parseInt(localStorage.getItem(storageKey) || 0);
+                const newLikes = currentLikes + 1;
+                
+                localStorage.setItem(storageKey, newLikes);
+                
+                const likeCount = button.querySelector('.like-count');
+                likeCount.textContent = newLikes;
+                
+                // Add animation class
+                button.classList.add('liked');
+                setTimeout(() => button.classList.remove('liked'), 300);
+            });
+        });
     }
 
     startSavingsUpdates() {
