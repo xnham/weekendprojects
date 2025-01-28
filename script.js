@@ -167,5 +167,9 @@ class ProjectsDashboard {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize projects
     new ProjectsDashboard();
+    
+    // Set current year in footer
+    document.getElementById('current-year').textContent = new Date().getFullYear();
 });
