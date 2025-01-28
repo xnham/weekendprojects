@@ -90,65 +90,71 @@ class ProjectsDashboard {
 
         this.initializeProjects();
         this.startSavingsUpdates();
+        this.initializeFloatingActions();
     }
 
     initializeProjects() {
         const projectsContainer = document.querySelector('.projects');
         
         const projectsHTML = this.projects.map(project => {
-            // Extract project number from title (e.g., "#5" -> "5")
             const projectId = project.title.split(' ')[0].replace('#', '');
-            const likes = localStorage.getItem(`project-${projectId}-likes`) || 0;
             
             return `
-                <div id="project-${projectId}" class="project-card">
-                    <div class="card-3d">
-                        <div class="face front">
-                            <div class="project-header">
-                                <h2>${project.title}</h2>
-                                <div class="project-date">
-                                    ${project.date.toLocaleDateString('en-US', { 
-                                        month: 'long',
-                                        year: 'numeric'
-                                    }).toLowerCase()}
+                <div class="project" data-project="${project.title}">
+                    <div class="project-card">
+                        <div class="project-header">
+                            <h2>${project.title}</h2>
+                            <div class="project-date">${project.date.toLocaleDateString('en-US', { 
+                                month: 'long',
+                                year: 'numeric'
+                            }).toLowerCase()}</div>
+                        </div>
+                        <div class="project-content">
+                            <div class="project-image">
+                                <img src="images/${project.image}" alt="${project.title}">
+                            </div>
+                            <div class="project-info">
+                                <div class="project-why">${project.why}</div>
+                                <div class="project-tools">
+                                    ${this.renderTools(project.tools)}
                                 </div>
                             </div>
-                            <div class="project-content">
-                                <div class="project-image">
-                                    <img src="images/${project.image}" alt="${project.title}">
-                                </div>
-                                <div class="project-info">
-                                    <div class="project-why">${project.why}</div>
-                                    <div class="project-tools">
-                                        ${project.tools.map((tool, index) => 
-                                            index === project.tools.length - 1
-                                                ? `<span class="tool">${tool}</span>`
-                                                : `<span class="tool-group"><span class="tool">${tool}</span><span class="tool-separator">|</span></span>`
-                                        ).join('')}
+                            <div class="project-savings">
+                                <div class="savings-header">
+                                    <div class="savings-amount ${project.savings === 0 ? 'zero-amount' : ''}">
+                                        $<span>${Math.floor(project.savings.formula()).toLocaleString()}</span><sup>.${project.savings.formula().toFixed(5).split('.')[1]}</sup>
                                     </div>
                                 </div>
-                                <div class="project-savings">
-                                    <div class="savings-header">
-                                        <div class="savings-amount" data-project="${project.title}">
-                                            ${this.formatMoney(project.savings.current)}
-                                        </div>
-                                    </div>
-                                    <p class="savings-explanation">${project.calcMethod.replace(/\n/g, '<br>')}</p>
-                                    <div class="action-buttons">
-                                        <button class="like-button" data-project-id="${projectId}">
-                                            <span class="heart-icon">♥</span>
-                                            <span class="like-count">${likes}</span>
-                                        </button>
-                                        <button class="share-button" data-project-id="${projectId}">
-                                            <span class="share-icon">↗</span>Share
-                                        </button>
-                                        <a href="mailto:your@email.com" class="write-me-link">Write me</a>
-                                    </div>
-                                </div>
+                                <div class="savings-explanation">${project.calcMethod.replace(/\n/g, '<br>')}</div>
                             </div>
                         </div>
-                        <div class="face right"></div>
-                        <div class="face bottom"></div>
+                    </div>
+                    <div class="floating-actions">
+                        <button class="action-button like-button" data-project-id="${projectId}">
+                            <span class="action-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#41424C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </span>
+                            <span class="action-label">I want this</span>
+                        </button>
+                        <button class="action-button share-button" data-project-id="${projectId}">
+                            <span class="action-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#41424C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </span>
+                            <span class="action-label">Share</span>
+                        </button>
+                        <a href="mailto:your@email.com" class="action-button message-button">
+                            <span class="action-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#41424C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-message-circle">
+                                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                                </svg>
+                            </span>
+                            <span class="action-label">Message</span>
+                        </a>
                     </div>
                 </div>
             `;
@@ -184,17 +190,51 @@ class ProjectsDashboard {
                 const newAmount = project.savings.formula();
                 const element = document.querySelector(`[data-project="${project.title}"]`);
                 if (element) {
-                    element.innerHTML = this.formatMoney(newAmount);
+                    element.querySelector('.savings-amount').innerHTML = `$<span>${Math.floor(newAmount).toLocaleString()}</span><sup>.${newAmount.toFixed(5).split('.')[1]}</sup>`;
                 }
             });
         }, 100);  // Update every 100ms instead of 1000ms
     }
 
-    formatMoney(amount) {
-        const [dollars, cents] = amount.toFixed(5).split('.');
-        const formattedDollars = dollars.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        const zeroClass = amount === 0 ? 'zero-amount' : '';
-        return `<span class="${zeroClass} updating">$${formattedDollars}<sup>.${cents}</sup></span>`;
+    renderTools(tools) {
+        return tools.map((tool, index) => 
+            index === tools.length - 1
+                ? `<span class="tool">${tool}</span>`
+                : `<span class="tool-group"><span class="tool">${tool}</span><span class="tool-separator">|</span></span>`
+        ).join('');
+    }
+
+    initializeFloatingActions() {
+        const cards = document.querySelectorAll('.project-card');
+        
+        cards.forEach(card => {
+            const actions = card.querySelector('.floating-actions');
+            const cardRect = card.getBoundingClientRect();
+            
+            window.addEventListener('scroll', () => {
+                const cardTop = card.offsetTop;
+                const cardBottom = cardTop + card.offsetHeight;
+                const actionsHeight = actions.offsetHeight;
+                const scrollY = window.scrollY;
+                
+                // Calculate the middle position
+                const middlePosition = cardTop + (card.offsetHeight - actionsHeight) / 2;
+                
+                // Calculate boundaries
+                const minTop = cardTop;
+                const maxTop = cardBottom - actionsHeight;
+                
+                // Calculate new position
+                let newTop = middlePosition;
+                
+                if (scrollY > middlePosition - window.innerHeight/2) {
+                    newTop = Math.min(maxTop, Math.max(minTop, scrollY + window.innerHeight/2));
+                }
+                
+                // Apply new position
+                actions.style.top = `${newTop - cardTop}px`;
+            });
+        });
     }
 }
 
