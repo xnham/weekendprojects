@@ -1,0 +1,276 @@
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sigmar&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Londrina+Shadow&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Londrina+Sketch&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rampart+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik+Doodle+Shadow&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Shizuru&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Londrina+Outline&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.4;
+    color: #41424C;
+    background-image: 
+        radial-gradient(
+            circle,
+            #41424C20 2px,
+            transparent 1px
+        ),
+        linear-gradient(45deg, transparent 49%, #41424C60 49.5%, #41424C60 50.5%, transparent 51%),
+        linear-gradient(-45deg, transparent 49%, #41424C60 49.5%, #41424C60 50.5%, transparent 51%);
+    background-size: 14px 20px, 8px 8px, 8px 8px;
+    background-position: center;
+}
+
+body::before {
+    display: none;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 2rem;
+    margin: 0 auto;
+}
+
+h1 {
+    font-family: 'Rampart One', cursive;
+    text-align: center;
+    font-size: clamp(1rem, 8.2vw, 9.2vw);
+    line-height: 1.0;
+    padding-bottom: 2rem; 
+    width: 100%;
+    position: relative;
+    background-color: white;
+}
+
+.project-card {
+    position: relative;
+    border: 2px solid #41424C;
+    background-color: white;
+    margin-bottom: 5rem;
+    border-radius: 1vw;
+    overflow: hidden;
+}
+
+.project-header {
+    background-color: #0066ff;
+    /* background-color: #8ffa7f; */
+    color: #ffffff;
+    padding: 0.5rem 4%;  /* Match content padding */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.project-header h2 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.project-date {
+    font-size: 0.9rem;
+    font-weight: 400; 
+}
+
+.project-content {
+    padding: 5%;
+    display: grid;
+    grid-template-columns: 25% 40% 25%;
+    gap: 5%;
+}
+
+.project-image {
+    background: #f5f5f5;
+    width: 100%;
+    aspect-ratio: 1;
+    border: 1px solid #41424C;
+    border-radius: 1vw;
+    overflow: hidden;  /* Contain the gif */
+}
+
+.project-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;  /* Make image cover the square */
+    display: block;
+}
+
+.project-info h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.project-savings {
+    text-align: right;
+}
+
+.savings-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.savings-amount {
+    font-size: 4vw;
+    font-weight: 900;
+    line-height: 100%;
+    transition: color 0.2s ease;
+}
+
+.savings-amount sup {
+    font-size: 1.2vw;
+    font-weight: 400;
+}
+
+.savings-label {
+    color: #41424C80;
+}
+
+.savings-explanation {
+    font-size: 0.875rem;
+    color: #41424C80;
+}
+
+.timeline-placeholder {
+    width: 100%;
+    height: 14px;
+    background-color: #41424C;
+    margin-bottom: 5rem;
+}
+
+.project-tools {
+    margin-top: 2rem;
+    color: #41424C80;
+    font-size: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0;  /* Vertical gap between wrapped lines */
+    width: 100%;
+}
+
+.tool {
+    color: #41424C70;
+    white-space: nowrap;  /* Prevent individual tool names from breaking */
+    display: flex;
+    align-items: center;
+}
+
+.tool-separator {
+    color: #41424C20;
+    padding: 0 0.4rem;
+    display: flex;
+    align-items: center;
+}
+
+.zero-amount {
+    color: transparent;
+}
+
+.tool-group {
+    white-space: nowrap;  /* Keep tool and its separator together */
+    display: flex;
+    align-items: center;
+}
+
+.savings-amount span {
+    display: inline;  /* Back to default */
+}
+
+.savings-amount .rolling {
+    animation: rollNumber 0.3s ease-out;
+}
+
+.highlight {
+    background-color: #eff75d;
+}
+
+footer {
+    background-color: #41424C;
+    color: white;
+    padding: 1rem 0;
+    margin-top: 4rem;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.project-why ul {
+    list-style: none;
+    margin: 1.2rem 0;  /* Adjust these values to control spacing */
+    padding-left: 1.2rem;
+}
+
+.project-why li {
+    position: relative;
+    padding: 0.1rem 0;  /* Vertical spacing between list items */
+    line-height: 1.4;  /* Line height for wrapped text */
+    margin: 0;  /* Remove default margins */
+}
+
+.project-why li:before {
+    content: "•";
+    position: absolute;
+    left: -1rem;
+    color: #41424C;  /* Match the text color */
+}
+
+/* Add spacing after the text that precedes the list */
+.project-why ul:first-of-type {
+    margin-top: 0.5rem;
+}
+
+.project-why ol {
+    list-style: none;
+    counter-reset: item;
+    margin: 1.2rem 0;  /* Match the ul spacing */
+    padding-left: 1.2rem;
+}
+
+.project-why ol li {
+    position: relative;
+    padding: 0.1rem 0;  /* Match ul li padding */
+    line-height: 1.4;
+    margin: 0;
+}
+
+.project-why ol li:before {
+    content: counter(item) ".";
+    counter-increment: item;
+    position: absolute;
+    left: -1rem;  /* Match ul bullet position */
+    color: #41424C;
+}
+
+/* Match the first-of-type spacing */
+.project-why ol:first-of-type {
+    margin-top: 0.5rem;
+}
+
+.project-why a {
+    color: #41424C;  
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    border-bottom-color: #41424C;
+}
+
+.project-why a:hover {
+    color: #41424C95;  
+    border-bottom-color: #41424C95;
+}
+
+html {
+    scroll-behavior: smooth;  /* Makes the scroll animation smooth */
+}
+
+
