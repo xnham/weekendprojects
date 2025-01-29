@@ -19,7 +19,7 @@ body {
     font-family: 'Roboto', sans-serif;
     line-height: 1.5;
     color: #41424C;
-    background-image: 
+    /* background-image: 
         radial-gradient(
             circle,
             #41424C15 2px,
@@ -28,7 +28,7 @@ body {
         linear-gradient(45deg, transparent 49%, #41424C40 49.5%, #41424C40 50.5%, transparent 51%),
         linear-gradient(-45deg, transparent 49%, #41424C40 49.5%, #41424C40 50.5%, transparent 51%);
     background-size: 14px 20px, 8px 8px, 8px 8px;
-    background-position: center;
+    background-position: center; */
 }
 
 body::before {
@@ -57,26 +57,27 @@ h1 {
     position: relative;
     margin-bottom: 5rem;
     display: flex;  /* Makes children (card and buttons) flex items */
-    gap: 1.2rem;      /* Creates space between card and buttons */
-    /* outline: 3px solid #2196f3; */
+    gap: 0;      /* Creates space between card and buttons */
+    /* outline: 3px solid #2196f3; /* Blue outline for project card */
 }
 
 .project-card {
     flex: 1;
     border: 1px solid #41424C;
     background-color: white;
-    border-radius: 1vw;
+    border-radius: 16px;
     overflow: hidden;
     /* outline: 2px solid #ffeb3b;  /* Yellow outline for project card */
 }
 
 .project-header {
-    background-color: #0066ff;
-    color: #ffffff;
+    /* background-color: #0066ff; */
+    color: #41424C;
     padding: 0.5rem 4%;  /* Match content padding */
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px #41424C solid;
 }
 
 .project-header h2 {
@@ -86,8 +87,9 @@ h1 {
 }
 
 .project-date {
-    font-size: 0.9rem;
+    font-size: 0.9vw;
     font-weight: 400; 
+    opacity: 0.7;
 }
 
 .project-content {
@@ -131,25 +133,26 @@ h1 {
 }
 
 .savings-amount {
-    font-size: 4vw;
+    font-size: 3.2vw;
     font-weight: 900;
     line-height: 100%;
     transition: color 0.2s ease;
 }
 
 .savings-amount sup {
-    font-size: 1vw;
+    font-size: 0.9vw;
     font-weight: 400;
 }
 
 .savings-explanation {
     font-size: 0.9vw;
-    color: #41424C80;
+    color: #41424C;
+    opacity: 0.7;
 }
 
 .timeline-placeholder {
     width: 100%;
-    height: 2px;
+    height: 1px;
     background-color: #41424C;
     margin-bottom: 5rem;
 }
@@ -194,10 +197,6 @@ h1 {
 
 .savings-amount .rolling {
     animation: rollNumber 0.3s ease-out;
-}
-
-.highlight {
-    background-color: #eff75d;
 }
 
 footer {
@@ -280,25 +279,25 @@ html {
 
 .floating-actions {
     position: sticky;
-    top: 2rem;  /* Distance from top of viewport when sticking */
-    align-self: flex-start;  /* Prevents stretching with flex parent */
+    top: 0.5rem;
+    padding: 1.4rem 0;
+    height:fit-content;
+    margin-left: 0.8rem;
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
-    height: fit-content;  /* Only as tall as its buttons */
-    /* background-color: white; */
-    /* border: 1px solid #41424C; */
-    border-radius: 12px;
+    gap: 1rem;
+    border: 1px #41424C solid;
+    border-radius: 16px;
+    /* outline: 2px solid #3bff79;  /* Green outline for project card */
 }
 
 .action-button {
-    background: white;
-    /* border: none; */
-    border: 1px solid #41424C;
+    background: transparent;
+    border: none;
     border-radius: 14px;
     padding: 0.8rem;
-    width: 80px;
-    height: 80px;
+    width: 76px;
+    height: 60px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
@@ -319,8 +318,10 @@ html {
 
 .action-label {
     font-size: 0.7rem;
+    font-weight: 400;
     text-align: center;
     color: #41424C;
+    opacity: 0.7;
 }
 
 @keyframes pulse {
@@ -336,19 +337,19 @@ html {
 }
 
 .action-icon svg path {
-    stroke-width: 1.5px;  /* Adjust this value to change outline thickness */
+    stroke-width: 2px;  /* Adjust this value to change outline thickness */
     stroke: #41424C;      /* Default color */
     fill: none;           /* Make icons hollow by default */
 }
 
 /* Like button states */
 .like-button .action-icon svg path {
-    transition: fill 0.3s ease;
+    transition: all 0.1s ease;
 }
 
 .like-button.liked .action-icon svg path {
-    fill: #ff4b4b;
-    stroke: #ff4b4b;
+    fill: #ff0066;  /* Red fill when liked */
+    stroke: #ff0066;  /* Red outline when liked */
 }
 
 /* Make the like button container relative for positioning */
@@ -359,18 +360,17 @@ html {
 /* Update feedback message positioning */
 .feedback-message {
     position: absolute;
-    left: calc(100% + 1rem);
-    top: 0;  /* Align to top of button instead of center */
-    transform: none;  /* Remove vertical centering transform */
+    /* Remove left calc() since we're setting it in JS */
     font-family: 'Shadows Into Light Two', cursive;
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     text-align: left;
     color: #41424C;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     opacity: 0;
-    transition: opacity 0.8s ease;  /* Increased from 0.3s to 0.8s */
+    transition: opacity 0.8s ease;
+    pointer-events: none;  /* Prevent it from interfering with button clicks */
 }
 
 .feedback-message.visible {
@@ -388,5 +388,48 @@ html {
 }
 
 .message-button.highlight {
-    transform: scale(1.2);
+    transform: scale(1.4);
+}
+
+.feedback-text {
+    white-space: nowrap;  /* Prevent "Say more?" from breaking */
+}
+
+/* Override opacity inheritance for feedback message */
+.like-button.highlight .feedback-message.visible {
+    opacity: 1 !important;  /* This ensures it overrides any inherited opacity */
+}
+
+/* Add dimmed state for like and share buttons */
+.like-button.highlight,
+.share-button.highlight {
+    opacity: 1;  /* Reset opacity */
+}
+
+.like-button,
+.share-button {
+    position: relative;  /* For pseudo-element positioning */
+}
+
+.like-button.highlight::before,
+.share-button.highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
+    opacity: 0.4;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.message-button.highlight .action-label {
+    opacity: 1;
+}
+
+.share-button.shared .action-icon svg path {
+    fill: #944cc4;  /* Lime fill when shared */
+    stroke: #944cc4;
 }

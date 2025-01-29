@@ -7,7 +7,7 @@ class ProjectsDashboard {
                 title: "#5 miss penny: get daily 8 AM texts to stay on budget",
                 image: "miss-penny.gif",
                 date: new Date(2025, 0), // January 2025
-                why: '<p>Month after month, we decimated our budget by spending too much on restaurants and silly Amazon purchases.</p></br><p>"We\'ll spend more mindfully next month," we\'d declare. Well... that rarely worked.</p></br><p>A big reason why was that we had no real-time insight into where we stood against our budget. What we needed was a simple daily expense report. Yet, I couldn\'t find a personal finance app that would send alerts about just a few custom, discretionary categories.</p></br><p>So I built a simple solution called Miss Penny: It sends a text daily at 8 AM showing how we\'re tracking against our eating and shopping budgets.</p></br><p>Improvement plans:</p><ul><li>I noticed that if we had already gone over budget for the month, we tended to just give up and overspend even more. So, Miss Penny v2 will track expenses on a rolling 30-day basis rather than by calendar month.</li><li>The current version only tracks expenses that have posted to our bank accounts, so there\'s a 2-3 day lag in the updates. I\'d like to explore ways to include pending transactions as well.</li></ul>',
+                why: '<p>Month after month, I decimated our family\'s budget by spending too much on restaurants and silly Amazon purchases.</p></br><p>"I\'ll spend more mindfully next month," I\'d declare. Well... that rarely worked.</p></br><p>A big reason why was that I had no real-time insight into where I stood against our budget. What I needed was a simple daily expense report. Yet, I couldn\'t find a personal finance app that would send alerts about just a few custom, discretionary categories.</p></br><p>So I built a simple solution called Miss Penny: It sends a text daily at 8 AM showing how I\'m tracking against our eating and shopping budgets.</p></br><p>Improvement plans:</p><ul><li>I noticed that if I had already gone over budget for the month, I tended to just give up and overspend even more. So, Miss Penny v2 will track expenses on a rolling 30-day basis rather than by calendar month.</li><li>The current version only tracks expenses that have posted to our bank accounts, so there\'s a 2-3 day lag in the updates. I\'d like to explore ways to include pending transactions as well.</li></ul>',
                 tools: ["GitHub Actions", "Google Apps Script", "Google Sheets", "OpenAI", "Python", "Sheet SMS", "Tiller Money"],
                 calcMethod: "cumulative reduction in expenses\n~$500/month",
                 savings: {
@@ -145,7 +145,7 @@ class ProjectsDashboard {
                                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                                 </svg>
                             </span>
-                            <span class="action-label">I want this</span>
+                            <span class="action-label">i want this</span>
                         </button>
                         <button class="action-button share-button" data-project-id="${projectId}">
                             <span class="action-icon">
@@ -174,8 +174,6 @@ class ProjectsDashboard {
         document.querySelectorAll('.like-button').forEach(button => {
             button.addEventListener('click', (e) => {
                 const button = e.currentTarget;
-                
-                // Toggle liked state
                 button.classList.add('liked');
                 
                 // Create and show feedback message
@@ -183,38 +181,102 @@ class ProjectsDashboard {
                 feedback.className = 'feedback-message';
                 feedback.innerHTML = `
                     <div class="feedback-text">
-                        Thanks!<br>
+                        Nice!<br>
                         Say more?
                     </div>
                     <img src="images/arrow.png" class="feedback-arrow" alt="arrow">
                 `;
                 
                 // Remove any existing feedback
-                const existingFeedback = button.querySelector('.feedback-message');
+                const existingFeedback = document.querySelector('.feedback-message');
                 if (existingFeedback) {
                     existingFeedback.remove();
                 }
                 
-                // Add new feedback
-                button.appendChild(feedback);
+                // Add new feedback to floating-actions instead of button
+                const floatingActions = button.parentElement;
+                floatingActions.appendChild(feedback);
                 
-                // Find and highlight message button
-                const messageButton = button.parentElement.querySelector('.message-button');
+                // Position feedback relative to like button
+                const buttonRect = button.getBoundingClientRect();
+                feedback.style.left = `${buttonRect.width + 16}px`; // 16px = 1rem
+                feedback.style.top = `${buttonRect.top - floatingActions.getBoundingClientRect().top}px`;
+                
+                // Find and highlight/dim buttons
+                const messageButton = floatingActions.querySelector('.message-button');
+                const shareButton = floatingActions.querySelector('.share-button');
                 messageButton.classList.add('highlight');
+                button.classList.add('highlight');
+                shareButton.classList.add('highlight');
                 
                 // Make visible after a brief delay (for animation)
                 setTimeout(() => {
                     feedback.classList.add('visible');
                 }, 10);
                 
-                // Remove after 3 seconds
+                // Remove after 4 seconds
                 setTimeout(() => {
                     feedback.classList.remove('visible');
-                    messageButton.classList.remove('highlight');  // Remove highlight
+                    messageButton.classList.remove('highlight');
+                    button.classList.remove('highlight');
+                    shareButton.classList.remove('highlight');
                     setTimeout(() => {
                         feedback.remove();
-                    }, 1000); // Increased from 300ms to 1000ms for slower fade out
-                }, 3000);
+                    }, 800);
+                }, 4000);
+            });
+        });
+
+        // Add click handler for share buttons
+        document.querySelectorAll('.share-button').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const button = e.currentTarget;
+                const projectId = button.getAttribute('data-project-id');
+                
+                // Copy the URL with project ID to clipboard
+                const url = `${window.location.href}#project-${projectId}`;
+                await navigator.clipboard.writeText(url);
+                
+                // Add shared state and update label
+                button.classList.add('shared');
+                button.querySelector('.action-label').textContent = 'shared';
+                
+                // Create and show feedback message
+                const feedback = document.createElement('div');
+                feedback.className = 'feedback-message';
+                feedback.innerHTML = `
+                    <div class="feedback-text">
+                        Link copied!
+                    </div>
+                `;
+                
+                // Remove any existing feedback
+                const existingFeedback = document.querySelector('.feedback-message');
+                if (existingFeedback) {
+                    existingFeedback.remove();
+                }
+                
+                // Add new feedback to floating-actions
+                const floatingActions = button.parentElement;
+                floatingActions.appendChild(feedback);
+                
+                // Position feedback relative to share button
+                const buttonRect = button.getBoundingClientRect();
+                feedback.style.left = `${buttonRect.width + 16}px`; // 16px = 1rem
+                feedback.style.top = `${buttonRect.top - floatingActions.getBoundingClientRect().top}px`;
+                
+                // Make visible after a brief delay (for animation)
+                setTimeout(() => {
+                    feedback.classList.add('visible');
+                }, 10);
+                
+                // Remove after 4 seconds
+                setTimeout(() => {
+                    feedback.classList.remove('visible');
+                    setTimeout(() => {
+                        feedback.remove();
+                    }, 800);
+                }, 4000);
             });
         });
     }
@@ -281,10 +343,6 @@ class ProjectsDashboard {
             };
             requestAnimationFrame(updateAmount);
         });
-    }
-
-    initializeFloatingActions() {
-        // Implementation of initializeFloatingActions method
     }
 
     renderTools(tools) {
