@@ -234,8 +234,9 @@ class ProjectsDashboard {
                 const button = e.currentTarget;
                 const projectId = button.getAttribute('data-project-id');
                 
-                // Copy the URL with project ID to clipboard
-                const url = `${window.location.href}#project-${projectId}`;
+                // Get base URL without hash fragment
+                const baseUrl = window.location.href.split('#')[0];
+                const url = `${baseUrl}#project-${projectId}`;
                 await navigator.clipboard.writeText(url);
                 
                 // Add shared state and update label
