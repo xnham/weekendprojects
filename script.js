@@ -93,6 +93,7 @@ class ProjectsDashboard {
         this.initializeProjects();
         this.startSavingsUpdates();
         this.initializeFloatingActions();
+        this.initializeHashNavigation();
     }
 
     initializeProjects() {
@@ -109,7 +110,7 @@ class ProjectsDashboard {
             `).join('');
 
             return `
-                <div class="project" data-project="${project.title}">
+                <div class="project" data-project="${project.title}" id="project-${projectId}">
                     <div class="project-card">
                         <div class="project-header">
                             <h2>${project.title}</h2>
@@ -349,6 +350,27 @@ class ProjectsDashboard {
         return tools.map(tool => {
             return `<span class="tool">${tool}</span>`;
         }).join('');
+    }
+
+    initializeHashNavigation() {
+        // Function to handle scrolling to project
+        const scrollToProject = () => {
+            // Wait a bit for DOM to be ready
+            setTimeout(() => {
+                if (window.location.hash) {
+                    const targetElement = document.querySelector(window.location.hash);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            }, 100);
+        };
+
+        // Handle initial hash on page load
+        scrollToProject();
+
+        // Handle hash changes
+        window.addEventListener('hashchange', scrollToProject);
     }
 }
 
