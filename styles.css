@@ -65,7 +65,7 @@ h1 {
     flex: 1;
     border: 1px solid #41424C;
     background-color: white;
-    border-radius: 16px;
+    border-radius: 18px;
     overflow: hidden;
     /* outline: 2px solid #ffeb3b;  /* Yellow outline for project card */
 }
@@ -73,7 +73,7 @@ h1 {
 .project-header {
     /* background-color: #0066ff; */
     color: #41424C;
-    padding: 0.5rem 4%;  /* Match content padding */
+    padding: 5%;  /* Match content padding */
     display: flex;
     justify-content: space-between;
     align-items: center;
