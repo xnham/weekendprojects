@@ -1,5 +1,7 @@
 class ProjectsDashboard {
     constructor() {
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        
         this.projects = [
             {
                 title: "#5 miss penny: get daily 8 AM texts to stay on budget",
@@ -99,6 +101,13 @@ class ProjectsDashboard {
         const projectsHTML = this.projects.map(project => {
             const projectId = project.title.split(' ')[0].replace('#', '');
             
+            const toolsHTML = project.tools.map((tool, index) => `
+                <div class="tool-group">
+                    <span class="tool">${tool}</span>
+                    ${index < project.tools.length - 1 ? '<span class="tool-separator">|</span>' : ''}
+                </div>
+            `).join('');
+
             return `
                 <div class="project" data-project="${project.title}">
                     <div class="project-card">
@@ -116,7 +125,7 @@ class ProjectsDashboard {
                             <div class="project-info">
                                 <div class="project-why">${project.why}</div>
                                 <div class="project-tools">
-                                    ${this.renderTools(project.tools)}
+                                    ${toolsHTML}
                                 </div>
                             </div>
                             <div class="project-savings">
@@ -132,7 +141,7 @@ class ProjectsDashboard {
                     <div class="floating-actions">
                         <button class="action-button like-button" data-project-id="${projectId}">
                             <span class="action-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#41424C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                                 </svg>
                             </span>
@@ -140,108 +149,152 @@ class ProjectsDashboard {
                         </button>
                         <button class="action-button share-button" data-project-id="${projectId}">
                             <span class="action-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#41424C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send">
-                                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"></path>
                                 </svg>
                             </span>
-                            <span class="action-label">Share</span>
+                            <span class="action-label">share</span>
                         </button>
-                        <a href="mailto:your@email.com" class="action-button message-button">
+                        <button class="action-button message-button" data-project-id="${projectId}">
                             <span class="action-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#41424C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-message-circle">
-                                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 13.4876 3.36093 14.891 4 16.1272L3 21L7.8728 20C9.10904 20.6391 10.5124 21 12 21Z"></path>
                                 </svg>
                             </span>
-                            <span class="action-label">Message</span>
-                        </a>
+                            <span class="action-label">message</span>
+                        </button>
                     </div>
                 </div>
             `;
         }).join('');
 
         projectsContainer.innerHTML = projectsHTML;
-        this.initializeLikeButtons();
+
+        // Add click handler for like buttons
+        document.querySelectorAll('.like-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const button = e.currentTarget;
+                
+                // Toggle liked state
+                button.classList.add('liked');
+                
+                // Create and show feedback message
+                const feedback = document.createElement('div');
+                feedback.className = 'feedback-message';
+                feedback.innerHTML = `
+                    <div class="feedback-text">
+                        Thanks!<br>
+                        Say more?
+                    </div>
+                    <img src="images/arrow.png" class="feedback-arrow" alt="arrow">
+                `;
+                
+                // Remove any existing feedback
+                const existingFeedback = button.querySelector('.feedback-message');
+                if (existingFeedback) {
+                    existingFeedback.remove();
+                }
+                
+                // Add new feedback
+                button.appendChild(feedback);
+                
+                // Find and highlight message button
+                const messageButton = button.parentElement.querySelector('.message-button');
+                messageButton.classList.add('highlight');
+                
+                // Make visible after a brief delay (for animation)
+                setTimeout(() => {
+                    feedback.classList.add('visible');
+                }, 10);
+                
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    feedback.classList.remove('visible');
+                    messageButton.classList.remove('highlight');  // Remove highlight
+                    setTimeout(() => {
+                        feedback.remove();
+                    }, 1000); // Increased from 300ms to 1000ms for slower fade out
+                }, 3000);
+            });
+        });
     }
 
     initializeLikeButtons() {
         document.querySelectorAll('.like-button').forEach(button => {
             button.addEventListener('click', (e) => {
-                const projectId = e.currentTarget.dataset.projectId;
-                const storageKey = `project-${projectId}-likes`;
-                const currentLikes = parseInt(localStorage.getItem(storageKey) || 0);
-                const newLikes = currentLikes + 1;
+                const button = e.currentTarget;
                 
-                localStorage.setItem(storageKey, newLikes);
-                
-                const likeCount = button.querySelector('.like-count');
-                likeCount.textContent = newLikes;
-                
-                // Add animation class
+                // Toggle liked state
                 button.classList.add('liked');
-                setTimeout(() => button.classList.remove('liked'), 300);
+                
+                // Create and show feedback message
+                const feedback = document.createElement('div');
+                feedback.className = 'feedback-message';
+                feedback.innerHTML = `
+                    <div class="feedback-text">
+                        Thanks!<br>
+                        Tell me more?
+                    </div>
+                    <img src="images/arrow.png" class="feedback-arrow" alt="arrow">
+                `;
+                
+                // Remove any existing feedback
+                const existingFeedback = button.querySelector('.feedback-message');
+                if (existingFeedback) {
+                    existingFeedback.remove();
+                }
+                
+                // Add new feedback
+                button.appendChild(feedback);
+                
+                // Find and highlight message button
+                const messageButton = button.parentElement.querySelector('.message-button');
+                messageButton.classList.add('highlight');
+                
+                // Make visible after a brief delay (for animation)
+                setTimeout(() => {
+                    feedback.classList.add('visible');
+                }, 10);
+                
+                // Remove after 1 minute
+                setTimeout(() => {
+                    feedback.classList.remove('visible');
+                    messageButton.classList.remove('highlight');  // Remove highlight
+                    setTimeout(() => {
+                        feedback.remove();
+                    }, 300); // Wait for fade out animation
+                }, 60000);
             });
         });
     }
 
     startSavingsUpdates() {
-        setInterval(() => {
-            this.projects.forEach(project => {
+        this.projects.forEach(project => {
+            const updateAmount = () => {
                 const newAmount = project.savings.formula();
                 const element = document.querySelector(`[data-project="${project.title}"]`);
                 if (element) {
-                    element.querySelector('.savings-amount').innerHTML = `$<span>${Math.floor(newAmount).toLocaleString()}</span><sup>.${newAmount.toFixed(5).split('.')[1]}</sup>`;
+                    element.querySelector('.savings-amount').innerHTML = 
+                        `$<span>${Math.floor(newAmount).toLocaleString()}</span><sup>.${newAmount.toFixed(5).split('.')[1]}</sup>`;
                 }
-            });
-        }, 100);  // Update every 100ms instead of 1000ms
-    }
-
-    renderTools(tools) {
-        return tools.map((tool, index) => 
-            index === tools.length - 1
-                ? `<span class="tool">${tool}</span>`
-                : `<span class="tool-group"><span class="tool">${tool}</span><span class="tool-separator">|</span></span>`
-        ).join('');
+                requestAnimationFrame(updateAmount);
+            };
+            requestAnimationFrame(updateAmount);
+        });
     }
 
     initializeFloatingActions() {
-        const cards = document.querySelectorAll('.project-card');
-        
-        cards.forEach(card => {
-            const actions = card.querySelector('.floating-actions');
-            const cardRect = card.getBoundingClientRect();
-            
-            window.addEventListener('scroll', () => {
-                const cardTop = card.offsetTop;
-                const cardBottom = cardTop + card.offsetHeight;
-                const actionsHeight = actions.offsetHeight;
-                const scrollY = window.scrollY;
-                
-                // Calculate the middle position
-                const middlePosition = cardTop + (card.offsetHeight - actionsHeight) / 2;
-                
-                // Calculate boundaries
-                const minTop = cardTop;
-                const maxTop = cardBottom - actionsHeight;
-                
-                // Calculate new position
-                let newTop = middlePosition;
-                
-                if (scrollY > middlePosition - window.innerHeight/2) {
-                    newTop = Math.min(maxTop, Math.max(minTop, scrollY + window.innerHeight/2));
-                }
-                
-                // Apply new position
-                actions.style.top = `${newTop - cardTop}px`;
-            });
-        });
+        // Implementation of initializeFloatingActions method
+    }
+
+    renderTools(tools) {
+        return tools.map(tool => {
+            return `<span class="tool">${tool}</span>`;
+        }).join('');
     }
 }
 
+// At the end of script.js
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize projects
     new ProjectsDashboard();
-    
-    // Set current year in footer
-    document.getElementById('current-year').textContent = new Date().getFullYear();
 });
