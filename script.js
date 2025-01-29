@@ -176,6 +176,21 @@ class ProjectsDashboard {
         document.querySelectorAll('.like-button').forEach(button => {
             button.addEventListener('click', (e) => {
                 const button = e.currentTarget;
+                const project = button.closest('.project');
+                const projectId = project.getAttribute('data-project-id');
+                const projectTitle = project.querySelector('.project-header h2').textContent;
+                
+                // Track like event with detailed parameters
+                gtag('event', 'button_click', {
+                    'event_category': 'engagement',
+                    'event_label': projectTitle,
+                    'button_type': 'like',
+                    'project_id': projectId,
+                    'project_title': projectTitle,
+                    'device_type': /Mobile|iP(hone|od|ad)|Android|BlackBerry|IEMobile/.test(navigator.userAgent) ? 'mobile' : 'desktop',
+                    'timestamp': new Date().toISOString()
+                });
+                
                 button.classList.add('liked');
                 
                 // Create and show feedback message
@@ -233,9 +248,20 @@ class ProjectsDashboard {
         document.querySelectorAll('.share-button').forEach(button => {
             button.addEventListener('click', async (e) => {
                 const button = e.currentTarget;
-                const projectId = button.getAttribute('data-project-id');
+                const project = button.closest('.project');
+                const projectId = project.getAttribute('data-project-id');
+                const projectTitle = project.querySelector('.project-header h2').textContent;
                 
-                // Get base URL without hash fragment
+                gtag('event', 'button_click', {
+                    'event_category': 'engagement',
+                    'event_label': projectTitle,
+                    'button_type': 'share',
+                    'project_id': projectId,
+                    'project_title': projectTitle,
+                    'device_type': /Mobile|iP(hone|od|ad)|Android|BlackBerry|IEMobile/.test(navigator.userAgent) ? 'mobile' : 'desktop',
+                    'timestamp': new Date().toISOString()
+                });
+                
                 const baseUrl = window.location.href.split('#')[0];
                 const url = `${baseUrl}#project-${projectId}`;
                 await navigator.clipboard.writeText(url);
@@ -288,8 +314,21 @@ class ProjectsDashboard {
         document.querySelectorAll('.like-button').forEach(button => {
             button.addEventListener('click', (e) => {
                 const button = e.currentTarget;
+                const project = button.closest('.project');
+                const projectId = project.getAttribute('data-project-id');
+                const projectTitle = project.querySelector('.project-header h2').textContent;
                 
-                // Toggle liked state
+                // Track like event with detailed parameters
+                gtag('event', 'button_click', {
+                    'event_category': 'engagement',
+                    'event_label': projectTitle,
+                    'button_type': 'like',
+                    'project_id': projectId,
+                    'project_title': projectTitle,
+                    'device_type': /Mobile|iP(hone|od|ad)|Android|BlackBerry|IEMobile/.test(navigator.userAgent) ? 'mobile' : 'desktop',
+                    'timestamp': new Date().toISOString()
+                });
+                
                 button.classList.add('liked');
                 
                 // Create and show feedback message
