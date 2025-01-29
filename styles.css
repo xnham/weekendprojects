@@ -440,7 +440,7 @@ html {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #000000CC;
+    background-color: #000000d9;
     display: flex;
     justify-content: right;
     align-items: center;
@@ -490,7 +490,7 @@ html {
 
 .modal-close:hover {
     opacity: 1;
-    transform: scale(1.2);
+    transform: scale(1.1);
 }
 
 .modal-close svg {
@@ -498,28 +498,40 @@ html {
     height: 24px;
 }
 
+.modal-container {
+    position: relative;
+    min-height: 400px;  /* Adjust this value based on your form's height */
+}
+
 .modal-form {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    height: 100%;
 }
 
-.modal-form h2 {
-    color: #41424C;
-    margin-bottom: 0.5rem;
-    font-size: 1.5rem;
-    font-weight: 500;
+.form-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    opacity: 1;
+    transition: opacity 0.3s ease;
 }
 
-.modal-form label {
+.form-content.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.form-content label {
     display: block;
-    margin-bottom: -1.1rem;
+    margin-bottom: -1rem;
     color: #41424C;
     font-size: 0.9rem;
 }
 
-.modal-form input,
-.modal-form textarea {
+.form-content input,
+.form-content textarea {
     width: 100%;
     padding: 0.8rem;
     border: 1px solid #41424C40;
@@ -529,19 +541,19 @@ html {
     font-family: inherit;
 }
 
-.modal-form input:focus,
-.modal-form textarea:focus {
+.form-content input:focus,
+.form-content textarea:focus {
     outline: none;
     border-color: #41424CCC;
 }
 
-.modal-form textarea {
+.form-content textarea {
     min-height: 150px;
     max-height: 250px;
     resize: vertical;
 }
 
-.modal-form button[type="submit"] {
+.form-content button[type="submit"] {
     width: 100%;
     padding: 1rem;
     background: #41424C;
@@ -555,6 +567,34 @@ html {
     margin-top: 0.5rem;
 }
 
-.modal-form button[type="submit"]:hover {
-    opacity: 0.9;
+.form-content button[type="submit"]:hover {
+    background: #202022;
+}
+
+.success-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    padding: 2rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    width: 100%;
+}
+
+.success-message.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.success-message h2 {
+    color: #41424C;
+    margin-bottom: 1rem;
+}
+
+.success-message p {
+    color: #666;
+    line-height: 1.5;
 }
