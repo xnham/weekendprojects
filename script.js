@@ -94,6 +94,7 @@ class ProjectsDashboard {
         this.startSavingsUpdates();
         this.initializeFloatingActions();
         this.initializeHashNavigation();
+        this.initializeModal();
     }
 
     initializeProjects() {
@@ -162,7 +163,7 @@ class ProjectsDashboard {
                                     <path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 13.4876 3.36093 14.891 4 16.1272L3 21L7.8728 20C9.10904 20.6391 10.5124 21 12 21Z"></path>
                                 </svg>
                             </span>
-                            <span class="action-label">message</span>
+                            <span class="action-label">comment</span>
                         </button>
                     </div>
                 </div>
@@ -372,6 +373,96 @@ class ProjectsDashboard {
 
         // Handle hash changes
         window.addEventListener('hashchange', scrollToProject);
+    }
+
+    initializeFloatingActions() {
+        // Add message button click handler
+        document.querySelectorAll('.message-button').forEach(button => {
+            console.log('Adding message button handler'); // Debug log
+            button.addEventListener('click', () => {
+                console.log('Message button clicked'); // Debug log
+                this.openModal();
+            });
+        });
+    }
+
+    initializeModal() {
+        console.log('Initializing modal...'); // Debug log
+        
+        // Create modal HTML
+        const modalHTML = `
+            <div class="modal-overlay">
+                <div class="modal-content">
+                    <button class="modal-close">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 6l12 12M6 18L18 6"/>
+                        </svg>
+                    </button>
+                    <form class="modal-form">
+                        <h2>Send a private comment</h2>
+                        <label for="name">Name</label>
+                        <input type="text" id="name" required>
+                        
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                        
+                        <label for="message">Message</label>
+                        <textarea id="message" required></textarea>
+                        
+                        <button type="submit">Submit</button>
+                    </form>
+                </div>
+            </div>
+        `;
+
+        // Add modal to DOM
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        // Get modal elements
+        this.modal = document.querySelector('.modal-overlay');
+        this.modalForm = document.querySelector('.modal-form');
+
+        // Add event listeners for closing modal
+        document.querySelector('.modal-close').addEventListener('click', () => this.closeModal());
+        this.modal.addEventListener('click', (e) => {
+            if (e.target === this.modal) this.closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') this.closeModal();
+        });
+
+        this.modalForm.addEventListener('submit', (e) => this.handleSubmit(e));
+    }
+
+    openModal() {
+        console.log('Opening modal...'); // Debug log
+        this.modal.classList.add('visible');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    closeModal() {
+        this.modal.classList.remove('visible');
+        document.body.style.overflow = '';
+        this.modalForm.reset();
+    }
+
+    handleSubmit(e) {
+        e.preventDefault();
+        
+        // Get form data
+        const formData = {
+            name: this.modalForm.querySelector('#name').value,
+            email: this.modalForm.querySelector('#email').value,
+            message: this.modalForm.querySelector('#message').value
+        };
+
+        console.log('Form submitted:', formData);
+        
+        // Close modal
+        this.closeModal();
+        
+        // Optional: Show success message
+        alert('Message sent successfully!');
     }
 }
 
