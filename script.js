@@ -387,9 +387,6 @@ class ProjectsDashboard {
     }
 
     initializeModal() {
-        console.log('Initializing modal...'); // Debug log
-        
-        // Create modal HTML
         const modalHTML = `
             <div class="modal-overlay">
                 <div class="modal-content">
@@ -398,19 +395,27 @@ class ProjectsDashboard {
                             <path d="M6 6l12 12M6 18L18 6"/>
                         </svg>
                     </button>
-                    <form class="modal-form">
-                        <h2>Send a private comment</h2>
-                        <label for="name">Name</label>
-                        <input type="text" id="name" required>
-                        
-                        <label for="email">Email</label>
-                        <input type="email" id="email" required>
-                        
-                        <label for="message">Message</label>
-                        <textarea id="message" required></textarea>
-                        
-                        <button type="submit">Submit</button>
-                    </form>
+                    <div class="modal-container">
+                        <form class="modal-form" action="https://formspree.io/f/mjkgrbbv" method="POST">
+                            <div class="form-content">
+                                <h2>Send a private comment</h2>
+                                <label for="name">Name</label>
+                                <input type="text" id="name" name="name" required>
+                                
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" required>
+                                
+                                <label for="message">Message</label>
+                                <textarea id="message" name="message" required></textarea>
+                                
+                                <button type="submit">Submit</button>
+                            </div>
+                            <div class="success-message">
+                                <h2>Thank you!</h2>
+                                <p>I'll get back to you soon.</p>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         `;
@@ -449,20 +454,37 @@ class ProjectsDashboard {
     handleSubmit(e) {
         e.preventDefault();
         
-        // Get form data
-        const formData = {
-            name: this.modalForm.querySelector('#name').value,
-            email: this.modalForm.querySelector('#email').value,
-            message: this.modalForm.querySelector('#message').value
-        };
-
-        console.log('Form submitted:', formData);
+        const form = e.target;
+        const formContent = form.querySelector('.form-content');
+        const successMessage = form.querySelector('.success-message');
         
-        // Close modal
-        this.closeModal();
-        
-        // Optional: Show success message
-        alert('Message sent successfully!');
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'Accept': 'application/json'
+            }
+        }).then(response => {
+            if (response.ok) {
+                // Show success message
+                formContent.classList.add('hidden');
+                successMessage.classList.add('visible');
+                
+                // Close modal after 3 seconds
+                setTimeout(() => {
+                    this.closeModal();
+                    // Reset form state
+                    formContent.classList.remove('hidden');
+                    successMessage.classList.remove('visible');
+                    form.reset();
+                }, 3000);
+            } else {
+                alert('Oops! There was a problem submitting your form');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('Oops! There was a problem submitting your form');
+        });
     }
 }
 
