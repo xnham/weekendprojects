@@ -601,3 +601,8 @@ html {
     color: #666;
     line-height: 1.5;
 }
+
+.message-button.highlight .action-icon svg path {
+    stroke: #41424C;  /* Darker stroke when highlighted */
+    stroke-width: 1px;
+}
