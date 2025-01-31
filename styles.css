@@ -1,13 +1,7 @@
-/* Import fonts */
+/* Base Styles & Imports */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Sigmar&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Londrina+Shadow&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Londrina+Sketch&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Rampart+One&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Rubik+Doodle+Shadow&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Shizuru&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Londrina+Outline&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Shadows+Into+Light+Two&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Wendy+One&display=swap');
 
 * {
     margin: 0;
@@ -15,68 +9,72 @@
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     font-family: 'Roboto', sans-serif;
     line-height: 1.5;
     color: #41424C;
-    /* background-image: 
-        radial-gradient(
-            circle,
-            #41424C15 2px,
-            transparent 1px
-        ),
-        linear-gradient(45deg, transparent 49%, #41424C40 49.5%, #41424C40 50.5%, transparent 51%),
-        linear-gradient(-45deg, transparent 49%, #41424C40 49.5%, #41424C40 50.5%, transparent 51%);
-    background-size: 14px 20px, 8px 8px, 8px 8px;
-    background-position: center; */
+    background-color: #C9F1FF;
 }
 
 body::before {
     display: none;
 }
 
+/* Header */
+.header {
+    background-color: white;
+    color: #41424C;
+    width: 100%;
+    padding: 0.1rem 0 0.5rem 0;
+    margin-top: 1rem;
+}
+
+.header h1 {
+    font-family: 'Rampart One', sans-serif;
+    text-align: center;
+    font-size: clamp(42px, 4vw, 60px);
+    line-height: 1.0;
+    margin: 0.5rem 0 1rem 0;
+    width: 100%;
+    position: relative;
+    background-color: transparent;
+}
+
+/* Layout Container */
 .container {
     width: 100%;
     max-width: 1000px;
     margin: 0 auto;
-    /* outline: 4px solid #e91e63;  /* Pink outline for container */
+    padding: 0 10px;
 }
 
-h1 {
-    font-family: 'Rampart One', cursive;
-    text-align: center;
-    font-size: clamp(1rem, 7vw, 8vw);
-    line-height: 1.0;
-    padding-bottom: 2rem; 
-    width: 100%;
-    position: relative;
-    /* background-color: white; */
-}
-
+/* Project Card Structure */
 .project {
     position: relative;
     margin-bottom: 5rem;
-    display: flex;  /* Makes children (card and buttons) flex items */
-    gap: 0;      /* Creates space between card and buttons */
-    /* outline: 3px solid #2196f3; /* Blue outline for project card */
+    display: flex;
+    gap: 0.7rem;
 }
 
 .project-card {
     flex: 1;
-    border: 1px solid #41424C60;
-    background-color: white;
-    border-radius: 1rem;
+    background-color: #FDFDFD;
+    border-radius: 1.2rem;
     overflow: hidden;
-    /* outline: 2px solid #ffeb3b;  /* Yellow outline for project card */
 }
 
+/* Project Header */
 .project-header {
-    color: #41424C;
-    padding: 3% 5%;  /* Match content padding */
+    color: white;
+    background-color: #0281AF;
+    padding: 3% 5%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px #41424C60 solid;
 }
 
 .project-header h2 {
@@ -86,11 +84,12 @@ h1 {
 }
 
 .project-date {
-    font-size: 0.9vw;
-    font-weight: 400; 
-    opacity: 0.7;
+    font-size: clamp(12px, 0.9vw, 16px);
+    font-weight: 400;
+    opacity: 1;
 }
 
+/* Project Content */
 .project-content {
     padding: 5%;
     display: grid;
@@ -100,27 +99,123 @@ h1 {
     font-weight: 400;
 }
 
+/* Project Image */
 .project-image {
-    background: #f5f5f5;
+    background: #FDFDFD;
     width: 100%;
     aspect-ratio: 1;
-    border: 1px solid #41424C60;
+    border: 1px solid #FDFDFD;
     border-radius: 1rem;
-    overflow: hidden;  /* Contain the gif */
+    overflow: hidden;
 }
 
 .project-image img {
     width: 100%;
     height: 100%;
-    object-fit: cover;  /* Make image cover the square */
+    object-fit: cover;
     display: block;
 }
 
+/* Project Info & Lists */
 .project-info h3 {
     font-size: 1.2rem;
     margin-bottom: 1rem;
 }
 
+.project-why ul {
+    list-style: none;
+    margin: 1.2rem 0;
+    padding-left: 1.2rem;
+}
+
+.project-why li {
+    position: relative;
+    padding: 0.1rem 0;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.project-why li:before {
+    content: "•";
+    position: absolute;
+    left: -1rem;
+    color: #41424C;
+}
+
+.project-why ul:first-of-type {
+    margin-top: 0.5rem;
+}
+
+.project-why ol {
+    list-style: none;
+    counter-reset: item;
+    margin: 1.2rem 0;
+    padding-left: 1.2rem;
+}
+
+.project-why ol li {
+    position: relative;
+    padding: 0.1rem 0;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.project-why ol li:before {
+    content: counter(item) ".";
+    counter-increment: item;
+    position: absolute;
+    left: -1rem;
+    color: #41424C;
+}
+
+.project-why ol:first-of-type {
+    margin-top: 0.5rem;
+}
+
+.project-why a {
+    color: #41424Cbf;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    border-bottom-color: #41424Cbf;
+}
+
+.project-why a:hover {
+    color: #41424C95;
+    border-bottom-color: #41424C95;
+}
+
+/* Project Tools */
+.project-tools {
+    margin-top: 2rem;
+    color: #41424C80;
+    font-size: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0;
+    width: 100%;
+}
+
+.tool {
+    color: #41424C70;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+}
+
+.tool-separator {
+    color: #41424C20;
+    padding: 0 0.4rem;
+    display: flex;
+    align-items: center;
+}
+
+.tool-group {
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+}
+
+/* Project Savings */
 .project-savings {
     text-align: right;
 }
@@ -152,145 +247,29 @@ h1 {
     opacity: 0.7;
 }
 
-.timeline-placeholder {
-    width: 100%;
-    height: 1px;
-    background-color: #41424C60;
-    margin-bottom: 5rem;
-}
-
-.project-tools {
-    margin-top: 2rem;
-    color: #41424C80;
-    font-size: 0.75rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem 0;  /* Vertical gap between wrapped lines */
-    width: 100%;
-}
-
-.tool {
-    color: #41424C70;
-    white-space: nowrap;  /* Prevent individual tool names from breaking */
-    display: flex;
-    align-items: center;
-}
-
-.tool-separator {
-    color: #41424C20;
-    padding: 0 0.4rem;
-    display: flex;
-    align-items: center;
-}
-
 .zero-amount {
     color: transparent;
 }
 
-.tool-group {
-    white-space: nowrap;  /* Keep tool and its separator together */
-    display: flex;
-    align-items: center;
-}
-
 .savings-amount span {
-    display: inline;  /* Back to default */
+    display: inline;
 }
 
 .savings-amount .rolling {
     animation: rollNumber 0.3s ease-out;
 }
 
-footer {
-    background-color: #41424C;
-    color: #ffffff;
-    padding: 1.5rem 0;
-    margin-top: 10rem;
-    font-size: 0.9vw;
-    font-weight: 400;
-    text-align: center;
-}
-
-.project-why ul {
-    list-style: none;
-    margin: 1.2rem 0;  /* Adjust these values to control spacing */
-    padding-left: 1.2rem;
-}
-
-.project-why li {
-    position: relative;
-    padding: 0.1rem 0;  /* Vertical spacing between list items */
-    line-height: 1.4;  /* Line height for wrapped text */
-    margin: 0;  /* Remove default margins */
-}
-
-.project-why li:before {
-    content: "•";
-    position: absolute;
-    left: -1rem;
-    color: #41424C;  /* Match the text color */
-}
-
-/* Add spacing after the text that precedes the list */
-.project-why ul:first-of-type {
-    margin-top: 0.5rem;
-}
-
-.project-why ol {
-    list-style: none;
-    counter-reset: item;
-    margin: 1.2rem 0;  /* Match the ul spacing */
-    padding-left: 1.2rem;
-}
-
-.project-why ol li {
-    position: relative;
-    padding: 0.1rem 0;  /* Match ul li padding */
-    line-height: 1.4;
-    margin: 0;
-}
-
-.project-why ol li:before {
-    content: counter(item) ".";
-    counter-increment: item;
-    position: absolute;
-    left: -1rem;  /* Match ul bullet position */
-    color: #41424C;
-}
-
-/* Match the first-of-type spacing */
-.project-why ol:first-of-type {
-    margin-top: 0.5rem;
-}
-
-.project-why a {
-    color: #41424Cbf;  
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-    border-bottom-color: #41424Cbf;
-}
-
-.project-why a:hover {
-    color: #41424C95;  
-    border-bottom-color: #41424C95;
-}
-
-html {
-    scroll-behavior: smooth;  /* Makes the scroll animation smooth */
-}
-
+/* Floating Actions */
 .floating-actions {
     position: sticky;
     top: 0.5rem;
     padding: 1.4rem 0;
-    height:fit-content;
-    margin-left: 0.8rem;
+    height: fit-content;
     display: flex;
     flex-direction: column;
     gap: 0.7rem;
-    border: 1px #41424C60 solid;
     border-radius: 1rem;
-    /* outline: 2px solid #3bff79;  /* Green outline for project card */
+    background-color: #FDFDFD;
 }
 
 .action-button {
@@ -315,7 +294,7 @@ html {
 }
 
 .action-icon {
-    margin-bottom: 0.1rem; /* adds space between the icon and its label */
+    margin-bottom: 0.1rem;
 }
 
 .action-label {
@@ -326,43 +305,33 @@ html {
     opacity: 0.7;
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
-}
-
-/* Base SVG styling */
 .action-icon svg {
     width: 24px;
     height: 24px;
 }
 
 .action-icon svg path {
-    stroke-width: 2px;  /* Adjust this value to change outline thickness */
-    stroke: #41424Cbf;      /* Default color */
-    fill: none;           /* Make icons hollow by default */
+    stroke-width: 2px;
+    stroke: #41424C;
+    fill: none;
 }
 
-/* Like button states */
+/* Like Button States */
+.like-button {
+    position: relative;
+}
+
 .like-button .action-icon svg path {
     transition: all 0.1s ease;
 }
 
 .like-button.liked .action-icon svg path {
-    fill: #ff0066;  /* Red fill when liked */
-    stroke: #ff0066;  /* Red outline when liked */
+    fill: #ff0066;
+    stroke: #ff0066;
 }
 
-/* Make the like button container relative for positioning */
-.like-button {
-    position: relative;
-}
-
-/* Update feedback message positioning */
 .feedback-message {
     position: absolute;
-    /* Remove left calc() since we're setting it in JS */
     font-family: 'Shadows Into Light Two', cursive;
     font-size: 1.6rem;
     text-align: left;
@@ -372,7 +341,7 @@ html {
     align-items: flex-start;
     opacity: 0;
     transition: opacity 0.8s ease;
-    pointer-events: none;  /* Prevent it from interfering with button clicks */
+    pointer-events: none;
 }
 
 .feedback-message.visible {
@@ -381,36 +350,31 @@ html {
 
 .feedback-arrow {
     height: 100px;
-    margin-top: 0.2rem;  /* Space between text and arrow */
-    transform: translateX(0px);  /* Move arrow right to position under "more?" */
+    margin-top: 0.2rem;
+    transform: translateX(0px);
 }
 
-.message-button {
-    transition: transform 0.3s ease;
+.feedback-text {
+    white-space: nowrap;
 }
 
+/* Share Button States */
+.share-button.shared .action-icon svg path {
+    fill: #944cc4;
+    stroke: #944cc4;
+}
+
+/* Button Highlight States */
 .message-button.highlight {
     transform: scale(1.4);
 }
 
-.feedback-text {
-    white-space: nowrap;  /* Prevent "Say more?" from breaking */
+.message-button.highlight .action-label {
+    opacity: 1;
 }
 
-/* Override opacity inheritance for feedback message */
-.like-button.highlight .feedback-message.visible {
-    opacity: 1 !important;  /* This ensures it overrides any inherited opacity */
-}
-
-/* Add dimmed state for like and share buttons */
-.like-button.highlight,
-.share-button.highlight {
-    opacity: 1;  /* Reset opacity */
-}
-
-.like-button,
-.share-button {
-    position: relative;  /* For pseudo-element positioning */
+.message-button.highlight .action-icon svg path {
+    stroke: #41424C;
 }
 
 .like-button.highlight::before,
@@ -422,28 +386,19 @@ html {
     right: 0;
     bottom: 0;
     background: white;
-    opacity: 0.4;
+    opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
 }
 
-.message-button.highlight .action-label {
-    opacity: 1;
-}
-
-.share-button.shared .action-icon svg path {
-    fill: #944cc4;  /* Lime fill when shared */
-    stroke: #944cc4;
-}
-
-/* Modal styles */
+/* Modal Styles */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #000000d9;
+    background-color: #000000cc;
     display: flex;
     justify-content: right;
     align-items: center;
@@ -503,7 +458,7 @@ html {
 
 .modal-container {
     position: relative;
-    min-height: 400px;  /* Adjust this value based on your form's height */
+    min-height: 400px;
 }
 
 .modal-form {
@@ -559,7 +514,7 @@ html {
 .form-content button[type="submit"] {
     width: 100%;
     padding: 1rem;
-    background: #41424C;
+    background: #0281AF;
     color: white;
     border: none;
     border-radius: 0.3rem;
@@ -571,7 +526,7 @@ html {
 }
 
 .form-content button[type="submit"]:hover {
-    background: #202022;
+    background: #005d7e;
 }
 
 .success-message {
@@ -602,7 +557,31 @@ html {
     line-height: 1.5;
 }
 
-.message-button.highlight .action-icon svg path {
-    stroke: #41424C;  /* Darker stroke when highlighted */
-    stroke-width: 1px;
+/* Footer */
+footer {
+    background-color: #41424C;
+    color: #ffffff;
+    opacity: 0.9;
+    padding: 1.5rem 0;
+    margin-top: 10rem;
+    font-size: 0.9vw;
+    font-weight: 400;
+    text-align: center;
+}
+
+/* Animations */
+@keyframes rollNumber {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.spacer {
+    height: 2rem;
 }
