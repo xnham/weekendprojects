@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekend Projects</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Shadows+Into+Light+Two&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/applause-button/dist/applause-button.css">
+    <script src="https://unpkg.com/applause-button/dist/applause-button.js"></script>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6PKHLZLTJG"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-6PKHLZLTJG');
+    </script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h2>What to build <span class="purple">next?</span></h2>
+            <div class="intro-wrapper">
+                <div class="intro-text">
+                    
+                    <p>Use the 'Follow' button to let me know if any of these tools would solve your problems too. I'll share them with you when they're built.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        <div class="container">
+            <div class="projects" id="projectList">
+                <!-- Projects will be dynamically inserted here -->
+            </div>
+        </div>
+        <div class="spacer">
+        </div>
+    </main>
+
+    <script src="templates.js"></script>
+    <script src="vote.js"></script>
+</body>
+</html> 

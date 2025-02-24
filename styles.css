@@ -1,7 +1,5 @@
 /* Base Styles & Imports */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Rampart+One&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Wendy+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&family=Roboto:wght@300;400;500;700&display=swap');
 
 * {
     margin: 0;
@@ -14,574 +12,253 @@ html {
 }
 
 body {
+    color: #292633D9;
+    background: #FFFFF7;
     font-family: 'Roboto', sans-serif;
-    line-height: 1.5;
-    color: #41424C;
-    background-color: #C9F1FF;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 2;
+    text-align: left;
+    background-image: url('images/waves12.svg');
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center top;
 }
 
-body::before {
-    display: none;
+/* Navigation */
+.nav {
+    padding-bottom: 20px;
+    width: 100vw;
+    margin: 0 0 60px 0;
+    color: #ffffff;
 }
 
-/* Header */
-.header {
-    background-color: white;
-    color: #41424C;
-    width: 100%;
-    padding: 0.1rem 0 0.5rem 0;
-    margin-top: 1rem;
-}
-
-.header h1 {
-    font-family: 'Rampart One', sans-serif;
-    text-align: center;
-    font-size: clamp(42px, 4vw, 60px);
-    line-height: 1.0;
-    margin: 0.5rem 0 1rem 0;
-    width: 100%;
-    position: relative;
-    background-color: transparent;
-}
-
-/* Layout Container */
-.container {
-    width: 100%;
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 0 10px;
-}
-
-/* Project Card Structure */
-.project {
-    position: relative;
-    margin-bottom: 5rem;
-    display: flex;
-    gap: 0.7rem;
-}
-
-.project-card {
-    flex: 1;
-    background-color: #FDFDFD;
-    border-radius: 1.2rem;
-    overflow: hidden;
-}
-
-/* Project Header */
-.project-header {
-    color: white;
-    background-color: #0281AF;
-    padding: 3% 5%;
+ .nav-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.project-header h2 {
-    font-size: 1.2rem;
-    font-weight: 800;
-    margin: 0;
-}
-
-.project-date {
-    font-size: clamp(12px, 0.9vw, 16px);
-    font-weight: 400;
-    opacity: 1;
-}
-
-/* Project Content */
-.project-content {
-    padding: 5%;
-    display: grid;
-    grid-template-columns: 25% 40% 25%;
-    gap: 5%;
-    color: #41424Cbf;
-    font-weight: 400;
-}
-
-/* Project Image */
-.project-image {
-    background: #FDFDFD;
-    width: 100%;
-    aspect-ratio: 1;
-    border: 1px solid #FDFDFD;
-    border-radius: 1rem;
-    overflow: hidden;
-}
-
-.project-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-/* Project Info & Lists */
-.project-info h3 {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-}
-
-.project-why ul {
+.nav-links {
     list-style: none;
-    margin: 1.2rem 0;
-    padding-left: 1.2rem;
+    display: flex;
+    gap: 2rem;
+    padding: 5px 40px 5px 40px;
 }
 
-.project-why li {
-    position: relative;
-    padding: 0.1rem 0;
-    line-height: 1.4;
-    margin: 0;
-}
-
-.project-why li:before {
-    content: "•";
-    position: absolute;
-    left: -1rem;
-    color: #41424C;
-}
-
-.project-why ul:first-of-type {
-    margin-top: 0.5rem;
-}
-
-.project-why ol {
-    list-style: none;
-    counter-reset: item;
-    margin: 1.2rem 0;
-    padding-left: 1.2rem;
-}
-
-.project-why ol li {
-    position: relative;
-    padding: 0.1rem 0;
-    line-height: 1.4;
-    margin: 0;
-}
-
-.project-why ol li:before {
-    content: counter(item) ".";
-    counter-increment: item;
-    position: absolute;
-    left: -1rem;
-    color: #41424C;
-}
-
-.project-why ol:first-of-type {
-    margin-top: 0.5rem;
-}
-
-.project-why a {
-    color: #41424Cbf;
+.nav-links a {
     text-decoration: none;
-    border-bottom: 1px solid transparent;
-    border-bottom-color: #41424Cbf;
-}
-
-.project-why a:hover {
-    color: #41424C95;
-    border-bottom-color: #41424C95;
-}
-
-/* Project Tools */
-.project-tools {
-    margin-top: 2rem;
-    color: #41424C80;
-    font-size: 0.75rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem 0;
-    width: 100%;
-}
-
-.tool {
-    color: #41424C70;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-}
-
-.tool-separator {
-    color: #41424C20;
-    padding: 0 0.4rem;
-    display: flex;
-    align-items: center;
-}
-
-.tool-group {
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-}
-
-/* Project Savings */
-.project-savings {
-    text-align: right;
-}
-
-.savings-header {
-    display: flex;
-    justify-content: flex-end;
-    align-items: baseline;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.savings-amount {
-    font-size: 3.2vw;
-    font-weight: 900;
-    color: #41424C;
-    line-height: 100%;
+    font-weight: 400;
     transition: color 0.2s ease;
+    color: #ffffff;
 }
 
-.savings-amount sup {
-    font-size: 0.9vw;
-    font-weight: 400;
+.nav-links a:hover {
+    opacity: 0.85;
 }
 
-.savings-explanation {
-    font-size: 0.9vw;
-    color: #41424C;
-    opacity: 0.7;
-}
-
-.zero-amount {
-    color: transparent;
-}
-
-.savings-amount span {
-    display: inline;
-}
-
-.savings-amount .rolling {
-    animation: rollNumber 0.3s ease-out;
-}
-
-/* Floating Actions */
-.floating-actions {
-    position: sticky;
-    top: 0.5rem;
-    padding: 1.4rem 0;
-    height: fit-content;
-    display: flex;
-    flex-direction: column;
-    gap: 0.7rem;
-    border-radius: 1rem;
-    background-color: #FDFDFD;
-}
-
-.action-button {
-    background: transparent;
-    border: none;
-    border-radius: 1rem;
-    padding: 0.8rem;
-    width: 76px;
-    height: 60px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    text-decoration: none;
-}
-
-.action-button:hover {
-    transform: scale(1.1);
-    cursor: pointer;
-}
-
-.action-icon {
-    margin-bottom: 0.1rem;
-}
-
-.action-label {
-    font-size: 0.7rem;
-    font-weight: 400;
-    text-align: center;
-    color: #41424C;
-    opacity: 0.7;
-}
-
-.action-icon svg {
-    width: 24px;
-    height: 24px;
-}
-
-.action-icon svg path {
-    stroke-width: 2px;
-    stroke: #41424C;
-    fill: none;
-}
-
-/* Like Button States */
-.like-button {
-    position: relative;
-}
-
-.like-button .action-icon svg path {
-    transition: all 0.1s ease;
-}
-
-.like-button.liked .action-icon svg path {
-    fill: #ff0066;
-    stroke: #ff0066;
-}
-
-.feedback-message {
-    position: absolute;
-    font-family: 'Shadows Into Light Two', cursive;
-    font-size: 1.6rem;
-    text-align: left;
-    color: #41424C;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    opacity: 0;
-    transition: opacity 0.8s ease;
-    pointer-events: none;
-}
-
-.feedback-message.visible {
-    opacity: 1;
-}
-
-.feedback-arrow {
-    height: 100px;
-    margin-top: 0.2rem;
-    transform: translateX(0px);
-}
-
-.feedback-text {
-    white-space: nowrap;
-}
-
-/* Share Button States */
-.share-button.shared .action-icon svg path {
-    fill: #944cc4;
-    stroke: #944cc4;
-}
-
-/* Button Highlight States */
-.message-button.highlight {
-    transform: scale(1.4);
-}
-
-.message-button.highlight .action-label {
-    opacity: 1;
-}
-
-.message-button.highlight .action-icon svg path {
-    stroke: #41424C;
-}
-
-.like-button.highlight::before,
-.share-button.highlight::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: white;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-/* Modal Styles */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #000000cc;
-    display: flex;
-    justify-content: right;
-    align-items: center;
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.2s ease, visibility 0.2s ease;
-}
-
-.modal-overlay.visible {
-    opacity: 1;
-    visibility: visible;
-}
-
-.modal-content {
-    background: #FFFFFF;
-    margin-right: 5vw;
-    padding: 2.5rem;
-    border-radius: 1rem;
-    width: 90%;
-    max-width: 500px;
-    position: relative;
-    transform: translateY(20px);
-    transition: transform 0.2s ease;
-    border: 1px solid #41424C40;
-}
-
-.modal-overlay.visible .modal-content {
-    transform: translateY(0);
-}
-
-.modal-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: transparent;
-    border: none;
-    padding: 0.5rem;
-    cursor: pointer;
-    color: #41424C;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-close:hover {
-    opacity: 1;
-    transform: scale(1.1);
-}
-
-.modal-close svg {
-    width: 24px;
-    height: 24px;
-}
-
-.modal-container {
-    position: relative;
-    min-height: 400px;
-}
-
-.modal-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    height: 100%;
-}
-
-.form-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    opacity: 1;
-    transition: opacity 0.3s ease;
-}
-
-.form-content.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.form-content label {
+.nav-logo img {
+    height: 80px;  /* Adjust this value to your preferred logo height */
+    width: auto;   /* Maintains aspect ratio */
     display: block;
-    margin-bottom: -1rem;
-    color: #41424C;
-    font-size: 0.9rem;
+    padding: 10px 40px 5px 40px;
 }
 
-.form-content input,
-.form-content textarea {
+/* Headings */
+
+h1, h2 {
+    font-family: 'DM Serif Text', serif;
+    color: #292633;
+    line-height: 1.2;
+    text-align: left;
+    margin-bottom: 2.4rem;
+    z-index: 1000;
+}
+h1 {
+    font-size: 72px;
+}
+
+h2 {
+    font-size: 48px;
+}
+
+h3 {
+    font-size: 16px;
+    color: #292633;
+}
+
+/* Container */
+.container {
     width: 100%;
-    padding: 0.8rem;
-    border: 1px solid #41424C40;
-    border-radius: 0.3rem;
-    background: #FDFDFD;
-    transition: border-color 0.2s ease;
-    font-family: inherit;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 10px;
+    z-index: 1000;
 }
 
-.form-content input:focus,
-.form-content textarea:focus {
-    outline: none;
-    border-color: #41424CCC;
+.divider {
+    margin: 5rem 0;
+    border-bottom: 1px #292633 solid;
 }
 
-.form-content textarea {
-    min-height: 150px;
-    max-height: 250px;
-    resize: vertical;
-}
-
-.form-content button[type="submit"] {
-    width: 100%;
-    padding: 1rem;
-    background: #0281AF;
-    color: white;
-    border: none;
-    border-radius: 0.3rem;
-    cursor: pointer;
-    font-size: 1.2vw;
-    font-weight: 500;
-    transition: opacity 0.2s ease;
-    margin-top: 0.5rem;
-}
-
-.form-content button[type="submit"]:hover {
-    background: #005d7e;
-}
-
-.success-message {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    padding: 2rem;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-    width: 100%;
-}
-
-.success-message.visible {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.success-message h2 {
-    color: #41424C;
-    margin-bottom: 1rem;
-}
-
-.success-message p {
-    color: #666;
-    line-height: 1.5;
+.spacer {
+    margin: 10rem;
 }
 
 /* Footer */
 footer {
-    background-color: #41424C;
+    background-color: #292633;
     color: #ffffff;
-    opacity: 0.9;
     padding: 1.5rem 0;
-    margin-top: 10rem;
-    font-size: 0.9vw;
-    font-weight: 400;
+    margin-top: 5rem;
+    font-size: 14px;
     text-align: center;
 }
 
-/* Animations */
-@keyframes rollNumber {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
+/* Title and Intro Section */
+
+.purple {
+    color: #5D3FD3;
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
+.rotating-text {
+    font-family: 'DM Serif Text', serif;
+    font-size: 72px;
+    color: #5D3FD3;
+    position: relative;
 }
 
-.spacer {
-    height: 2rem;
+.about-layout {
+    width: 75%;
+    border-collapse: collapse;
+}
+
+.about-timeline {
+    text-align: left;
+    width: 150px;
+    vertical-align: top;
+    /* border: 1px #EE5300 solid; */
+}
+
+.about-timeline h3 {
+    top: 2rem;
+    margin: 0;
+}
+
+.about-content p {
+    margin: 0;
+    /* border: 1px #EE5300 solid; */
+}
+
+.about-content a {
+    color: #292633;
+    text-decoration: none;
+    border-bottom: 1px solid #292633;
+    transition: opacity 0.2s ease;
+}
+
+.about-content p {
+    margin-bottom: 1.5rem;
+}
+
+.about-content a:hover {
+    opacity: 0.7;
+}
+
+.intro-wrapper {
+    width: 75%;
+}
+
+.intro-text p {
+    margin-bottom: 1.5rem;
+}
+
+.intro-text a {
+    color: #292633;
+    text-decoration: none;
+    border-bottom: 1px solid #292633;
+    transition: opacity 0.2s ease;
+}
+
+.intro-text a:hover {
+    opacity: 0.7;
+}
+
+.emphasized-text {
+    color: #292633BF;
+    font-weight: 600;
+}
+
+/* Voting Page Styles */
+.project-list {
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+.project-item {
+    margin: 15px 0 30px 0;
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    border-bottom: 1px #292633 solid;
+}
+
+.project-content {
+    flex-grow: 1;
+    padding-right: 20px;
+}
+
+.project-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #292633;
+    margin-bottom: 10px;
+}
+
+.project-details {
+    font-size: 16px;
+    width: 75%;
+    margin-bottom:30px;
+}
+
+.vote-section {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.like-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    transition: transform 0.2s ease;
+}
+
+.like-button:hover {
+    transform: scale(1.1);
+}
+
+.like-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.like-button svg path {
+    fill: none;
+    stroke: #292633;
+    stroke-width: 2;
+    transition: fill 0.2s ease;
+}
+
+.like-button.active svg path {
+    fill: #EE5300;
+    stroke: #EE5300;
+}
+
+.like-button:disabled {
+    cursor: default;
+    transform: none;
 }
