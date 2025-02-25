@@ -44,6 +44,8 @@ body {
     display: flex;
     gap: 2rem;
     padding: 5px 40px 5px 40px;
+    background-color: #292633B3;
+    border-radius: 50px 0 0 50px;
 }
 
 .nav-links a {
@@ -107,7 +109,7 @@ h3 {
 
 /* Footer */
 footer {
-    background-color: #292633;
+    background-color: #292633CC;
     color: #ffffff;
     padding: 1.5rem 0;
     margin-top: 5rem;
