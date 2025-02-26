@@ -25,4 +25,30 @@ function updateRotatingText() {
 updateRotatingText();
 
 // Update text every 3 seconds
-setInterval(updateRotatingText, 3000); 
+setInterval(updateRotatingText, 3000);
+
+// Slider functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const projectCards = document.querySelectorAll('.weekend-project-card');
+    
+    projectCards.forEach(card => {
+        const sliderTrack = card.querySelector('.slider-track');
+        const sliderDots = card.querySelectorAll('.slider-dot');
+        
+        // Set up click handlers for dots
+        sliderDots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const slideIndex = parseInt(dot.getAttribute('data-slide'));
+                const numSlides = sliderDots.length;
+                const slideWidth = 100 / numSlides;
+                
+                // Update slider position with dynamic width calculation
+                sliderTrack.style.transform = `translateX(-${slideIndex * slideWidth}%)`;
+                
+                // Update active dot
+                sliderDots.forEach(d => d.classList.remove('active'));
+                dot.classList.add('active');
+            });
+        });
+    });
+}); 

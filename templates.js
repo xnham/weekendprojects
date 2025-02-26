@@ -3,12 +3,14 @@ const templates = {
     <nav class="nav">
         <div class="nav-container">
             <div class="nav-logo">
-                <img src="images/eggs_ham.png" alt="xnham logo">
+                <a href="index.html">
+                    <img src="images/eggs_ham.png" alt="xnham logo" title="xnham">
+                </a>
             </div>
             <ul class="nav-links">
-                <li><a href="index.html">Weekend Projects</a></li>
-                <li><a href="vote.html">Vote</a></li>
-                <li><a href="about.html">About Me</a></li>
+                <li><a href="index.html">Portfolio</a></li>
+                <li><a href="next.html">Next</a></li>
+                <li><a href="about.html">About</a></li>
             </ul>
         </div>
     </nav>`,
