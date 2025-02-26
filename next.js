@@ -2,12 +2,14 @@ const projects = [
     {
         id: 1,
         title: "Apple Watch Timestamp App",
-        details: "An Apple Watch app that lets tennis players record timestamps with one tap. The timestamps are then used to automatically annotate corresponding video recording, making it easy to review notable moments from a tennis session."
+        details: "An Apple Watch app that lets tennis players record timestamps with one tap. The timestamps are then used to automatically annotate corresponding video recording, making it easy to review notable moments from a tennis session.",
+        votes: 0
     },
     {
         id: 2,
         title: "AI Grocery Shopping Assistant",
-        details: "An AI agent that turns recipe URLs into a loaded shopping cart and understands your preferences based on past orders. Save 60 minutes a week."
+        details: "An AI agent that turns recipe URLs into a loaded shopping cart and understands your preferences based on past orders. Save 60 minutes a week.",
+        votes: 0
     },
     {
         id: 3,
@@ -69,54 +71,16 @@ const projectList = document.getElementById('projectList');
 
 projects.forEach(project => {
     const projectElement = document.createElement('div');
-    projectElement.className = 'project-item';
+    projectElement.className = 'next-project-item';
     projectElement.innerHTML = `
-        <div class="project-content">
-            <div class="project-title">
+        <div class="next-project-content">
+            <div class="next-project-title">
                 <span>${project.title}</span>
             </div>
-            <div class="project-details">
+            <div class="next-project-details">
                 ${project.details}
             </div>
         </div>
-        <div class="vote-section">
-            <button class="like-button" onclick="handleLike(${project.id}, '${project.title}')">
-                <svg viewBox="0 0 24 24">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                </svg>
-            </button>
-        </div>
     `;
     projectList.appendChild(projectElement);
-});
-
-async function handleLike(projectId, projectTitle) {
-    const button = event.target.closest('.like-button');
-    
-    // Disable button to prevent multiple clicks
-    button.disabled = true;
-    button.classList.add('active');
-
-    // Track like with Google Analytics
-    gtag('event', 'like', {
-        'event_category': 'engagement',
-        'event_label': projectTitle,
-        'value': 1
-    });
-
-    // Send email notification (you'll need to set up an endpoint for this)
-    try {
-        await fetch('/api/notify', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                projectId: projectId,
-                projectTitle: projectTitle
-            })
-        });
-    } catch (error) {
-        console.error('Failed to send notification:', error);
-    }
-} 
+}); 
