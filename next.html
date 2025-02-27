@@ -37,6 +37,35 @@
         </div>
     </main>
 
+    <!-- Email Collection Modal -->
+    <div id="emailModal" class="next-modal">
+        <div class="next-modal-content">
+            <span class="next-close-modal">&times;</span>
+            <h3>Stay Updated</h3>
+            <p>Get notified when projects you follow launch!</p>
+            <form id="followForm">
+                <input type="hidden" id="projectId" name="projectId">
+                <div class="next-form-group">
+                    <input type="email" id="email" placeholder="Your email" required>
+                </div>
+                <button type="submit" class="next-submit-button">Follow Project</button>
+            </form>
+            <div class="next-privacy-note">
+                <small>We'll only email about projects you follow. Unsubscribe anytime.</small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Brief Confirmation Modal -->
+    <div id="confirmModal" class="next-modal">
+        <div class="next-modal-content next-confirm-content">
+            <div class="next-confirmation">
+                <i class="fas fa-check-circle"></i>
+                <p id="confirmMessage">Now following!</p>
+            </div>
+        </div>
+    </div>
+
     <script src="templates.js"></script>
     <script src="next.js"></script>
 </body>

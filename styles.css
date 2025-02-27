@@ -31,7 +31,7 @@ h1, h2 {
     color: rgba(41, 38, 51, 1); /* #292633 */
     line-height: 1.2;
     text-align: left;
-    margin-bottom: 2.4rem;
+    margin-bottom: 60px;
 }
 
 h1 {
@@ -108,14 +108,10 @@ p a:hover {
 }
 
 .nav-logo img {
-    height: 100px;
+    height: 150px;
     width: auto;
     display: block;
     padding: 10px 40px 5px 40px;
-}
-
-.nav-logo a:hover {
-    text-decoration: none;
 }
 
 /* Nav Links */
@@ -184,6 +180,16 @@ footer {
 .intro-text.three-columns p {
     margin-bottom: 1rem;
 }
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  
+  .blink {
+    animation: blink 1.2s infinite;
+    display: inline-block;
+  }
 
 /* ===== WEEKEND PROJECT CARDS ===== */
 .weekend-projects {
@@ -257,12 +263,17 @@ footer {
 }
 
 .weekend-project-value.time {
-    background-color: rgba(255, 255, 0, 1); /* Yellow */
+    background-color: rgba(255, 225, 0, 1); /* Yellow */
     color: rgba(41, 38, 51, 0.90); /* #292633E6 - Dark text */
 }
 
 .weekend-project-value.sanity {
     background-color: rgba(255, 73, 128, 1); /* #FF4980 - Pink */
+    color: rgba(255, 255, 255, 1); /* White text */
+}
+
+.weekend-project-value.fun {
+    background-color: rgba(255, 89, 0, 1); /* #FF5900 - Orange */
     color: rgba(255, 255, 255, 1); /* White text */
 }
 
@@ -460,34 +471,215 @@ footer {
 }
 
 /* ===== NEXT PAGE ===== */
-.next-project-list {
-    max-width: 800px;
-    margin: 20px auto;
-}
-
-.next-project-item {
-    margin: 15px 0 30px 0;
-    padding: 0;
+/* Next Projects - Post-it Note Styling */
+.next-projects {
     display: flex;
-    justify-content: space-between;
-    align-items: start;
-    border-bottom: 1px rgba(41, 38, 51, 1) solid; /* #292633 */
+    flex-wrap: wrap;
+    gap: 100px;
+    justify-content: flex-start;
 }
 
-.next-project-content {
-    flex-grow: 1;
-    padding-right: 20px;
+.next-post-it {
+    position: relative;
+    width: 400px;
+    height: 360px;
+    padding: 0 0 20px 20px;
+    margin-top: 40px;
+    border-left: 1px solid rgba(41, 38, 51, 1);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.next-project-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: rgba(41, 38, 51, 0.9); /* #292633E6 */
+.next-post-it-header {
     margin-bottom: 10px;
 }
 
-.next-project-details {
+.next-post-it .weekend-project-value {
+    font-size: 12px;
+    border-radius: 20px;
+    padding: 2px 16px;
+    align-self: flex-start;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
+.next-post-it-title {
+    font-family: 'DM Serif Text', serif;
+    font-size: 24px;
+    line-height: 1.4;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color:rgba(41, 38, 51, 0.85);
+    word-wrap: break-word;
+}
+
+.next-post-it-details {
+    flex-grow: 1;
+    margin-bottom: 20px;
+    color:rgba(41, 38, 51, 0.85);
+}
+
+.next-post-it-actions {
+    display: flex;
+    justify-content: left;
+    gap: 0px;
+    margin-top: auto;
+    border-top: 1px rgba(41, 38, 51, 1) solid;
+}
+
+.next-like-button, .next-follow-button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    gap: 8px;
+    padding: 8px 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    background-color: rgba(255, 255, 247, 1); /* #FFFFF7 */
+}
+
+.next-like-button {
+    stroke: rgba(41, 38, 51, 1);
+}
+
+.next-like-button.next-liked {
+    color: rgba(255, 73, 128, 1);
+}
+
+.next-like-button.next-liked i {
+    animation: heartPulse 0.3s ease-in-out;
+}
+
+.next-follow-button {
+    color: rgba(41, 38, 51, 1)
+}
+
+.next-follow-button.next-following {
+    color: rgba(255, 73, 128, 1);
+}
+
+/* Add this after your .next-follow-button.next-following style */
+.next-counters {
+    display: flex;
+    justify-content: flex-end;
+    font-size: 14px;
+    margin-top: 16px;
+    color: rgba(41, 38, 51, 0.7);
+    text-align: right;
+}
+
+/* Modal Styling */
+.next-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.next-modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 400px;
+    width: 90%;
+    position: relative;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+.next-confirm-content {
+    padding: 20px;
+    text-align: center;
+    max-width: 300px;
+}
+
+.next-close-modal {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 24px;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.next-form-group {
+    margin: 20px 0;
+}
+
+.next-form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
     font-size: 16px;
-    width: 75%;
-    margin-bottom: 30px;
+}
+
+.next-submit-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #5d3fd3;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.next-submit-button:hover {
+    background-color: #4b32a8;
+}
+
+.next-privacy-note {
+    margin-top: 15px;
+    text-align: center;
+    color: #888;
+}
+
+.next-confirmation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.next-confirmation i {
+    font-size: 40px;
+    color: #4CAF50;
+}
+
+.next-confirmation p {
+    font-size: 18px;
+    margin: 0;
+}
+
+/* Animations */
+@keyframes heartPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
+/* Responsive Layout */
+@media (max-width: 992px) {
+    .next-post-it {
+        width: calc(50% - 20px); /* 2 per row on medium screens */
+    }
+}
+
+@media (max-width: 768px) {
+    .next-post-it {
+        width: 100%; /* Full width on small screens */
+        max-width: 340px;
+        margin: 0 auto 20px;
+    }
 }
