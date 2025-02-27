@@ -30,6 +30,25 @@ function loadTemplates() {
     
     // Update copyright year
     document.getElementById('current-year').textContent = new Date().getFullYear();
+    
+    // Setup logo hover animation
+    setupLogoAnimation();
+}
+
+function setupLogoAnimation() {
+    const logoImg = document.querySelector('.nav-logo img');
+    if (!logoImg) return;
+    
+    const staticSrc = 'images/eggs_ham.png';
+    const animatedSrc = 'images/eggs_ham_animated.gif';
+    
+    logoImg.addEventListener('mouseenter', () => {
+        logoImg.src = animatedSrc;
+    });
+    
+    logoImg.addEventListener('mouseleave', () => {
+        logoImg.src = staticSrc;
+    });
 }
 
 document.addEventListener('DOMContentLoaded', loadTemplates); 
