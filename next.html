@@ -23,9 +23,15 @@
 <body>
     <header>
         <div class="container">
-            <h2>Tell Me What to Build <span class="purple">Next.</span></h2>
+            <h2 class="small-bottom-margin">Tell Me What to Build <span class="purple">Next.</span></h2>
+            <div class="next-intro">
+                <p>Like the projects that resonate with you. Follow the ones you want early access to.</p> 
+                <p>If you have your own project idea, <a href="#">Mr. Benedict</a>, my gentle robot, would love to hear about it!</p>
         </div>
     </header>
+
+    <!-- Test button for email modal -->
+    <!-- <button id="testEmailModal" style="margin: 20px;">Show Email Modal (Test)</button> -->
     
     <main>
         <div class="container">
@@ -41,17 +47,18 @@
     <div id="emailModal" class="next-modal">
         <div class="next-modal-content">
             <span class="next-close-modal">&times;</span>
-            <h3>Stay Updated</h3>
-            <p>Get notified when projects you follow launch!</p>
-            <form id="followForm">
-                <input type="hidden" id="projectId" name="projectId">
-                <div class="next-form-group">
-                    <input type="email" id="email" placeholder="Your email" required>
-                </div>
-                <button type="submit" class="next-submit-button">Follow Project</button>
-            </form>
+            <h3 class="next-modal-title">Get early access to your favorite projects.</h3>
+            <div class="next-form-and-button">
+                <form id="followForm">
+                    <input type="hidden" id="projectId" name="projectId">
+                    <div class="next-form-group">
+                        <input type="email" id="email" placeholder="Your email" required>
+                    </div>
+                    <button type="submit" class="next-submit-button">Submit</button>
+                </form>
+            </div>
             <div class="next-privacy-note">
-                <small>We'll only email about projects you follow. Unsubscribe anytime.</small>
+                <small>Low volume. Unsubscribe anytime.</small>
             </div>
         </div>
     </div>
