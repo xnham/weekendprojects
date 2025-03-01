@@ -11,7 +11,11 @@ const projects = [
         extraContentLinkText: "Role of AI >",
         launchDate: new Date(2025, 0, 15), // January 15, 2025
         image: "miss-penny.gif",
-        tools: ["GitHub Actions", "Google Apps Script", "Google Sheets", "OpenAI", "Python", "Sheet SMS", "Tiller Money"]
+        tools: ["GitHub Actions", "Google Apps Script", "Google Sheets", "OpenAI", "Python", "Sheet SMS", "Tiller Money"],
+        timeSaved: {
+            daily: 0, // minutes saved per day
+            hasCalculator: false
+        }
     },
     {
         id: 4,
@@ -25,7 +29,11 @@ const projects = [
         extraContentLinkText: "Role of AI >",
         launchDate: new Date(2024, 10, 10), // November 10, 2024
         image: "expeditr.gif",
-        tools: ["Anthropic", "Heroku", "Node.js", "Perplexity", "Python + Quart", "React + Vite", "REST API"]
+        tools: ["Anthropic", "Heroku", "Node.js", "Perplexity", "Python + Quart", "React + Vite", "REST API"],
+        timeSaved: {
+            weekly: 30, // minutes saved per week
+            hasCalculator: true
+        }
     },
     {
         id: 3,
@@ -37,7 +45,11 @@ const projects = [
         linkText: "See impact >",
         launchDate: new Date(2024, 7, 14), // August 14, 2024
         image: "jdp.gif",
-        tools: ["Google Apps Script", "Google Sheets"]
+        tools: ["Google Apps Script", "Google Sheets"],
+        timeSaved: {
+            weekly: 60, // minutes saved per week
+            hasCalculator: true
+        }
     },
     {
         id: 2,
@@ -49,7 +61,18 @@ const projects = [
         linkText: "See impact >",
         launchDate: new Date(2024, 7, 6), // July 6, 2024
         image: "joe-calendar.gif",
-        tools: ["Google Calendar", "Node.js"]
+        tools: ["Google Calendar", "Node.js"],
+        timeSaved: {
+            daily: 15, // minutes saved per day
+            hasCalculator: true
+        },
+        alternativeUses: [
+            "eat 72 extra meals.", 
+            "get 182 foot massages.", 
+            "fly around the world twice.",
+            "read 15 books.",
+            "explore 30 museums."
+        ]
     },
     {
         id: 1,
@@ -57,11 +80,22 @@ const projects = [
         value: "time",
         shortDescription: "Web scraper + email notification",
         longDescription: "My tennis video company's workflow requires constant monitoring of tennis club court schedules to determine when to send videos, which courts they're from, and who should receive them. This process used to require manual checks several times daily.\n\nI built a web scraper to automate this entirely, sending updates to Google Sheets and triggering email notifications as needed.",
-        impact: "Impact metrics...",
+        impact: "This solution saves me 15 minutes a day. It eliminates a small yet significant cognitive load from my days, allowing me to focus on other work and enjoy personal time without interruptions.",
         linkText: "See impact >",
         launchDate: new Date(2024, 4, 10), // May 10, 2024
         image: "scraper.gif",
-        tools: ["Google Sheets", "Node.js"]
+        tools: ["Google Sheets", "Node.js"],
+        timeSaved: {
+            daily: 15, // minutes saved per day
+            hasCalculator: true
+        },
+        alternativeUses: [
+            "take 22 hiking trips.", 
+            "play 60 tennis matches.", 
+            "walk from Las Vegas to Mexico.",
+            "watch Stranger Things seasons 1-3 4x.",
+            "drive from NYC to LA and back."
+        ]
     },
     // Add more projects as needed
 ];

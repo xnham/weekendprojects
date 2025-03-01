@@ -4,80 +4,90 @@ const projects = [
         title: "Apple Watch Timestamp App",
         details: "An Apple Watch app that lets tennis players record timestamps with one tap. The timestamps are then used to automatically annotate corresponding video recording, making it easy to review notable moments from a tennis session.",
         value: "fun",
-        votes: 0,
-        follows: 0
+        dummyVotes: 0,
+        dummyFollows: 8,
+        show: true
     },
     {
         id: 2,
         title: "AI Grocery Shopping Assistant",
         details: "An AI agent that turns recipe URLs into a loaded shopping cart and understands your preferences based on past orders. Save 60 minutes a week.",
         value: "time",
-        votes: 0,
-        follows: 0
+        dummyVotes: 24,
+        dummyFollows: 13,
+        show: false
     },
     {
         id: 3,
         title: "Miss Penny 2.0",
         details: "Like Miss Penny 1.0, but instantly updated with every transaction, including pending ones, and with enhanced transaction categorization.",
         value: "money",
-        votes: 0,
-        follows: 0
+        dummyVotes: 31,
+        dummyFollows: 0,
+        show: false
     },
     {
         id: 4,
         title: "Cardboard Costume Creator",
         details: "A collection of patterns and step-by-step guides for creating amazing costumes from cardboard. Win Halloween with a resourceful and creative spirit.",
         value: "fun",
-        votes: 0,
-        follows: 0
+        dummyVotes: 12,
+        dummyFollows: 0,
+        show: true
     },
     {
         id: 5,
         title: "Practice Small Talk",
         details: "An AI Agent that helps you practice small talk in a safe, judgment-free environment. Try different scenarios, personality types, and difficulty levels. Get real-time feedback on engagement and natural flow.",
         value: "fun",
-        votes: 0,
-        follows: 0
+        dummyVotes: 1,
+        dummyFollows: 1,
+        show: true
     },
     {
         id: 6,
         title: "Take the Bias out of News",
         details: "A browser extension that rewrites news articles from your favorite publication in a neutral tone. Avoid getting baited into fear or anger.",
         value: "sanity",
-        votes: 0,
-        follows: 0
+        dummyVotes: 43,
+        dummyFollows: 27,
+        show: true
     },
     {
         id: 7,
         title: "Browse Fashion from Indie Boutiques Near You, Tinder-Style",
         details: "A mobile app that lets you swipe fashion items from local indie boutiques. Stay hip while supporting the community.",
         value: "fun",
-        votes: 0,
-        follows: 0
+        dummyVotes: 21,
+        dummyFollows: 9,
+        show: true
     },
     {
         id: 8,
         title: "Personalized Curation of Weekend Activities",
         details: "An AI Agent that diligently scours all the event listings to find the top five perfect activities just for you.",
         value: "fun",
-        votes: 0,
-        follows: 0
+        dummyVotes: 35,
+        dummyFollows: 22,
+        show: true
     },
     {
         id: 9,
         title: "Know Exactly How to Negotiate a Car Lease",
         details: "A dynamic coaching system that helps you decipher the complexity of car lease structures. Negotiate with self-assuredness and save thousands.",
         value: "money",
-        votes: 0,
-        follows: 0
+        dummyVotes: 19,
+        dummyFollows: 11,
+        show: true
     },
     {
         id: 10,
         title: "Second Brain",
         details: "TBD.",
         value: "time",
-        votes: 0,
-        follows: 0
+        dummyVotes: 26,
+        dummyFollows: 15,
+        show: true
     }
 ];
 
@@ -87,6 +97,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const confirmModal = document.getElementById('confirmModal');
     const followForm = document.getElementById('followForm');
     const closeModalBtn = document.querySelector('.next-close-modal');
+    const emailInput = document.getElementById('email');
+    const submitButton = document.querySelector('.next-submit-button');
+    
+    // Disable submit button initially
+    submitButton.disabled = true;
+    submitButton.classList.add('disabled');
+    
+    // Email validation function
+    function validateEmail(email) {
+        const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    }
+    
+    // Email input validation
+    emailInput.addEventListener('input', function() {
+        const isValid = validateEmail(this.value.trim());
+        submitButton.disabled = !isValid;
+        
+        if (isValid) {
+            submitButton.classList.remove('disabled');
+        } else {
+            submitButton.classList.add('disabled');
+        }
+    });
     
     // User data management
     const getUserData = () => {
@@ -102,17 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('nextUserData', JSON.stringify(data));
     };
     
-    // Shuffle array function (Fisher-Yates algorithm)
-    const shuffleArray = (array) => {
-        const shuffled = [...array]; // Create a copy to avoid modifying the original
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; // Swap elements
-        }
-        return shuffled;
-    };
-    
-    // Render projects in 2-column layout with randomized order
+    // Render projects in 2-column layout without shuffling
     const renderProjects = () => {
         // Clear existing projects
         projectList.innerHTML = '';
@@ -120,11 +144,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Get user data
         const userData = getUserData();
         
-        // Shuffle the projects array for random order
-        const shuffledProjects = shuffleArray(projects);
-        
-        // Create post-it notes for each project
-        shuffledProjects.forEach(project => {
+        // Use original order of projects (no shuffling) but filter by show attribute
+        projects.filter(project => project.show).forEach(project => {
             // Check if user has liked this project
             const isLiked = userData.likes[project.id] || false;
             
@@ -142,16 +163,18 @@ document.addEventListener('DOMContentLoaded', function() {
             <h3 class="next-post-it-title">${project.title}</h3>
             <div class="next-post-it-details">${project.details}</div>
             <div class="next-post-it-actions">
-                <button class="next-like-button ${isLiked ? 'next-liked' : ''}" data-id="${project.id}">
-                    <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
-                    <span>${isLiked ? 'Liked' : 'Like'}</span>
-                </button>
-                <button class="next-follow-button ${isFollowing ? 'next-following' : ''}" data-id="${project.id}">
-                    <i class="${isFollowing ? 'fas' : 'far'} fa-bell"></i>
-                    <span>${isFollowing ? 'Following' : 'Follow'}</span>
-                </button>
-                <div class="next-counters">
-                    ${formatCounters(project.votes, project.follows)}
+                <div class="next-buttons">
+                    <button class="next-like-button ${isLiked ? 'next-liked' : ''}" data-id="${project.id}">
+                        <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
+                        <span>${isLiked ? 'Liked' : 'Like'}</span>
+                    </button>
+                    <button class="next-follow-button ${isFollowing ? 'next-following' : ''}" data-id="${project.id}">
+                        <i class="${isFollowing ? 'fas' : 'far'} fa-bell"></i>
+                        <span>${isFollowing ? 'Following' : 'Follow'}</span>
+                    </button>
+                </div>
+                <div class="next-counters"> 
+                    ${formatCounters(project.dummyVotes, project.dummyFollows)}
                 </div>
             </div>
             `;
@@ -167,6 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const likeBtn = e.target.closest('.next-like-button');
             const projectId = parseInt(likeBtn.dataset.id);
             const textSpan = likeBtn.querySelector('span');
+            const iconElement = likeBtn.querySelector('i');
             
             // Get user data
             let userData = getUserData();
@@ -175,19 +199,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const project = projects.find(p => p.id === projectId);
             
             if (project) {
-                // Toggle like status
+                // Toggle like status - only change the visual state
                 if (userData.likes[projectId]) {
                     // Unlike
                     delete userData.likes[projectId];
                     likeBtn.classList.remove('next-liked');
-                    project.votes--;
                     textSpan.textContent = 'Like';
+                    iconElement.className = 'far fa-heart';
                 } else {
                     // Like
                     userData.likes[projectId] = true;
                     likeBtn.classList.add('next-liked');
-                    project.votes++;
                     textSpan.textContent = 'Liked';
+                    iconElement.className = 'fas fa-heart';
                     
                     // Track event in GA
                     if (typeof gtag === 'function') {
@@ -198,10 +222,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         });
                     }
                 }
-                
-                // Update counters
-                const countersEl = likeBtn.closest('.next-post-it-actions').querySelector('.next-counters');
-                countersEl.textContent = formatCounters(project.votes, project.follows);
                 
                 // Save user data
                 saveUserData(userData);
@@ -214,6 +234,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target.closest('.next-follow-button')) {
             const followBtn = e.target.closest('.next-follow-button');
             const projectId = parseInt(followBtn.dataset.id);
+            const iconElement = followBtn.querySelector('i');
             
             // Get user data
             let userData = getUserData();
@@ -224,16 +245,16 @@ document.addEventListener('DOMContentLoaded', function() {
             if (project) {
                 const isFollowing = userData.follows.includes(projectId);
                 
-                // Toggle follow status
+                // Toggle follow status - only change the visual state
                 if (isFollowing) {
                     // Unfollow
                     userData.follows = userData.follows.filter(id => id !== projectId);
                     followBtn.classList.remove('next-following');
                     followBtn.querySelector('span').textContent = 'Follow';
-                    project.follows--;
+                    iconElement.className = 'far fa-bell';
                     
-                    // Show brief confirmation
-                    showConfirmation(`No longer following "${project.title}"`);
+                    // Remove confirmation popup
+                    // showConfirmation(`No longer following "${project.title}"`);
                 } else {
                     // Check if email exists
                     if (userData.email) {
@@ -241,10 +262,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         userData.follows.push(projectId);
                         followBtn.classList.add('next-following');
                         followBtn.querySelector('span').textContent = 'Following';
-                        project.follows++;
+                        iconElement.className = 'fas fa-bell';
                         
-                        // Show brief confirmation
-                        showConfirmation(`Now following "${project.title}"`);
+                        // Remove confirmation popup
+                        // showConfirmation(`Now following "${project.title}"`);
                         
                         // Track event in GA
                         if (typeof gtag === 'function') {
@@ -288,9 +309,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Find the project
             const project = projects.find(p => p.id === projectId);
-            if (project) {
-                project.follows++;
-            }
             
             // Save user data
             saveUserData(userData);
@@ -301,8 +319,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update UI
             renderProjects();
             
-            // Show confirmation
-            showConfirmation(`Now following "${project.title}"`);
+            // Remove confirmation popup
+            // showConfirmation(`Now following "${project.title}"`);
             
             // Reset form
             followForm.reset();
@@ -318,17 +336,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Show brief confirmation message
-    const showConfirmation = (message) => {
-        document.getElementById('confirmMessage').textContent = message;
-        confirmModal.style.display = 'flex';
-        
-        // Auto hide after 2 seconds
-        setTimeout(() => {
-            confirmModal.style.display = 'none';
-        }, 2000);
-    };
-    
     // Close modal when clicking X
     closeModalBtn.addEventListener('click', function() {
         emailModal.style.display = 'none';
@@ -340,6 +347,17 @@ document.addEventListener('DOMContentLoaded', function() {
             emailModal.style.display = 'none';
         }
     });
+    
+    // Add test button functionality
+    const testBtn = document.getElementById('testEmailModal');
+    if (testBtn) {
+        testBtn.addEventListener('click', function() {
+            // Set a dummy project ID
+            document.getElementById('projectId').value = 1;
+            // Show the modal
+            emailModal.style.display = 'flex';
+        });
+    }
     
     // Initialize by rendering projects
     renderProjects();

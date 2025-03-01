@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <!-- Slide 2: Impact -->
             <div class="slider-slide">
                 <div class="weekend-project-impact">
-                    ${formatImpact(project.impact)}
+                    ${formatImpact(project.impact, project)}
                 </div>
             </div>
         `;
@@ -107,8 +107,15 @@ function formatDescription(description) {
 }
 
 // Helper function to format impact with paragraphs
-function formatImpact(impact) {
-    return impact.split('\n').map(line => `<p>${line}</p>`).join('');
+function formatImpact(impact, project) {
+    let formattedImpact = impact.split('\n').map(line => `<p>${line}</p>`).join('');
+    
+    // Add time calculator if the project has one
+    if (project.timeSaved && project.timeSaved.hasCalculator) {
+        formattedImpact += `<div class="time-calculator-container" data-project-id="${project.id}"></div>`;
+    }
+    
+    return formattedImpact;
 }
 
 // Helper function to generate tools HTML
