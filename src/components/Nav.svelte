@@ -8,8 +8,8 @@
   let isDesktop = true;
   let isLogoHovered = false;
   
-  const staticLogoSrc = '/images/eggs_ham.png';
-  const animatedLogoSrc = '/images/eggs_ham_animated.gif';
+  const staticLogoSrc = '/weekendprojects/images/eggs_ham.png';
+  const animatedLogoSrc = '/weekendprojects/images/eggs_ham_animated.gif';
   
   function toggleMenu() {
     isMenuOpen = !isMenuOpen;
