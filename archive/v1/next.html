@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekend Projects</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Shadows+Into+Light+Two&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/applause-button/dist/applause-button.css">
+    <script src="https://unpkg.com/applause-button/dist/applause-button.js"></script>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6PKHLZLTJG"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-6PKHLZLTJG');
+    </script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h2 class="small-bottom-margin">Tell Me What to Build <span class="purple">Next.</span></h2>
+            <div class="future-project-intro">
+                <p>Like the projects that resonate with you. Follow the ones you want early access to.</p> 
+                <p>If you have your own project idea, how about having a chat with <a href="#">Mr. Benedict</a>, my gentle robot?</p>
+        </div>
+    </header>
+
+    <!-- Test button for email modal -->
+    <!-- <button id="testEmailModal" style="margin: 20px;">Show Email Modal (Test)</button> -->
+    
+    <main>
+        <div class="container">
+            <div class="future-projects" id="projectList">
+                <!-- Projects will be dynamically inserted here -->
+            </div>
+        </div>
+        <div class="spacer">
+        </div>
+    </main>
+
+    <!-- Email Collection Modal -->
+    <div id="emailModal" class="future-project-modal">
+        <div class="future-project-modal-content">
+            <span class="future-project-close-modal">&times;</span>
+            <h3 class="future-project-modal-title">Get early access to your favorite projects.</h3>
+            <div class="future-project-form-and-button">
+                <form id="followForm">
+                    <input type="hidden" id="projectId" name="projectId">
+                    <div class="future-project-form-group">
+                        <input type="email" id="email" placeholder="Your email" required>
+                    </div>
+                    <button type="submit" class="future-project-submit-button">Submit</button>
+                </form>
+            </div>
+            <div class="future-project-privacy-note">
+                <small>Low volume. Unsubscribe anytime.</small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Brief Confirmation Modal -->
+    <div id="confirmModal" class="future-project-modal">
+        <div class="future-project-modal-content future-project-confirm-content">
+            <div class="future-project-confirmation">
+                <i class="fas fa-check-circle"></i>
+                <p id="confirmMessage">Now following!</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="templates.js"></script>
+    <script src="next.js"></script>
+</body>
+</html> 
