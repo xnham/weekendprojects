@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
   
   // Accept currentPage as a prop
@@ -8,8 +8,8 @@
   let isDesktop = true;
   let isLogoHovered = false;
   
-  const staticLogoSrc = '/weekendprojects/images/eggs_ham.png';
-  const animatedLogoSrc = '/weekendprojects/images/eggs_ham_animated.gif';
+  const staticLogoSrc = '/images/eggs_ham.png';
+  const animatedLogoSrc = '/images/eggs_ham_animated.gif';
   
   function toggleMenu() {
     isMenuOpen = !isMenuOpen;
@@ -19,7 +19,7 @@
     isMenuOpen = false;
   }
   
-  function handleKeyDown(event) {
+  function handleKeyDown(event: KeyboardEvent) {
     if (event.key === 'Enter' || event.key === ' ') {
       toggleMenu();
     }
