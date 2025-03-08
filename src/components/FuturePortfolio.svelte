@@ -1,19 +1,37 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
   import { projects } from '../data/projects.js'; // Adjust path as needed
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   
+  // Define interfaces for our data structures
+  interface Project {
+    id: number;
+    title: string;
+    status: string;
+    show: boolean;
+    value: string;
+    longDescription: string;
+    likes: number;
+    follows: number;
+  }
+
+  interface UserData {
+    email: string;
+    follows: string[];
+    likes: { [key: string]: boolean };
+  }
+  
   // Filtered projects (future status and show=true)
-  let displayProjects = [];
+  let displayProjects: Project[] = [];
   
   // State for email modal
   let showEmailModal = false;
-  let currentProjectId = null;
+  let currentProjectId: string = '';
   let email = '';
   let isEmailValid = false;
   
   // User data state
-  let userData = { 
+  let userData: UserData = { 
     email: '', 
     follows: [], 
     likes: {} 
@@ -43,7 +61,7 @@
   }
   
   // Email validation
-  function validateEmail(email) {
+  function validateEmail(email: string): boolean {
     const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
   }
@@ -54,49 +72,38 @@
   }
   
   // Handle like button click
-  function handleLike(projectId) {
-    // Find the project
+  function handleLike(projectId: number): void {
     const project = projects.find(p => p.id === projectId);
     
     if (project) {
-      // Toggle like status
-      if (userData.likes[projectId]) {
-        delete userData.likes[projectId];
+      if (userData.likes[projectId.toString()]) {
+        delete userData.likes[projectId.toString()];
       } else {
-        userData.likes[projectId] = true;
+        userData.likes[projectId.toString()] = true;
       }
-      
-      // Trigger Svelte reactivity by reassigning the userData object
       userData = { ...userData };
-      
-      // Save user data
       saveUserData();
     }
   }
   
   // Handle follow button click
-  function handleFollow(projectId) {
-    // Find the project
+  function handleFollow(projectId: number): void {
     const project = projects.find(p => p.id === projectId);
     
     if (project) {
-      const isFollowing = userData.follows.includes(projectId);
+      const projectIdStr = projectId.toString();
+      const isFollowing = userData.follows.includes(projectIdStr);
       
       if (isFollowing) {
-        // Unfollow
-        userData.follows = userData.follows.filter(id => id !== projectId);
-        // Trigger Svelte reactivity
+        userData.follows = userData.follows.filter(id => id !== projectIdStr);
         userData = { ...userData };
         saveUserData();
       } else {
-        // Check if email exists
         if (userData.email) {
-          // Already have email, just follow
-          userData.follows = [...userData.follows, projectId];  // Create new array reference
+          userData.follows = [...userData.follows, projectIdStr];
           saveUserData();
         } else {
-          // Need email, show modal
-          currentProjectId = projectId;
+          currentProjectId = projectIdStr;
           showEmailModal = true;
         }
       }
@@ -126,7 +133,7 @@
   }
   
   // Format counters text
-  function formatCounters(likes, followers) {
+  function formatCounters(likes: number, followers: number): string {
     // No likes or followers
     if (likes === 0 && followers === 0) {
       return "";
@@ -163,11 +170,11 @@
       <div class="future-project-post-it-actions">
         <div class="future-project-buttons">
           <button 
-            class="future-project-like-button {userData.likes[project.id] ? 'future-project-liked' : ''}" 
+            class="future-project-like-button {userData.likes[project.id.toString()] ? 'future-project-liked' : ''}" 
             on:click={() => handleLike(project.id)}
-            aria-label={userData.likes[project.id] ? 'Unlike this project' : 'Like this project'}
+            aria-label={userData.likes[project.id.toString()] ? 'Unlike this project' : 'Like this project'}
           >
-            {#if userData.likes[project.id]}
+            {#if userData.likes[project.id.toString()]}
               <FontAwesomeIcon icon={['fas', 'heart']} />
               <span>Liked</span>
             {:else}
@@ -176,11 +183,11 @@
             {/if}
           </button>
           <button 
-            class="future-project-follow-button {userData.follows.includes(project.id) ? 'future-project-following' : ''}" 
+            class="future-project-follow-button {userData.follows.includes(project.id.toString()) ? 'future-project-following' : ''}" 
             on:click={() => handleFollow(project.id)}
-            aria-label={userData.follows.includes(project.id) ? 'Unfollow this project' : 'Follow this project'}
+            aria-label={userData.follows.includes(project.id.toString()) ? 'Unfollow this project' : 'Follow this project'}
           >
-            {#if userData.follows.includes(project.id)}
+            {#if userData.follows.includes(project.id.toString())}
               <FontAwesomeIcon icon={['fas', 'bell']} />
               <span>Following</span>
             {:else}
@@ -244,7 +251,7 @@
   .future-project-post-it {
     position: relative;
     width: 400px;
-    height: 340px;
+    height: 460px;
     margin-top: 40px;
     border-left: 1px solid var(--dark-100);
     display: flex;
@@ -307,6 +314,8 @@
     padding-left: 20px;
     margin-bottom: 20px;
     color: var(--dark-85);
+    white-space: pre-wrap;
+    line-height: 1.6;
   }
   
   .future-project-post-it-actions {
