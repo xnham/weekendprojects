@@ -9,11 +9,10 @@
 
 <style>
   footer {
-    margin-top: auto;
     background-color: var(--dark-80);
     color: var(--pure-white-100);
     padding: 1.5rem 0;
-    margin-top: 5rem;
+    margin-top: 0;
     font-size: 14px;
     text-align: center;
   }

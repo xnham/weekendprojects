@@ -71,10 +71,10 @@
     </button>
     
     <ul class="nav-links" class:active={isMenuOpen}>
-      <li><a href="/" class:active={currentPage === 'home'}>Portfolio</a></li>
-      <li><a href="/next" class:active={currentPage === 'next'}>Next</a></li>
-      <li><a href="/writing" class:active={currentPage === 'writing'}>Writing</a></li>
-      <li><a href="/about" class:active={currentPage === 'about'}>About</a></li>
+      <li><a href="/" class:active={currentPage === 'home'} on:click={closeMenu}>Portfolio</a></li>
+      <li><a href="/next" class:active={currentPage === 'next'} on:click={closeMenu}>Next</a></li>
+      <li><a href="/writing" class:active={currentPage === 'writing'} on:click={closeMenu}>Writing</a></li>
+      <li><a href="/about" class:active={currentPage === 'about'} on:click={closeMenu}>About</a></li>
     </ul>
   </div>
 </nav>

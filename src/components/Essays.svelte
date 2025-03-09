@@ -45,8 +45,8 @@
 <style>
     .essays {
         display: flex;    
-        margin-top: 2rem;
         width: 75%;
+        margin-bottom: 200px;
     }
     
     .essay-card {
@@ -100,4 +100,12 @@
     .read-more:hover {
         opacity: 0.8;
     }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .essays {
+            margin-bottom: 160px;
+        }
+    }
+
 </style>
