@@ -5,7 +5,7 @@ date: "2025-03-08"
 published: true
 image:
 tags: []
-excerpt: "We're witnessing the dawn of a new era—one where software can be built for a single user. The economics of software creation have fundamentally changed, and with it, our assumptions about what's possible."
+excerpt: "The economics of software creation have fundamentally changed, and with it, our assumptions about what's possible."
 ---
 For decades, software followed a predictable pattern. First, identify a large market with a common problem. Next, build a solution that works well enough for most people in that market. Finally, scale it to as many users as possible to justify the enormous investment required to build it in the first place. This approach made perfect sense in a world where software development was prohibitively expensive, requiring teams of skilled programmers, project managers, designers, and testers.
 
