@@ -323,7 +323,7 @@
     max-width: 300px;
     height: auto;
     overflow: hidden;
-    align-self: center;
+    align-self: flex-start;
   }
 
   .completed-project-image-column img {
@@ -542,8 +542,8 @@
     }
     
     .completed-project-image-column img {
-      width: 100%;
-      max-width: 300px;
+      width: 75%;
+      max-width: 280px;
       height: auto;
       margin: 0; /* Remove auto centering */
       object-fit: contain;
