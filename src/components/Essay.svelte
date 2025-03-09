@@ -127,8 +127,8 @@
 
 <style>
   article {
-    max-width: 75%;
-    margin: 0;
+    width: 75%;
+    margin: 0 0 200px 0;
   }
 
   .back-link {
@@ -245,5 +245,20 @@
   
   .floating-back-button .floating-link-text {
     text-decoration: underline;
+  }
+
+  /* Responsiveness */
+
+  @media (max-width: 1150px) {
+    .floating-back-button {
+      display: none;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    article {
+      width: 100%;
+      margin: 0 0 160px 0;
+    }
   }
 </style>
