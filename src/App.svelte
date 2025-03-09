@@ -1,10 +1,11 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
   import Nav from './components/Nav.svelte';
   import Footer from './components/Footer.svelte';
   import Home from './routes/Home.svelte';
-  import About from './routes/About.svelte';
   import Next from './routes/Next.svelte';
+  import Writing from './routes/Writing.svelte'
+  import About from './routes/About.svelte';
   
   // State to track current page
   let currentPage = 'home';
@@ -17,6 +18,8 @@
       currentPage = 'about';
     } else if (path === '/next') {
       currentPage = 'next';
+    } else if (path.startsWith('/writing')) {
+      currentPage = 'writing';
     } else {
       currentPage = 'home';
     }
@@ -35,15 +38,19 @@
     // Add event listener for navigation
     window.addEventListener('popstate', handleNavigation);
     
+    // Add click event listener to document for capturing link clicks
+    document.addEventListener('click', handleLinkClick);
+    
     return () => {
       window.removeEventListener('popstate', handleNavigation);
+      document.removeEventListener('click', handleLinkClick);
     };
   });
   
   // Intercept link clicks for SPA navigation
-  function handleLinkClick(event) {
+  function handleLinkClick(event: MouseEvent) {
     // Only handle links within our app
-    const target = event.target.closest('a');
+    const target = (event.target as Element).closest('a');
     if (target && target.origin === window.location.origin) {
       event.preventDefault();
       const href = target.getAttribute('href');
@@ -57,7 +64,7 @@
   }
 </script>
 
-<div on:click={handleLinkClick}>
+<div>
   <Nav currentPage={currentPage} />
 
   <main>
@@ -67,6 +74,8 @@
       <About />
     {:else if currentPage === 'next'}
       <Next />
+    {:else if currentPage === 'writing'}
+      <Writing />
     {/if}
   </main>
   

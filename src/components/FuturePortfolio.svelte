@@ -166,7 +166,9 @@
         <span class="completed-project-value {project.value}">↑ {project.value}</span>
       </div>
       <h3 class="future-project-post-it-title">{project.title}</h3>
-      <div class="future-project-post-it-details">{project.longDescription}</div>
+      <div class="future-project-post-it-details">
+        {@html project.longDescription}
+      </div>
       <div class="future-project-post-it-actions">
         <div class="future-project-buttons">
           <button 
@@ -243,15 +245,19 @@
   /* Post-it styling */
   .future-projects {
     display: flex;
-    flex-wrap: wrap;
-    gap: 100px;
-    justify-content: flex-start;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: left;
+    justify-content: center;
+    gap: 50px;
+    margin: 0;
   }
   
   .future-project-post-it {
     position: relative;
-    width: 400px;
-    height: 460px;
+    width: 100%;
+    max-width: 600px;
+    height: auto;
     margin-top: 40px;
     border-left: 1px solid var(--dark-100);
     display: flex;
@@ -312,10 +318,21 @@
   .future-project-post-it-details {
     flex-grow: 1;
     padding-left: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
     color: var(--dark-85);
     white-space: pre-wrap;
     line-height: 1.6;
+  }
+  
+  .future-project-post-it-details :global(a) {
+    color: var(--dark-85);
+    text-decoration: none;
+    border-bottom: 1px solid var(--dark-100);
+    transition: opacity 0.2s ease;
+  }
+  
+  .future-project-post-it-details :global(a:hover) {
+    opacity: 0.7;
   }
   
   .future-project-post-it-actions {
@@ -505,8 +522,8 @@
   
   /* Responsive adjustments */
   @media (max-width: 768px) {
-    .future-projects {
-      justify-content: center;
+    .future-project-post-it {
+      max-width: 90%;
     }
   }
   
