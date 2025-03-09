@@ -4,7 +4,9 @@
   // Import other home page specific components as needed
 </script>
 
-<AboveTheFold />
+<section class="container">
+  <AboveTheFold />
+</section>
 
 <!-- Completed Projects Section -->
 <section class="container">
@@ -14,5 +16,11 @@
 <!-- Additional home page content would go here -->
 
 <style>
-  /* Home page specific styles */
+    /* Small desktop breakpoint */
+    @media (max-width: 1200px) {
+      .container {
+        padding-left: 5vw;
+        padding-right: 5vw;
+      }
+    }
 </style>

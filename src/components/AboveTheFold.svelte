@@ -42,42 +42,40 @@
 </script>
 
 <header>
-  <div class="container">
-    <h1 class="title">
-      Weekend Projects<span class="rotating-text" bind:this={rotatingTextElement}>{rotatingText}</span>
-    </h1>
+  <h1 class="title">
+    <span class="title-part">Weekend</span> <span class="title-part">Projects</span><span class="rotating-text" bind:this={rotatingTextElement}>{rotatingText}</span>
+  </h1>
 
-    <div class="intro-wrapper">
-      <div class="intro-text two-columns">
-        <div class="column">
-          <p>Building and maintaining software used to be expensive, which meant custom solutions were mainly accessible to large enterprises. That's changing fast. Soon, anyone will be able to create production-grade software using everyday language. It will become completely normal for small businesses, families, and even individuals to deploy bespoke software that's precisely tailored—even adaptive—to their needs.</p>
+  <div class="intro-wrapper">
+    <div class="intro-text two-columns">
+      <div class="column">
+        <p>Building and maintaining software used to be expensive, which meant custom solutions were mainly accessible to large enterprises. That's changing fast. Soon, anyone will be able to create production-grade software using everyday language. It will become completely normal for small businesses, families, and even individuals to deploy bespoke software that's precisely tailored—even adaptive—to their needs.</p>
 
-          <p>We are entering the era of the software long tail, and Weekend Projects is my personal exploration of this future.</p>
+        <p>We are entering the era of the software long tail, and Weekend Projects is my personal exploration of this future.</p>
 
-          <p>In 2024, empowered by Claude, Cursor, and other AI tools, I started building software to squash various small yet pesky problems that were bugging me and my family.</p>
-        </div>
+        <p>In 2024, empowered by Claude, Cursor, and other AI tools, I started building software to squash various small yet pesky problems that were bugging me and my family.</p>
+      </div>
 
-        <div class="column">
-          <p>Before the advent of these powerful AI assistants, owing to my meager coding skills, I would've had to hire a developer to build "software for one," which would have been a silly use of resources.</p>
+      <div class="column">
+        <p>Before the advent of these powerful AI assistants, owing to my meager coding skills, I would've had to hire a developer to build "software for one," which would have been a silly use of resources.</p>
 
-          <p>What great fun it is to see that the economic forces are now enabling, even favoring, hyperpersonal software creation. This ushers us into truly human-centric design, where technology molds to our natural behavior, not the other way around.</p>
+        <p>What great fun it is to see that the economic forces are now enabling, even favoring, hyperpersonal software creation. This ushers us into truly human-centric design, where technology molds to our natural behavior, not the other way around.</p>
 
-          <p>I hope you enjoy browsing through my weekend projects <span class="blink">↓</span></p>
-          
-          <p>Have a project in mind? I encourage you to discuss it with my empathetic robot, <a href="/mr-benedict">Mr. Benedict</a>.</p>
-        </div>
+        <p>I hope you enjoy browsing through my weekend projects <span class="blink">↓</span></p>
+        
+        <p>Have a project in mind? I encourage you to discuss it with my empathetic robot, <a href="/mr-benedict">Mr. Benedict</a>.</p>
       </div>
     </div>
-    <div class="divider"></div>
   </div>
+  <div class="divider"></div>
 </header>
 
 <style>
-  
   .title {
     font-size: 78px;
     margin-bottom: 60px;
     text-align: left;
+    line-height: 1.1;
   }
   
   .rotating-text {
@@ -105,15 +103,57 @@
     flex: 1;
   }
   
-  /* Mobile responsiveness */
+  /* Small desktop breakpoint */
+  @media (max-width: 1200px) {    
+    .title {
+      font-size: 64px;
+      margin-bottom: 40px;
+      line-height: 1.2;
+    }
+    
+    .intro-text.two-columns {
+      gap: 1.5rem;
+    }
+  }
+
+  /* Smaller desktop breakpoint */
+  @media (max-width: 940px) {   
+    .title {
+      font-size: 54px;
+    }
+  }
+  
+  /* Tablet breakpoint */
   @media (max-width: 768px) {
     .intro-text.two-columns {
       flex-direction: column;
-      gap: 1rem;
+      gap: 0;
     }
     
     .title {
+      font-size: 60px;
+      margin-bottom: 40px;
+      line-height: 1.2;
+    }
+    
+    .title-part {
+      display: block;
+    }
+    
+    .title-part:nth-child(2) {
+      display: inline;
+    }
+  }
+  
+  /* Mobile breakpoint */
+  @media (max-width: 576px) {
+    .title {
       font-size: 48px;
+      margin-bottom: 30px;
+    }
+    
+    .intro-text p {
+      margin-bottom: 1.2rem;
     }
   }
 </style>

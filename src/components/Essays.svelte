@@ -35,7 +35,7 @@
                             {essay.description}
                         {/if}
                     </p>
-                    <span class="read-more">Read more &gt</span>
+                    <span class="read-more"><span class="read-more-text">Read more</span> &gt</span>
                 </div>
             </div>
         </a>
@@ -51,7 +51,8 @@
     
     .essay-card {
         overflow: hidden;
-        transition: transform 0.2s, box-shadow 0.2s;
+        padding-left: 20px;
+        border-left: 1px solid var(--dark-100);
     }
 
     .essay-date {
@@ -75,7 +76,7 @@
     }
     
     .essay-content {
-        padding: 0;
+        padding-left: 0;
     }
     
     .essay-card-link {
@@ -87,9 +88,13 @@
     
     .read-more {
         display: inline-block;
-        margin-top: 1rem;
-        color: var(--purple-100);
-        font-weight: 500;
+        margin-top: 20px;
+        color: var(--dark-80);
+        font-weight: 400;
+    }
+
+    .read-more-text {
+        text-decoration: underline;
     }
 
     .read-more:hover {
