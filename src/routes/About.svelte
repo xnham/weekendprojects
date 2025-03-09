@@ -102,6 +102,10 @@
   
   /* Mobile responsiveness */
   @media (max-width: 768px) {
+    h2 {
+      margin-bottom: 80px;
+    }
+
     .about-layout {
       width: 100%;
     }
