@@ -92,11 +92,11 @@
   <div class="error">
     <h1>Essay Not Found</h1>
     <p>{error}</p>
-    <a href="/writing" on:click={goBackToWriting}>Back to all essays</a>
+    <a href="/writing" on:click={goBackToWriting}>&lt; Back to essays</a>
   </div>
 {:else}
   <article>
-    <a href="/writing" class="back-link" on:click={goBackToWriting}><span class="arrow">&lt;</span> <span class="link-text">Back to all essays</span></a>
+    <a href="/writing" class="back-link" on:click={goBackToWriting}><span class="arrow">&lt;</span> <span class="link-text">Back to essays</span></a>
     {#if metadata}
       <header>
         <time class="essay-date" datetime={metadata.date}>{formatDate(metadata.date)}</time>
@@ -121,7 +121,7 @@
 <!-- Floating back button -->
 {#if !loading && !error && showFloatingButton}
   <a href="/writing" class="floating-back-button {buttonVisible ? 'visible' : 'hidden'}" on:click={goBackToWriting}>
-    Back to essays
+    <span class="arrow">&lt;</span> <span class="floating-link-text">Back to essays</span>
   </a>
 {/if}
 
@@ -212,17 +212,15 @@
     position: fixed;
     top: 10px;
     left: 10px;
-    background-color: var(--dark-5);
-    color: var(--dark-80);
+    background-color: var(--light-100);
+    color: var(--dark-70);
     padding: 8px 12px;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
     font-size: 14px;
     text-decoration: none;
     z-index: 100;
     opacity: 0;
-    transition: opacity 1.5s ease; /* Slow fade transition */
-    pointer-events: none; /* Disable interactions when fading */
+    transition: opacity 1.5s ease, transform 0.3s ease, color 0.3s ease;
+    pointer-events: none;
   }
   
   .floating-back-button.visible {
@@ -236,6 +234,16 @@
   }
   
   .floating-back-button:hover {
-    background-color: var(--dark-10);
+    transform: scale(1.02);
+    color: var(--dark-80);
+    box-shadow: 0 2px 6px 2px var(--dark-30); /* Optional: enhanced shadow on hover */
+  }
+  
+  .floating-back-button .arrow {
+    text-decoration: none;
+  }
+  
+  .floating-back-button .floating-link-text {
+    text-decoration: underline;
   }
 </style>
