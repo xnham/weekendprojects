@@ -104,6 +104,7 @@
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .essays {
+            width: 100%;
             margin-bottom: 160px;
         }
     }
