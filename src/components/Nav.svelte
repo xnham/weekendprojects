@@ -103,7 +103,7 @@
     height: 140px;
     width: auto;
     display: block;
-    padding: 20px 40px 5px 40px;
+    padding: 20px 0px 5px 20px;
   }
 
   /* Nav Links */
