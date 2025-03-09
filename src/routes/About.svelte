@@ -35,7 +35,7 @@
         <p>← 2015</p>
       </div>
       <div class="about-content">
-        <p>Before Ocams, I explored different corners of academia. At MIT, I studied molecular biology and contributed to cognitive science research in language and thought. Later, at Harvard, I supported a neurobiology laboratory and helped develop a pioneering initiative for online case-based simulations in medical training. I then earned a PhD at Wharton, where I built computational models of networks to study what makes agents learn better and create more accurate forecasts. A highlight I deeply cherish in my academic wandering was a summer month spent at the Santa Fe Institute, which gave me <a href="https://www.amazon.com/dp/0671872346" target="_blank" rel="noopener">a new lens to see the world</a>.</p>
+        <p>Before Ocams, I explored different corners of academia. At MIT, I studied molecular biology and contributed to cognitive science research in language and thought. Later, at Harvard, I managed a neurobiology laboratory and helped develop a pioneering initiative for online case-based simulations in medical training. I then earned a PhD at Wharton, where I built computational models of networks to study what makes agents learn better and create more accurate forecasts. A highlight I deeply cherish in my academic wandering was a summer month spent at the Santa Fe Institute, which gave me <a href="https://www.amazon.com/dp/0671872346" target="_blank" rel="noopener">a new lens to see the world</a>.</p>
       </div>
     </div>
     
@@ -68,6 +68,10 @@
   .about-row {
     display: flex;
     margin-bottom: 40px;
+  }
+
+  .about-row:last-child {
+    margin-bottom: 0;
   }
   
   .about-timeline {
@@ -102,13 +106,9 @@
       width: 100%;
     }
     
-    .about-row {
-      margin-bottom: 20px;
-    }
-    
     .about-timeline {
-      flex: 0 0 70px;
-      width: 70px;
+      flex: 0 0 90px;
+      width: 90px;
       padding-right: 15px;
     }
     

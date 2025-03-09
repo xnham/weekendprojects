@@ -250,7 +250,7 @@
     align-items: left;
     justify-content: center;
     gap: 50px;
-    margin: 0;
+    margin: 0 0 200px 0;
   }
   
   .future-project-post-it {
@@ -525,6 +525,10 @@
     .future-project-post-it {
       max-width: 90%;
     }
+  }
+
+  .future-projects {
+    margin: 0 0 160px 0;
   }
   
   .future-project-form-and-button form {
