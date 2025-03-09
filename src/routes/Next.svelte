@@ -44,5 +44,14 @@
     h2 {
       font-size: 42px;
     }
+
+    .future-project-intro {
+      margin-bottom: 40px;
+      width: 100%;
+    }
+
+    .future-project-intro p {
+      margin-bottom: 1.5rem;
+    }
   }
 </style>
