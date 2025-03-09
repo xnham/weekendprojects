@@ -25,6 +25,7 @@
   
   .future-project-intro {
     margin-bottom: 60px;
+    width: 75%
   }
   
   .future-project-intro a {

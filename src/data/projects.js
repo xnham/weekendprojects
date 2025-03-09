@@ -134,7 +134,7 @@ export const projects = [
         status: "future",
         value: "insight",
         shortDescription: "Record tennis session timestamps with one tap",
-        longDescription: "Mark important moments in a real-time recording with a single tap on the Apple Watch. When reviewing your recording later, the saved timestamps lets you find those important moments quickly.\n\nPerfect for athletes reviewing performance videos, sales professionals flagging key points in Zoom calls, or anyone who needs to quickly identify important moments during recordings for efficient review later.",
+        longDescription: "When recording my tennis practice sessions, it's often difficult to find important moments later when reviewing the footage. I need a simple way to mark key events in real-time.\n\nI plan to build an Apple Watch app to let me create timestamp markers while I'm recording myself. Later, I could easily jump to these marked moments when watching the video, saving me from tediously scrubbing through the entire recording.\n\nI'm planning to integrate this tool with <a href='https://www.ocamsclub.com' target='_blank'>Ocams's</a> video recording system to benefit Ocams users. However, I believe it would also be valuable for anyone who records themselves regularly and wants to quickly locate specific moments afterward.",
         impact: "TBD",
         extraContent: null,
         linkText: "Follow for updates >",
@@ -204,7 +204,7 @@ export const projects = [
         status: "future",
         value: "time",
         shortDescription: "Your personal second brain",
-        longDescription: "Don't let FOMO disrupt your priorities. Save newsletters and articles that seem valuable but you don't have time to read now.\n\nStore content easily in your \"Second Brain\" repository and search it intelligently when needed. Simply ask questions like \"What advice do my saved materials offer about identifying ideal customers?\" and get relevant insights from your personally curated knowledge base.",
+        longDescription: "I struggle with information overload from technology and business newsletters. These resources seem valuable but aren't immediately relevant, forcing me to choose between protecting my focus and giving in to FOMO.\n\nI plan to build a personal knowledge repository where I can save these resources for later use. When needed, I'll ask questions like \"What advice do my saved materials offer about identifying ideal customers?\" and have an LLM search my personally curated articles for insights.\n\nThis tool would benefit anyone overwhelmed by information who doesn't want to miss content that might become relevant later.",
         impact: "Coming soon...",
         extraContent: null,
         linkText: "Follow for updates >",
@@ -223,11 +223,11 @@ export const projects = [
     },
     {
         id: 10,
-        title: "Take the Bias out of News",
+        title: "Take the Negative Bias out of News",
         status: "future",
         value: "sanity",
         shortDescription: "Rewrite news in a neutral tone",
-        longDescription: "A browser extension that rewrites news articles from your favorite publication in a neutral tone. Avoid getting baited into fear or anger.",
+        longDescription: "Reading my daily newspaper leaves me drained, not from the information but from how it's framed. Headlines exploit our natural attention to threats with negative, alarming language. I want to stay informed but without the emotional manipulation.\n\nI plan to build a browser extension that automatically rewrites news content in a neutral tone while preserving the original site's styling and layout. This would create a natural reading experience with the same information but without the anxiety.\n\nI hope this tool would help news readers everywhere stay informed about world events without the mental fatigue that arises from negative framing.",
         impact: "Coming soon...",
         extraContent: null,
         linkText: "Follow for updates >",
@@ -246,11 +246,34 @@ export const projects = [
     },
     {
         id: 11,
+        title: "Car Lease Offer Analyzer",
+        status: "future",
+        value: "money",
+        shortDescription: "Car lease negotiation coaching system",
+        longDescription: "When negotiating a car lease, the consumer often feels outmatched by the dealer's control over information. Key details like money factors, incentives, and fees are unclear, making it hard to know if they're getting a fair deal. Unlike car loans with legally mandated APR disclosures, car leases remain frustratingly opaque with complex calculations. I want to help car lease consumers confidently assess offers so they can negotiate without second-guessing.\n\nI plan to build a lease advisor tool to let users input lease offers and receive an instant assessment. The tool will highlight missing details, suggest follow-up questions, and provide clear, data-driven recommendations—empowering users to negotiate with confidence and avoid hidden costs.",
+        impact: "Coming soon...",
+        extraContent: null,
+        linkText: "Follow for updates >",
+        extraContentLinkText: null,
+        launchDate: null,
+        image: "placeholder.gif",
+        tools: [],
+        timeSaved: {
+            daily: 0,
+            hasCalculator: false
+        },
+        alternativeUses: [],
+        likes: 19,
+        follows: 11,
+        show: true
+    },
+    {
+        id: 15,
         title: "Practice Small Talk",
         status: "future",
         value: "fun", 
         shortDescription: "AI-powered small talk practice environment",
-        longDescription: "An AI Agent that helps you practice small talk in a safe, judgment-free environment. Try different scenarios, personality types, and difficulty levels. Get real-time feedback on engagement and natural flow.",
+        longDescription: "I want to be a better communicator, and like with everything else, practice is key. While I am familiar with techniques such as active listening, appropriate sharing, and avoiding yes/no questions, practicing them \"in the wild\" feels risky. (The last thing I want is to weird out my conversation partners even more!)\n\nI plan to build a tool to let myself and others practice communication skills with AI conversation partners. It will allow the user to isolate specific techniques, receive real-time feedback, and review recordings to track progress. Unlike real-world interactions, one can practice without fear of messing up.",
         impact: "Coming soon...",
         extraContent: null,
         linkText: "Follow for updates >",
@@ -288,11 +311,11 @@ export const projects = [
         alternativeUses: [],
         likes: 12,
         follows: 0,
-        show: true
+        show: false
     },
     {
         id: 13,
-        title: "Browse Fashion from Indie Boutiques Near You, Tinder-Style",
+        title: "Browse Fashion from Local Boutiques",
         status: "future",
         value: "fun",
         shortDescription: "Swipe to discover local fashion",
@@ -315,7 +338,7 @@ export const projects = [
     },
     {
         id: 14,
-        title: "Personalized Curation of Weekend Activities",
+        title: "Personalized Weekend Newsletter",
         status: "future",
         value: "fun",
         shortDescription: "AI-curated perfect weekend activities",
@@ -336,27 +359,4 @@ export const projects = [
         follows: 22,
         show: true
     },
-    {
-        id: 15,
-        title: "Know Exactly How to Negotiate a Car Lease",
-        status: "future",
-        value: "money",
-        shortDescription: "Car lease negotiation coaching system",
-        longDescription: "A dynamic coaching system that helps you decipher the complexity of car lease structures. Negotiate with self-assuredness and save thousands.",
-        impact: "Coming soon...",
-        extraContent: null,
-        linkText: "Follow for updates >",
-        extraContentLinkText: null,
-        launchDate: null,
-        image: "placeholder.gif",
-        tools: [],
-        timeSaved: {
-            daily: 0,
-            hasCalculator: false
-        },
-        alternativeUses: [],
-        likes: 19,
-        follows: 11,
-        show: true
-    }
 ];

@@ -1,14 +1,14 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
 
   // Array of rotating texts (copied from your original implementation)
   const rotatingTexts = ['^Claude', '^Cursor', '^Replit', '^n8n', '^AutoGPT', '^Gumloop', '^VAPI'];
   let rotatingText = "";
   let currentIndex = 0;
-  let rotatingTextElement;
+  let rotatingTextElement: HTMLElement | null = null;
 
   // Function to get random index different from current one
-  function getRandomIndex(currentIndex, arrayLength) {
+  function getRandomIndex(currentIndex: number, arrayLength: number): number {
     let newIndex;
     do {
       newIndex = Math.floor(Math.random() * arrayLength);
@@ -17,22 +17,19 @@
   }
 
   // Function to update rotating text with fade effect
-  function updateRotatingText() {
+  function updateRotatingText(): void {
     if (rotatingTextElement) {
       rotatingTextElement.style.opacity = '0';
       
       setTimeout(() => {
         currentIndex = getRandomIndex(currentIndex, rotatingTexts.length);
         rotatingText = rotatingTexts[currentIndex];
-        rotatingTextElement.style.opacity = '1';
+        rotatingTextElement!.style.opacity = '1';
       }, 500);
     }
   }
 
   onMount(() => {
-    // Get reference to rotating text element
-    rotatingTextElement = document.querySelector('.rotating-text');
-    
     // Initial text update
     updateRotatingText();
     
