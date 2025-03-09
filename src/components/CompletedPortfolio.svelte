@@ -1,6 +1,25 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
   import { projects } from '../data/projects.js';
+  
+  // Define a type for the project structure
+  interface Project {
+    id: number;
+    title: string;
+    status: string;
+    show: boolean;
+    value: string;
+    longDescription: string;
+    impact: string;
+    image: string;
+    tools: string[];
+    extraContent?: string | null;
+    extraContentLinkText?: string | null;
+    linkText?: string | null;
+    timeSaved?: {
+      hasCalculator: boolean;
+    } | null;
+  }
   
   // Filter for completed projects only that are set to show, and sort by ID in descending order
   const completedProjects = projects
@@ -8,7 +27,7 @@
     .sort((a, b) => b.id - a.id);
   
   // Track current slide for each project
-  let currentSlides = {};
+  let currentSlides: Record<number, number> = {};
   
   // Initialize current slide for each project
   onMount(() => {
@@ -24,22 +43,22 @@
   });
   
   // Helper function to format description with paragraphs
-  function formatDescription(description) {
+  function formatDescription(description: string): string {
     return description.split('\n\n').map(paragraph => `<p>${paragraph}</p>`).join('');
   }
   
   // Helper function to format impact with paragraphs
-  function formatImpact(impact) {
+  function formatImpact(impact: string): string {
     return impact.split('\n').map(line => `<p>${line}</p>`).join('');
   }
   
   // Function to navigate to a specific slide
-  function goToSlide(projectId, slideIndex) {
+  function goToSlide(projectId: number, slideIndex: number): void {
     currentSlides[projectId] = slideIndex;
   }
   
   // Function to go forward one slide
-  function goForward(projectId, project) {
+  function goForward(projectId: number, project: Project): void {
     const numSlides = project.extraContent ? 3 : 2;
     if (currentSlides[projectId] < numSlides - 1) {
       currentSlides[projectId]++;
@@ -47,14 +66,14 @@
   }
   
   // Function to go back one slide
-  function goBack(projectId) {
+  function goBack(projectId: number): void {
     if (currentSlides[projectId] > 0) {
       currentSlides[projectId]--;
     }
   }
   
   // Function to get the appropriate link text based on current slide
-  function getLinkText(project, currentSlide) {
+  function getLinkText(project: Project, currentSlide: number): {main: string, arrow: string} {
     if (currentSlide === 0) {
       // Split the text into main part and arrow part
       const text = project.linkText || "See more";
@@ -367,7 +386,7 @@
     padding: 0;
     cursor: pointer;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 400;
     color: var(--dark-85);
     transition: opacity 0.2s ease;
     text-align: left;
@@ -493,5 +512,50 @@
   .slider-link .link-arrow {
     text-decoration: none;
     margin-left: 3px; /* Add a small space between text and arrow */
+  }
+
+  /* ===== TABLET BREAKPOINT (max-width: 768px) ===== */
+  @media (max-width: 768px) {
+    .completed-project-content {
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .completed-project-left-column {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .completed-project-header {
+      margin-bottom: 1rem;
+      order: -1; /* Keep the header/title at the top */
+    }
+    
+    .completed-project-image-column {
+      order: 0; /* Place image after header but before slider */
+      max-width: 100%;
+      width: 100%;
+      margin: 0 0 20px 0; /* Reduced top and bottom margins */
+      display: flex;
+      justify-content: flex-start; /* Left align the image */
+    }
+    
+    .completed-project-image-column img {
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      margin: 0; /* Remove auto centering */
+      object-fit: contain;
+    }
+    
+    .completed-project-slider {
+      order: 1; /* Place description after the image */
+    }
+    
+    .completed-project-title {
+      font-size: 28px;
+      margin-bottom: 15px;
+    }
   }
 </style>
