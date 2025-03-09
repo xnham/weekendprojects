@@ -1,0 +1,1 @@
+import"./index-DO6wVKB_.js";const e={title:"The value of taste in the AI age",description:"Taste is what's valuable. Why is that? How do we develop it?",date:"2025-03-11",published:!1,image:null,tags:[],exceprt:null},{title:i,description:s,date:l,published:o,image:d,tags:n,exceprt:h}=e;function p(t){}export{p as default,e as metadata};
