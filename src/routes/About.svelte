@@ -26,7 +26,7 @@
         
         <p>There is one radical design choice we made with Ocams that I find interesting to reflect on: interfaceless SaaS.</p>
         
-        <p>Interfaceless SaaS is just a term I made up, but I believe it is something the tech world is transitioning into. While building Ocams, I felt strongly about not making our tennis club partners manage yet another interface on top of a variety of other SaaS interfaces they already had to deal with. Instead, we adapted our system to fit each partner club's existing workflow, affording them the luxury of simply carrying on with their existing ways of being. This is what software will gift us in the immediate future. It'll run our lives quietly in the background with no new buttons to push.</p>
+        <p>Interfaceless SaaS is just a term I made up, but I believe it is something the tech world is transitioning into. While building Ocams, I felt strongly about not making our tennis club partners manage yet another interface on top of a variety of other SaaS interfaces they already had to deal with. Instead, we adapted our system to fit each partner club's existing workflow, allowing them the luxury of simply carrying on with their existing ways of being. This is what software will gift us in the immediate future. It'll run our lives quietly in the background with no new buttons to push.</p>
       </div>
     </div>
     
@@ -35,7 +35,7 @@
         <p>← 2015</p>
       </div>
       <div class="about-content">
-        <p>Before Ocams, I explored different corners of academia. At MIT, I studied molecular biology and contributed to cognitive science research in language and thought. Later, at Harvard, I managed a neurobiology laboratory and helped develop a pioneering initiative for online case-based simulations in medical training. I then earned a PhD at Wharton, where I built computational models of networks to study what makes agents learn better and create more accurate forecasts. A highlight I deeply cherish in my academic wandering was a summer month spent at the Santa Fe Institute, which gave me <a href="https://www.amazon.com/dp/0671872346" target="_blank" rel="noopener">a new lens to see the world</a>.</p>
+        <p>Before Ocams, I explored different corners of academia. At MIT, I studied molecular biology and contributed to cognitive science research in language and thought. Later, at Harvard, I managed a neurobiology laboratory and helped develop a pioneering initiative for online case-based simulations in medical training. I then earned a PhD at Wharton, where I built computational models of networks to understand what makes agents learn and predict things better. A highlight I deeply cherish in my academic wandering was a summer month spent at the Santa Fe Institute, which gave me <a href="https://www.amazon.com/dp/0671872346" target="_blank" rel="noopener">a new lens to see the world</a>.</p>
       </div>
     </div>
     
