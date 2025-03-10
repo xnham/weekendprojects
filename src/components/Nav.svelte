@@ -177,7 +177,7 @@
     }
 
     .nav-logo img {
-    padding: 20px 0px 5px 3vw;
+      padding: 20px 0px 5px 3vw;
     }
 
     .nav-hamburger {
@@ -190,14 +190,16 @@
       right: -100vw;
       height: 100vh;
       width: 100vw;
-      padding-left: 7vw;
+      padding: 120px 0 0 7vw; /* Moved top margin to padding to preserve full background */
       background-color: var(--dark-95);
       font-size: 24px;
+      display: flex;
       flex-direction: column;
-      align-items: left;
-      justify-content: center;
+      align-items: flex-start;
+      justify-content: flex-start;
       transition: right 0.3s ease;
       z-index: 90;
+      gap: clamp(16px, 4vh, 24px);
     }
 
     .nav-links a {

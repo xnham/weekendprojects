@@ -2,7 +2,8 @@
   import { onMount } from 'svelte';
 
   // Array of rotating texts (copied from your original implementation)
-  const rotatingTexts = ['^Claude', '^Cursor', '^Replit', '^n8n', '^AutoGPT', '^Gumloop', '^VAPI'];
+  // const rotatingTexts = ['^Claude', '^Cursor', '^Replit', '^n8n', '^AutoGPT', '^Gumloop', '^VAPI']; //
+  const rotatingTexts = ['^AutoGPT2', '^AutoGPT3'];
   let rotatingText = "";
   let currentIndex = 0;
   let rotatingTextElement: HTMLElement | null = null;
@@ -59,7 +60,7 @@
       <div class="column">
         <p>Before the advent of these powerful AI assistants, owing to my meager coding skills, I would've had to hire a developer to build "software for one," which would have been a silly use of resources.</p>
 
-        <p>What great fun it is to see that the economic forces are now enabling, even favoring, hyperpersonal software creation. This ushers us into truly human-centric design, where technology molds to our natural behavior, not the other way around.</p>
+        <p>What great fun it is to see that the economic forces are now enabling, even favoring, hyperpersonal software creation.</p>
 
         <p>I hope you enjoy browsing through my weekend projects <span class="blink">↓</span></p>
         
@@ -72,7 +73,7 @@
 
 <style>
   .title {
-    font-size: 78px;
+    font-size: 76px;
     margin-bottom: 60px;
     text-align: left;
     line-height: 1.1;
@@ -106,20 +107,13 @@
   /* Small desktop breakpoint */
   @media (max-width: 1200px) {    
     .title {
-      font-size: 64px;
+      font-size: min(7vw, 72px);
       margin-bottom: 40px;
-      line-height: 1.2;
+      line-height: 1.1;
     }
     
     .intro-text.two-columns {
       gap: 1.5rem;
-    }
-  }
-
-  /* Smaller desktop breakpoint */
-  @media (max-width: 940px) {   
-    .title {
-      font-size: 54px;
     }
   }
   
@@ -131,9 +125,8 @@
     }
     
     .title {
-      font-size: 60px;
+      font-size: max(8vw, 60px);
       margin-bottom: 40px;
-      line-height: 1.2;
     }
     
     .title-part {
@@ -148,7 +141,7 @@
   /* Mobile breakpoint */
   @media (max-width: 576px) {
     .title {
-      font-size: 48px;
+      font-size: max(9vw, 54px);
       margin-bottom: 30px;
     }
     
