@@ -33,7 +33,7 @@
         <p>← 2015</p>
       </div>
       <div class="about-content">
-        <p>Before Ocams, I spent many years in academia. I studied molecular biology and contributed to cognitive science research in language and thought as an undergraduate student at MIT. Later, I managed a neurobiology laboratory and helped develop an initiative for online case-based simulations in medical training at Harvard Medical School. I then pursued a PhD at Wharton, where I built computational models to study how different choices and attributes can make agents learn better and predict things more accurately.</p> 
+        <p>Before Ocams, I spent many years in academia. I studied molecular biology as an undergraduate student at MIT. Later, I managed a neurobiology laboratory and helped develop case-based medical training simulations at Harvard Medical School. I then pursued a PhD at Wharton, where I built computational models to study how different choices and attributes can make agents learn better and predict things more accurately.</p> 
         
         <p>A memorable part of my time in academia was a summer month at the Santa Fe Institute (SFI), where I was introduced to <a href="https://www.amazon.com/dp/0671872346" target="_blank" rel="noopener">complexity science</a>, which looks at how simple rules can give rise to rich, unpredictable behaviors in various domains—from social systems to biological and physical systems. This bottom-up approach gave me a new way of thinking that was a helpful complement to the traditional top-down analytic style I had encountered up to that point.</p>
 
