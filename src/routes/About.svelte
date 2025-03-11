@@ -13,7 +13,7 @@
         <p>2024 →</p>
       </div>
       <div class="about-content">
-        <p>I started using AI tools to build ""<a href="/writing/software-for-one" class="essay-card-link">software for one</a>.""</p>
+        <p>I started using AI tools to build "<a href="/writing/software-for-one" class="essay-card-link">software for one</a>."</p>
       </div>
     </div>
     
