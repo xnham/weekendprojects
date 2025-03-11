@@ -2,8 +2,7 @@
   import { onMount } from 'svelte';
 
   // Array of rotating texts (copied from your original implementation)
-  // const rotatingTexts = ['^Claude', '^Cursor', '^Replit', '^n8n', '^AutoGPT', '^Gumloop', '^VAPI']; //
-  const rotatingTexts = ['^AutoGPT2', '^AutoGPT3'];
+  const rotatingTexts = ['^Claude', '^Cursor', '^Replit', '^n8n', '^AutoGPT', '^Gumloop', '^VAPI'];
   let rotatingText = "";
   let currentIndex = 0;
   let rotatingTextElement: HTMLElement | null = null;
@@ -52,7 +51,7 @@
       <div class="column">
         <p>Building and maintaining software used to be expensive, which meant custom solutions were mainly accessible to large enterprises. That's changing fast. Soon, anyone will be able to create production-grade software using everyday language. It will become completely normal for small businesses, families, and even individuals to deploy bespoke software that's precisely tailored—even adaptive—to their needs.</p>
 
-        <p>We are entering the era of the software long tail, and Weekend Projects is my personal exploration of this future.</p>
+        <p>This is the era of the software long tail, and Weekend Projects is my personal exploration of this exciting new beginning.</p>
 
         <p>In 2024, empowered by Claude, Cursor, and other AI tools, I started building software to squash various small yet pesky problems that were bugging me and my family.</p>
       </div>
@@ -64,7 +63,7 @@
 
         <p>I hope you enjoy browsing through my weekend projects <span class="blink">↓</span></p>
         
-        <p>Have a project in mind? I encourage you to discuss it with my empathetic robot, <a href="/mr-benedict">Mr. Benedict</a>.</p>
+        <p>Have your own project in mind? Would you like to get feedback from my friendly robot, <a href="/mr-benedict">Mr. Benedict</a>?</p>
       </div>
     </div>
   </div>
