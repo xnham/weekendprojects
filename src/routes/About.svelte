@@ -27,6 +27,15 @@
         <p>One design approach we took with Ocams was "interfaceless SaaS." Rather than creating another dashboard for our tennis club partners to manage, we adapted our system to work with each partner club's existing workflow. This meant they could continue using their familiar processes while our software ran quietly in the background, with no additional interfaces to learn or buttons to push for both club staff and players.</p>
       </div>
     </div>
+
+    <div class="about-row">
+      <div class="about-timeline">
+        <p>2015</p>
+      </div>
+      <div class="about-content">
+        <p>At this point, equipped with a Green Card, I finally broke free from visa restrictions that had kept me in academia since college. After years of reading and writing papers, I was eager to actually build something—anything—that solved real problems. Tennis was my obsession at the time, and I saw a need in the tennis community that I could try to build a solution for.</p> 
+      </div>
+    </div>
     
     <div class="about-row">
       <div class="about-timeline">
