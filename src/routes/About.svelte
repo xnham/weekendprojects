@@ -37,7 +37,7 @@
         
         <p>A memorable part of my time in academia was a summer month at the Santa Fe Institute (SFI), where I was introduced to <a href="https://www.amazon.com/dp/0671872346" target="_blank" rel="noopener">complexity science</a>, which looks at how simple rules can give rise to rich, unpredictable behaviors in various domains—from social systems to biological and physical systems. This bottom-up approach gave me a new way of thinking that helpfully complemented the traditional top-down analytic style I had encountered up to that point.</p>
 
-        <p>Around 2015, equipped with a Green Card, I broke free from visa restrictions that had kept me in academia since college. After years of reading and writing papers, I was eager to actually build something—anything—that solved real problems. Tennis was my obsession at the time, and I saw a need in the tennis community that I could try to build a solution for.</p> 
+        <p>Around 2015, equipped with a Green Card, I broke free from visa restrictions that had kept me in academia since college. After years of reading and writing papers, I was eager to actually build something—anything—that solved real problems. Tennis was my obsession at the time, and I noticed a need in the tennis community that I could try to build a solution for.</p> 
       </div>
     </div>
     
