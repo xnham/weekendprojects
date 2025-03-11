@@ -27,15 +27,6 @@
         <p>One design approach we took with Ocams was "interfaceless SaaS." Rather than creating another dashboard for our tennis club partners to manage, we adapted our system to work with each partner club's existing workflow. This meant they could continue using their familiar processes while our software ran quietly in the background, with no additional interfaces to learn or buttons to push for both club staff and players.</p>
       </div>
     </div>
-
-    <div class="about-row">
-      <div class="about-timeline">
-        <p>2015</p>
-      </div>
-      <div class="about-content">
-        <p>At this point, equipped with a Green Card, I finally broke free from visa restrictions that had kept me in academia since college. After years of reading and writing papers, I was eager to actually build something—anything—that solved real problems. Tennis was my obsession at the time, and I saw a need in the tennis community that I could try to build a solution for.</p> 
-      </div>
-    </div>
     
     <div class="about-row">
       <div class="about-timeline">
@@ -44,7 +35,9 @@
       <div class="about-content">
         <p>Before Ocams, I spent many years in academia. I studied molecular biology and contributed to cognitive science research in language and thought as an undergraduate student at MIT. Later, I managed a neurobiology laboratory and helped develop an initiative for online case-based simulations in medical training at Harvard Medical School. I then pursued a PhD at Wharton, where I built computational models to study how different choices and attributes can make agents learn better and predict things more accurately.</p> 
         
-        <p>A memorable part of my time in academia was a summer month at the Santa Fe Institute (SFI), where I was introduced to <a href="https://www.amazon.com/dp/0671872346" target="_blank" rel="noopener">complexity science</a>, which looks at how simple rules can give rise to rich, unpredictable behaviors in various domains. It was fascinating to see universal patterns emerge in seemingly unrelated domains—from social systems to biological and physical systems. This bottom-up approach gave me a new way of thinking that was a helpful complement to the traditional top-down analytic style I had encountered up to that point.</p>
+        <p>A memorable part of my time in academia was a summer month at the Santa Fe Institute (SFI), where I was introduced to <a href="https://www.amazon.com/dp/0671872346" target="_blank" rel="noopener">complexity science</a>, which looks at how simple rules can give rise to rich, unpredictable behaviors in various domains—from social systems to biological and physical systems. This bottom-up approach gave me a new way of thinking that was a helpful complement to the traditional top-down analytic style I had encountered up to that point.</p>
+
+        <p>Around 2015, equipped with a Green Card, I broke free from visa restrictions that had kept me in academia since college. After years of reading and writing papers, I was eager to actually build something—anything—that solved real problems. Tennis was my obsession at the time, and I saw a need in the tennis community that I could try to build a solution for.</p> 
       </div>
     </div>
     
