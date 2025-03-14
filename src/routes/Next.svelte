@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import FuturePortfolio from '../components/FuturePortfolio.svelte';
 </script>
 

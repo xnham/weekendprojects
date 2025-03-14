@@ -129,7 +129,7 @@ export const projects = [
         show: true
     },
     {
-        id: 6,
+        id: 106,
         title: "One-Tap Timestamps on Apple Watch",
         status: "future",
         value: "insight",
@@ -153,7 +153,7 @@ export const projects = [
         show: true
     },
     {
-        id: 7,
+        id: 107,
         title: "AI Grocery Shopping Assistant",
         status: "future",
         value: "time",
@@ -176,7 +176,7 @@ export const projects = [
         show: false
     },
     {
-        id: 8,
+        id: 108,
         title: "Miss Penny 2.0",
         status: "future",
         value: "money",
@@ -199,7 +199,7 @@ export const projects = [
         show: false
     },
     {
-        id: 9,
+        id: 109,
         title: "Second Brain",
         status: "future",
         value: "time",
@@ -222,7 +222,7 @@ export const projects = [
         show: true
     },
     {
-        id: 10,
+        id: 110,
         title: "Take the Negative Bias out of News",
         status: "future",
         value: "sanity",
@@ -245,7 +245,7 @@ export const projects = [
         show: true
     },
     {
-        id: 11,
+        id: 111,
         title: "Car Lease Offer Analyzer",
         status: "future",
         value: "money",
@@ -268,7 +268,7 @@ export const projects = [
         show: true
     },
     {
-        id: 15,
+        id: 115,
         title: "Practice Small Talk",
         status: "future",
         value: "fun", 
@@ -291,7 +291,7 @@ export const projects = [
         show: true
     },
     {
-        id: 12,
+        id: 112,
         title: "Cardboard Costume Creator",
         status: "future",
         value: "fun",
@@ -314,7 +314,7 @@ export const projects = [
         show: false
     },
     {
-        id: 13,
+        id: 113,
         title: "Neighborhood Boutique Browser",
         status: "future",
         value: "fun",
@@ -337,7 +337,7 @@ export const projects = [
         show: true
     },
     {
-        id: 14,
+        id: 114,
         title: "Family Weekend Newsletter",
         status: "future",
         value: "fun",
@@ -357,6 +357,29 @@ export const projects = [
         alternativeUses: [],
         likes: 35,
         follows: 22,
+        show: true
+    },
+    {
+        id: 116,
+        title: "Friend Catch-Upper",
+        status: "future",
+        value: "fun",
+        shortDescription: "Call your friends automatically to gather intel about them",
+        longDescription: "As time goes by, my friends and I get busier with family and work. It's harder to stay in touch, and we slowly—and sadly—fade from each other's immediate consciousness.\n\nGrowing new friendships is also challenging. Spontaneous hangouts and random chitchats that are so helpful for exploring new connections are disappearing from our culture. (Doesn't it feel like everything needs to be scheduled, agenda-ed and calendar-invited these days?)\n\nAs silly as it may sound—actually, the silliness may be the point here—I'd love to have a robot call my friends periodically to say hello and find out what's going on in their lives. My friends will hopefully find it amusing to be interviewed by a robot, and the topics uncovered will hopefully lead to real, engaging, robotless conversations afterward.",
+        impact: "Coming soon...",
+        extraContent: null,
+        linkText: "Follow for updates >",
+        extraContentLinkText: null,
+        launchDate: null,
+        image: "placeholder.gif",
+        tools: ["AI"],
+        timeSaved: {
+            daily: 0,
+            hasCalculator: false
+        },
+        alternativeUses: [],
+        likes: 24,
+        follows: 17,
         show: true
     },
 ];
