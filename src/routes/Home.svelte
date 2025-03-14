@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import AboveTheFold from '../components/AboveTheFold.svelte';
   import CompletedPortfolio from '../components/CompletedPortfolio.svelte';
   // Import other home page specific components as needed

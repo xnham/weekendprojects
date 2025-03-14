@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   // Get current year for copyright
   const currentYear = new Date().getFullYear();
 </script>
