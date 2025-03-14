@@ -129,6 +129,29 @@ export const projects = [
         show: true
     },
     {
+        id: 6,
+        title: "Custom live stream system",
+        status: "completed",
+        value: "money",
+        shortDescription: "Daily text to track expenses against budget",
+        longDescription: "Used to need third party software. Built a custom system from scratch to avoid having to use paid software",
+        impact: "Saves $499 per camera. The immediate impact for me was $2,000 saved.",
+        extraContent: "",
+        linkText: "See impact >",
+        extraContentLinkText: "",
+        launchDate: new Date(2025, 1, 1), // February 1, 2025
+        image: "miss-penny.gif",
+        tools: ["GitHub Actions", "Google Apps Script", "Google Sheets", "OpenAI", "Python", "Sheet SMS", "Tiller Money"],
+        timeSaved: {
+            daily: 0, // minutes saved per day
+            hasCalculator: false
+        },
+        alternativeUses: [],
+        likes: 0,
+        follows: 0,
+        show: false
+    },
+    {
         id: 106,
         title: "One-Tap Timestamps on Apple Watch",
         status: "future",
