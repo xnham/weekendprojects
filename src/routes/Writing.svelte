@@ -59,7 +59,7 @@
     <h2 class="small-bottom-margin">Thoughts about <span class="purple">Software.</span></h2>
     
     <div class="future-project-intro">
-      <p>I explore ideas about software from a human-centric perspective: how our natural behaviors, cognitive patterns, and lived experiences uncover opportunities to rethink software design to create tools that quietly complement how we think and live.</p>
+      <p>I enjoy thinking about how our natural behaviors, cognitive patterns, and lived experiences as humans uncover opportunities to rethink software design, so we can create tools that <span class="small-font">quietly</span> complement how we think and live.</p>
     </div>
     
     <Essays />
@@ -70,6 +70,10 @@
   .future-project-intro {
     width: 75%;
     margin-bottom: 80px;
+  }
+
+  .small-font {
+    font-size: 14px;
   }
   
   /* Responsive adjustments */
