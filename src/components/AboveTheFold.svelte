@@ -67,7 +67,7 @@
         
         <p>Have your own project in mind? How about getting feedback from my friendly robot, <a href="/mr-benedict">Mr. Benedict</a>?</p>
 
-        <p><i>*Andrej Karpathy called it "<a href="https://en.wikipedia.org/wiki/Vibe_coding" target=_blank>vibe coding</a>" in February 2025. The name exploded in popularity shortly after.</i></p>
+        <p class="asterisk-explanation">*In February 2025, Andrej Karpathy called it "<a href="https://en.wikipedia.org/wiki/Vibe_coding" target=_blank>vibe coding</a>." The term exploded in popularity shortly after.</p>
       </div>
     </div>
   </div>
@@ -105,6 +105,13 @@
 
   .intro-text.two-columns .column {
     flex: 1;
+  }
+  
+  .asterisk-explanation {
+    border-top: 1px solid var(--dark-100);
+    margin-top: 20px;
+    padding-top: 10px;
+    font-size: 14px;
   }
   
   /* Small desktop breakpoint */

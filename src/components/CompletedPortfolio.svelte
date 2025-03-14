@@ -140,7 +140,7 @@
                        on:click|preventDefault={() => goBack(project.id)}
                        on:keydown={(e) => e.key === 'Enter' && goBack(project.id)}
                        aria-label="Go to previous slide">
-                      &lt; Back
+                      <span class="link-arrow">&lt;</span><span class="link-text">Back</span>
                     </a>
                   </div>
                   <div class="slider-forward" 
@@ -512,6 +512,15 @@
   .slider-link .link-arrow {
     text-decoration: none;
     margin-left: 3px; /* Add a small space between text and arrow */
+  }
+  
+  .slider-back-link .link-text {
+    text-decoration: underline;
+  }
+  
+  .slider-back-link .link-arrow {
+    text-decoration: none;
+    margin-right: 3px; /* Add a small space between arrow and text */
   }
 
   /* ===== TABLET BREAKPOINT (max-width: 768px) ===== */
