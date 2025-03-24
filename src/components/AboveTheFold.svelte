@@ -51,7 +51,7 @@
       <div class="column">
         <p>Building and maintaining software used to be expensive, which meant custom solutions were mainly accessible to large enterprises.</p>
         
-        <p>That's changing fast. Soon, anyone will be able to create production-grade software using everyday language.* It will become completely normal for small businesses, families, and even individuals to deploy bespoke software that's precisely tailored—even adaptive—to their needs.</p>
+        <p>That has changed. Now, anyone can create production-grade software using everyday language.* It's becoming completely normal for small businesses, families, even individuals to deploy bespoke software that's precisely tailored—even adaptive—to their needs.</p>
 
         <p>Weekend Projects is my personal exploration of this exciting new era of software long tail.</p>
 
@@ -59,7 +59,7 @@
       </div>
 
       <div class="column">
-        <p>Before the advent of these powerful AI assistants, owing to my disjointed coding skills, I would've had to hire a developer to build those pieces of software, which would have been a silly use of resources.</p>
+        <p>Before the advent of these powerful AI assistants, due to my disjointed coding skills, I would've had to hire a developer or toil for months to build those pieces of software, which would have been a silly use of time and money.</p>
 
         <p>It's so much fun to see the economic forces now enabling, maybe even favoring, hyperpersonal software creation.</p>
 
@@ -67,7 +67,7 @@
         
         <p>Have your own project in mind? How about getting feedback from my friendly robot, <a href="/mr-benedict">Mr. Benedict</a>?</p>
 
-        <p class="asterisk-explanation">*In February 2025, Andrej Karpathy called it "<a href="https://en.wikipedia.org/wiki/Vibe_coding" target=_blank>vibe coding</a>." The term exploded in popularity shortly after.</p>
+        <p class="asterisk-explanation">*In February 2025, Andrej Karpathy coined the term <a href="https://en.wikipedia.org/wiki/Vibe_coding" target=_blank>vibe coding</a>, which became very popular shortly after.</p>
       </div>
     </div>
   </div>
@@ -151,7 +151,7 @@
   /* Mobile breakpoint */
   @media (max-width: 576px) {
     .title {
-      font-size: max(9vw, 54px);
+      font-size: max(11vw, 28px);
       margin-bottom: 30px;
     }
     
