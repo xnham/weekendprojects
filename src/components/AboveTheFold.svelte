@@ -53,7 +53,7 @@
         
         <p>That has changed. Now, anyone can create production-grade software using everyday language.* It's becoming completely normal for small businesses, families, even individuals to deploy bespoke software that's precisely tailored—even adaptive—to their needs.</p>
 
-        <p>Weekend Projects is my personal exploration of this exciting new era of software long tail.</p>
+        <p>Weekend Projects is my exploration of this exciting new era of software long tail.</p>
 
         <p>In 2024, empowered by Claude, Cursor, and other AI tools, I started building different kinds of "software for one" to squash small yet pesky problems that were bugging me and my family.</p>
       </div>
