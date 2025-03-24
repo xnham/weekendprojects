@@ -67,7 +67,7 @@
         
         <p>Have your own project in mind? How about getting feedback from my friendly robot, <a href="/mr-benedict">Mr. Benedict</a>?</p>
 
-        <p class="asterisk-explanation">*In February 2025, Andrej Karpathy coined the term <a href="https://en.wikipedia.org/wiki/Vibe_coding" target=_blank>vibe coding</a>, which became very popular shortly after.</p>
+        <p class="asterisk-explanation">*In February 2025, Andrej Karpathy coined the term <a href="https://en.wikipedia.org/wiki/Vibe_coding" target=_blank>vibe coding</a>, which caught on right away.</p>
       </div>
     </div>
   </div>
