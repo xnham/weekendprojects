@@ -46,7 +46,6 @@
     .essays {
         display: flex;    
         width: 75%;
-        margin-bottom: 200px;
     }
     
     .essay-card {
@@ -90,6 +89,7 @@
         display: inline-block;
         margin-top: 20px;
         color: var(--dark-80);
+        font-size: 14px;
         font-weight: 400;
     }
 
@@ -105,7 +105,6 @@
     @media (max-width: 768px) {
         .essays {
             width: 100%;
-            margin-bottom: 160px;
         }
     }
 

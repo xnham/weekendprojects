@@ -128,7 +128,7 @@
 <style>
   article {
     width: 75%;
-    margin: 0 0 200px 0;
+    margin: 0;
   }
 
   .back-link {
@@ -258,7 +258,6 @@
   @media (max-width: 768px) {
     article {
       width: 100%;
-      margin: 0 0 160px 0;
     }
   }
 </style>
