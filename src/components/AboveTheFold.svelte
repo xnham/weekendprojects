@@ -151,7 +151,7 @@
   /* Mobile breakpoint */
   @media (max-width: 576px) {
     .title {
-      font-size: max(11vw, 28px);
+      font-size: max(11vw, 26px);
       margin-bottom: 30px;
     }
     
