@@ -1,1 +1,0 @@
-import"./index-D5Go3jwy.js";const t={title:"Growth kills",description:"Growth messes up quality.",date:"2025-03-11",published:!1,image:null,tags:[],exceprt:null},{title:l,description:s,date:a,published:o,image:r,tags:d,exceprt:n}=t;function p(e){}export{p as default,t as metadata};
