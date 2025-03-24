@@ -81,7 +81,6 @@
   @media (max-width: 768px) {
     .future-project-intro {
     width: 100%;
-    margin-bottom: 80px;
     }
   }
 </style>

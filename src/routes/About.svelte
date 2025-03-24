@@ -13,7 +13,7 @@
         <p>2024 →</p>
       </div>
       <div class="about-content">
-        <p>I started using AI tools to build "<a href="/writing/software-for-one" class="essay-card-link">software for one</a>."</p>
+        <p>I started using AI tools to build various pieces of "<a href="/writing/software-for-one" class="essay-card-link">software for one</a>." Surprised by the meaningful impact they created, I felt encouraged to build more hyper-custom solutions and explore more deeply the implications of this new style of software development. </p>
       </div>
     </div>
     
@@ -35,7 +35,7 @@
       <div class="about-content">
         <p>Before Ocams, I spent many years in academia. I studied molecular biology as an undergraduate student at MIT. Later, I managed a neurobiology laboratory and helped develop case-based medical training simulations at Harvard Medical School. I then pursued a PhD at Wharton, where I built computational models to study how different choices and attributes can make agents learn better and predict things more accurately.</p> 
         
-        <p>A memorable part of my time in academia was a summer month at the Santa Fe Institute (SFI), where I was introduced to <a href="https://www.amazon.com/dp/0671872346" target="_blank" rel="noopener">complexity science</a>, which looks at how simple rules can give rise to rich, unpredictable behaviors in various domains—from social systems to biological and physical systems. This bottom-up approach gave me a new way of thinking that helpfully complemented the traditional top-down analytic style I had encountered up to that point.</p>
+        <p>While in grad school, I was lucky to spend a summer month at the Santa Fe Institute (SFI) to learn about <a href="https://www.amazon.com/dp/0671872346" target="_blank" rel="noopener">complexity science</a>, which looks at how simple rules can give rise to rich, unpredictable behaviors in various domains—from social systems to biological and physical systems. This bottom-up approach gave me a new way of thinking that helpfully complemented the traditional top-down analytic style I had encountered up to that point.</p>
 
         <p>Around 2015, equipped with a green card, I broke free from visa restrictions that had kept me in academia since college. After years of reading and writing papers, I was eager to actually build something—anything—that solved real problems. Tennis was my obsession at the time, and I noticed a need in the tennis community that I could try to build a solution for.</p> 
       </div>
@@ -49,9 +49,6 @@
         <p>I grew up in Jakarta, Indonesia.</p>
       </div>
     </div>
-  </div>
-  
-  <div class="spacer">
   </div>
 </div>
 

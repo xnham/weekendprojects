@@ -193,7 +193,7 @@
     display: flex;
     flex-direction: column;
     gap: 3rem;
-    margin: 3rem 0;
+    margin: 0;
   }
 
   .completed-project-card {
@@ -204,6 +204,10 @@
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     width: 100%;
     margin-bottom: 80px;
+  }
+
+  .completed-project-card:last-child {
+    margin-bottom: 0;
   }
 
   .completed-project-content {
