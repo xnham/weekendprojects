@@ -59,7 +59,7 @@
       </div>
 
       <div class="column">
-        <p>Before the advent of these powerful AI assistants, due to my disjointed coding skills, I would've had to hire a developer or toil for months to build those pieces of software, which would have been a silly use of time and money.</p>
+        <p>Before the advent of these powerful AI assistants, due to my disjointed coding skills, I would've had to hire a developer or toil for months to build those pieces of software, which would have been a silly use of resources.</p>
 
         <p>It's so much fun to see the economic forces now enabling, maybe even favoring, hyperpersonal software creation.</p>
 
