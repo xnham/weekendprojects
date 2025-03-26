@@ -13,7 +13,7 @@
         <p>2024 →</p>
       </div>
       <div class="about-content">
-        <p>I started using AI tools to build various pieces of "<a href="/writing/software-for-one" class="essay-card-link">software for one</a>." Surprised by the meaningful impact they created, I felt encouraged to build more hyper-custom solutions and explore more deeply the implications of this new style of software development. </p>
+        <p>Having accumulated a long list of business and personal micro-problems, I started using AI tools to build various pieces of '<a href="/writing/software-for-one" class="essay-card-link">software for one</a>' to solve them. I was surprised by the meaningful impact they delivered, particularly given their simplicity. It encouraged me to build more hyper-custom solutions and explore the implications of this new style of software development. </p>
       </div>
     </div>
     
@@ -24,7 +24,7 @@
       <div class="about-content">
         <p>I cofounded a SaaS company called <a href="https://www.ocamsclub.com" target="_blank" rel="noopener">Ocams</a>. It was among the early systems for automating video recording and delivery for tennis players.</p>
         
-        <p>One design approach we took with Ocams was "interfaceless SaaS." Rather than creating another dashboard for our tennis club partners to manage, we adapted our system to work with each partner club's existing workflow. This meant they could continue using their familiar processes while our software ran quietly in the background, with no additional interfaces to learn or buttons to push for both club staff and players.</p>
+        <p>In my interactions with clients, two patterns kept surfacing: traditional software often <a href="/awkward-software">awkwardly shoehorned itself</a> into each person’s unique workflow, and people experienced <a href="/interface-fatigue">interface fatigue</a>—the mental load of learning yet another set of menus, buttons, and layouts. These observations got me especially excited about AI’s potential to help us build software that adapts to humans, not the other way around.</p>
       </div>
     </div>
     
@@ -33,11 +33,13 @@
         <p>← 2015</p>
       </div>
       <div class="about-content">
-        <p>Before Ocams, I spent many years in academia. I studied molecular biology as an undergraduate student at MIT. Later, I managed a neurobiology laboratory and helped develop case-based medical training simulations at Harvard Medical School. I then pursued a PhD at Wharton, where I built computational models to study how different choices and attributes can make agents learn better and predict things more accurately.</p> 
+        <p>Before Ocams, I spent many years in academia. (One reason was visa restrictions, which limited my career mobility.)</p> 
         
-        <p>While in grad school, I was lucky to spend a summer month at the Santa Fe Institute (SFI) to learn about <a href="https://www.amazon.com/dp/0671872346" target="_blank" rel="noopener">complexity science</a>, which looks at how simple rules can give rise to rich, unpredictable behaviors in various domains—from social systems to biological and physical systems. This bottom-up approach gave me a new way of thinking that helpfully complemented the traditional top-down analytic style I had encountered up to that point.</p>
+        <p>I started out studying molecular biology as an undergraduate at MIT. Later, I managed a neurobiology laboratory and helped develop case-based medical training simulations at Harvard Medical School. I then pursued a PhD at Wharton, where I built computational models to study how different choices and attributes help people learn better and make more accurate predictions.</p> 
 
-        <p>Around 2015, equipped with a green card, I broke free from visa restrictions that had kept me in academia since college. After years of reading and writing papers, I was eager to actually build something—anything—that solved real problems. Tennis was my obsession at the time, and I noticed a need in the tennis community that I could try to build a solution for.</p> 
+        <p>In grad school, I spent a summer month at the Santa Fe Institute, where I was introduced to complexity science. I loved its premise: that universal principles can govern systems as different as ant colonies, economies, and weather systems. It gave me a new way to look past rigid disciplinary boundaries and synthesize insights across them.</p> 
+
+        <p>Shortly before 2015, I received my green card, making entrepreneurship an available path. After years of theoretical work, I was eager to build something—anything—that delivered value directly to people. Tennis happened to be my obsession at the time, and I noticed a need in the tennis community that prompted me to start Ocams.</p> 
       </div>
     </div>
     
