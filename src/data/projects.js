@@ -139,7 +139,7 @@ export const projects = [
         status: "completed",
         value: "money",
         beneficiary: "work/business",
-        shortDescription: "Daily text to track expenses against budget",
+        shortDescription: "Custom live stream system",
         longDescription: "Used to need third party software. Built a custom system from scratch to avoid having to use paid software",
         impact: "Saves $499 per camera. The immediate impact for me was $2,000 saved.",
         extraContent: "",
@@ -420,6 +420,30 @@ export const projects = [
         alternativeUses: [],
         likes: 24,
         follows: 17,
+        show: true
+    },
+    {
+        id: 117,
+        title: "Meal, Book, and Science Recommender",
+        status: "future",
+        value: "time",
+        beneficiary: "household",
+        shortDescription: "Recommendation system for meals, books, and science activities",
+        longDescription: "Each week, our family needs to plan meals; every three weeks, we pick new children's books; and every two weeks, we choose a science activity. Researching and evaluating all the options takes a huge amount of energy. Automating these tasks would be a huge help. With a database of recipes, books, and science activities, a recommender system could learn our preferences and deliver tailored suggestions on schedule.",
+        impact: "Coming soon...",
+        extraContent: null,
+        linkText: "Follow for updates >",
+        extraContentLinkText: null,
+        launchDate: null,
+        image: "placeholder.gif",
+        tools: ["AI"],
+        timeSaved: {
+            daily: 0,
+            hasCalculator: false
+        },
+        alternativeUses: [],
+        likes: 13,
+        follows: 11,
         show: true
     },
 ];
