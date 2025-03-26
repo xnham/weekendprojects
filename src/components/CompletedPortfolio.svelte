@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { projects } from '../data/projects.js';
+  import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   
   // Define a type for the project structure
   interface Project {
@@ -13,6 +14,7 @@
     impact: string;
     image: string;
     tools: string[];
+    beneficiary: string;
     extraContent?: string | null;
     extraContentLinkText?: string | null;
     linkText?: string | null;
@@ -92,7 +94,21 @@
         <div class="completed-project-left-column">
           <div class="completed-project-header">
             <div class="completed-project-header-left">
-              <div class="completed-project-value {project.value}">↑ {project.value}</div>
+              <div class="dual-pill-label">
+                <span class="beneficiary-side">
+                  {#if project.beneficiary === "personal"}
+                    <FontAwesomeIcon icon={['fas', 'person']} size="sm" />
+                  {:else if project.beneficiary === "household"}
+                    <FontAwesomeIcon icon={['fas', 'house-chimney-window']} size="sm" />
+                  {:else if project.beneficiary === "work/business"}
+                    <FontAwesomeIcon icon={['fas', 'briefcase']} size="sm" />
+                  {:else if project.beneficiary === "community"}
+                    <FontAwesomeIcon icon={['fas', 'tree-city']} size="sm" />
+                  {/if}
+                  {project.beneficiary}
+                </span>
+                <span class="value-side {project.value}">↑ {project.value}</span>
+              </div>
               <div class="completed-project-title">{project.title}</div>
             </div>
             <div class="completed-project-id">{String(project.id).padStart(2, '0')}</div>
@@ -407,7 +423,7 @@
     flex-direction: column;
     align-items: flex-end;
     margin-top: 1rem;
-    gap: 0.75rem;
+    gap: 1.5rem;
   }
 
   /* Center the dots horizontally */
@@ -527,10 +543,100 @@
     margin-right: 3px; /* Add a small space between arrow and text */
   }
 
+  .dual-pill-label {
+    display: inline-flex;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    font-size: 12px;
+  }
+  
+  .beneficiary-side {
+    padding: 2px 12px 2px 16px;
+    background-color: transparent;
+    border: 1px solid var(--dark-90);
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+    color: var(--dark-90);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    line-height: 1;
+  }
+  
+  .value-side {
+    padding: 2px 16px 2px 12px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border: 1px solid var(--dark-90);
+    border-left: none;
+  }
+  
+  /* Keep these existing value styles, but we can remove the standalone .completed-project-value class */
+  .value-side.money {
+    background-color: var(--purple-100);
+    color: var(--pure-white-100);
+  }
+
+  .value-side.time {
+    background-color: var(--yellow-100);
+    color: var(--dark-100);
+  }
+
+  .value-side.sanity {
+    background-color: var(--dark-pink-100);
+    color: var(--pure-white-100);
+  }
+
+  .value-side.fun {
+    background-color: var(--dark-orange-100);
+    color: var(--pure-white-100);
+  }
+
+  .value-side.insight {
+    background-color: var(--plum-100);
+    color: var(--pure-white-100)
+  }
+
+  /* ===== RESPONSIVE DESIGN ===== */
   /* ===== TABLET BREAKPOINT (max-width: 768px) ===== */
   @media (max-width: 768px) {
     .completed-project-content {
-      flex-direction: column;
+      gap: 30px; /* Reduce the gap between columns but keep horizontal layout */
+    }
+    
+    .completed-project-left-column {
+      flex: 2.8; /* Give more space to the content column */
+    }
+    
+    .completed-project-image-column {
+      flex: 1.2; /* Reduce the image column size */
+      max-width: 250px; /* Constrain the image size */
+    }
+    
+    .completed-project-image-column img {
+      width: 100%; /* Use full width of the constrained container */
+    }
+    
+    .completed-project-title {
+      font-size: 28px; /* Slightly smaller title */
+      margin-bottom: 15px;
+    }
+    
+    .completed-project-header {
+      margin-bottom: 1rem; /* Smaller margin */
+    }
+    
+    /* Use more compact styling for other elements */
+    .slider-controls {
+      gap: 0.5rem;
+    }
+  }
+
+  /* ===== MOBILE BREAKPOINT (max-width: 576px) ===== */
+  @media (max-width: 576px) {
+    .completed-project-content {
+      flex-direction: column; /* Stack vertically on mobile */
       gap: 10px;
     }
     
@@ -555,8 +661,8 @@
     }
     
     .completed-project-image-column img {
-      width: 75%;
-      max-width: 280px;
+      width: 70%;
+      min-width: 220px;
       height: auto;
       margin: 0; /* Remove auto centering */
       object-fit: contain;
@@ -564,11 +670,24 @@
     
     .completed-project-slider {
       order: 1; /* Place description after the image */
+      margin-bottom: 40px;
     }
     
     .completed-project-title {
-      font-size: 28px;
-      margin-bottom: 15px;
+      font-size: 24px; /* Even smaller title on mobile */
+      margin-bottom: 10px;
+    }
+    
+    .dual-pill-label {
+      font-size: 11px; /* Smaller label text */
+    }
+    
+    .completed-project-tools {
+      margin-bottom: 40px; /* Less bottom margin */
+    }
+    
+    .slider-controls {
+      gap: 40px; /* Increased gap between slider links and dots on mobile */
     }
   }
 </style>

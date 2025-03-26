@@ -110,6 +110,7 @@
     padding-top: 10px;
     font-size: 13px;
     text-align: right;
+    line-height: 1.6;
   }
   
   /* Small desktop breakpoint */
