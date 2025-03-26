@@ -1,1 +1,0 @@
-import"./index-C1SB9X4I.js";const t={title:"My coding background",description:"What did I know about coding prior to using AI.",date:"2025-03-22",published:!1,image:null,tags:[],exceprt:null},{title:a,description:o,date:d,published:n,image:c,tags:r,exceprt:s}=t;function g(e){}export{g as default,t as metadata};
