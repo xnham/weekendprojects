@@ -13,6 +13,7 @@
     longDescription: string;
     likes: number;
     follows: number;
+    beneficiary: string;
   }
 
   interface UserData {
@@ -163,7 +164,21 @@
   {#each displayProjects as project (project.id)}
     <div class="future-project-post-it">
       <div class="future-project-post-it-header">
-        <span class="completed-project-value {project.value}">↑ {project.value}</span>
+        <div class="dual-pill-label">
+          <span class="beneficiary-side">
+            {#if project.beneficiary === "personal"}
+              <FontAwesomeIcon icon={['fas', 'person']} size="sm" />
+            {:else if project.beneficiary === "household"}
+              <FontAwesomeIcon icon={['fas', 'house-chimney-window']} size="sm" />
+            {:else if project.beneficiary === "work/business"}
+              <FontAwesomeIcon icon={['fas', 'briefcase']} size="sm" />
+            {:else if project.beneficiary === "community"}
+              <FontAwesomeIcon icon={['fas', 'tree-city']} size="sm" />
+            {/if}
+            {project.beneficiary}
+          </span>
+          <span class="value-side {project.value}">↑ {project.value}</span>
+        </div>
       </div>
       <h3 class="future-project-post-it-title">{project.title}</h3>
       <div class="future-project-post-it-details">
@@ -270,36 +285,56 @@
     margin-bottom: 10px;
   }
   
-  .completed-project-value {
-    font-size: 12px;
+  .dual-pill-label {
+    display: inline-flex;
     border-radius: 20px;
-    padding: 2px 16px;
-    align-self: flex-start;
+    overflow: hidden;
     margin-bottom: 10px;
-    display: inline-block;
+    font-size: 12px;
   }
   
-  .completed-project-value.fun {
+  .beneficiary-side {
+    padding: 2px 12px 2px 16px;
+    background-color: transparent;
+    border: 1px solid var(--dark-90);
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+    color: var(--dark-90);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    line-height: 1;
+  }
+  
+  .value-side {
+    padding: 2px 16px 2px 12px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border: 1px solid var(--dark-90);
+    border-left: none;
+  }
+  
+  .value-side.fun {
     background-color: var(--dark-orange-100);
     color: var(--pure-white-100);
   }
   
-  .completed-project-value.time {
+  .value-side.time {
     background-color: var(--yellow-100);
     color: var(--dark-100);
   }
   
-  .completed-project-value.money {
+  .value-side.money {
     background-color: var(--purple-100);
     color: var(--pure-white-100);
   }
   
-  .completed-project-value.sanity {
+  .value-side.sanity {
     background-color: var(--dark-pink-100);
     color: var(--pure-white-100);
   }
   
-  .completed-project-value.insight {
+  .value-side.insight {
     background-color: var(--plum-100);
     color: var(--pure-white-100);
   }
