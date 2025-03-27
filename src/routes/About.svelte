@@ -39,7 +39,7 @@
 
         <p>In grad school, I spent a summer month at the Santa Fe Institute, where I was introduced to complexity science. I loved its premise: that universal principles can govern systems as different as ant colonies, economies, and weather systems. It gave me a new way to look past rigid disciplinary boundaries and synthesize insights across them.</p> 
 
-        <p>Shortly before 2015, I received my green card, making entrepreneurship an available path. After years of theoretical work, I was eager to build something—anything—that delivered value directly to people. Tennis happened to be my obsession at the time, and I noticed a need in the tennis community that prompted me to start Ocams.</p> 
+        <p>Shortly before 2015, I received my green card, making entrepreneurship an available path. After years of theoretical work, I was eager to create something—anything—that delivered value directly to people. Tennis happened to be my obsession at the time, and I noticed a need in the tennis community that prompted me to start Ocams.</p> 
       </div>
     </div>
     
