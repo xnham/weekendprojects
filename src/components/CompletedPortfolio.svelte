@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { projects } from '../data/projects.js';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
+  import ImpactShowcase from './ImpactShowcase.svelte';
   
   // Define a type for the project structure
   interface Project {
@@ -18,9 +19,23 @@
     extraContent?: string | null;
     extraContentLinkText?: string | null;
     linkText?: string | null;
+    
+    // Updated time saved structure
     timeSaved?: {
       hasCalculator: boolean;
+      daily?: number;
+      weekly?: number;
+      alternativeUses?: string[];
     } | null;
+    
+    // New money saved structure
+    moneySaved?: {
+      daily?: number;
+      weekly?: number;
+      alternativeUses?: string[];
+    } | null;
+
+    launchDate?: Date | null;
   }
   
   // Filter for completed projects only that are set to show, and sort by ID in descending order
@@ -90,30 +105,31 @@
 <div id="completed-projects" class="completed-projects">
   {#each completedProjects as project (project.id)}
     <div class="completed-project-card" data-project-id={project.id}>
+      <!-- Single unified header that works for both desktop and mobile -->
+      <div class="completed-project-header">
+        <div class="completed-project-header-left">
+          <div class="dual-pill-label">
+            <span class="beneficiary-side">
+              {#if project.beneficiary === "personal"}
+                <FontAwesomeIcon icon={['fas', 'person']} size="sm" />
+              {:else if project.beneficiary === "household"}
+                <FontAwesomeIcon icon={['fas', 'house-chimney-window']} size="sm" />
+              {:else if project.beneficiary === "work/business"}
+                <FontAwesomeIcon icon={['fas', 'briefcase']} size="sm" />
+              {:else if project.beneficiary === "community"}
+                <FontAwesomeIcon icon={['fas', 'tree-city']} size="sm" />
+              {/if}
+              {project.beneficiary}
+            </span>
+            <span class="value-side {project.value}">↑ {project.value}</span>
+          </div>
+          <div class="completed-project-title">{project.title}</div>
+        </div>
+        <div class="completed-project-id">{String(project.id).padStart(2, '0')}</div>
+      </div>
+      
       <div class="completed-project-content">
         <div class="completed-project-left-column">
-          <div class="completed-project-header">
-            <div class="completed-project-header-left">
-              <div class="dual-pill-label">
-                <span class="beneficiary-side">
-                  {#if project.beneficiary === "personal"}
-                    <FontAwesomeIcon icon={['fas', 'person']} size="sm" />
-                  {:else if project.beneficiary === "household"}
-                    <FontAwesomeIcon icon={['fas', 'house-chimney-window']} size="sm" />
-                  {:else if project.beneficiary === "work/business"}
-                    <FontAwesomeIcon icon={['fas', 'briefcase']} size="sm" />
-                  {:else if project.beneficiary === "community"}
-                    <FontAwesomeIcon icon={['fas', 'tree-city']} size="sm" />
-                  {/if}
-                  {project.beneficiary}
-                </span>
-                <span class="value-side {project.value}">↑ {project.value}</span>
-              </div>
-              <div class="completed-project-title">{project.title}</div>
-            </div>
-            <div class="completed-project-id">{String(project.id).padStart(2, '0')}</div>
-          </div>
-          
           <div class="completed-project-slider">
             <div class="slider-container">
               <div class="slider-track" 
@@ -130,10 +146,7 @@
                 <!-- Slide 2: Impact -->
                 <div class="slider-slide">
                   <div class="completed-project-impact">
-                    {@html formatImpact(project.impact)}
-                    {#if project.timeSaved && project.timeSaved.hasCalculator}
-                      <div class="time-calculator-container" data-project-id={project.id}></div>
-                    {/if}
+                    <ImpactShowcase project={project} />
                   </div>
                 </div>
                 
@@ -229,12 +242,13 @@
   .completed-project-content {
     display: flex;
     flex-direction: row;
-    gap: 80px;
+    gap: 40px;
     width: 100%;
   }
 
   .completed-project-left-column {
-    flex: 2.5;
+    width: 70%; /* Take up 70% of the available space */
+    min-width: 0; /* Allow proper text wrapping */
     display: flex;
     flex-direction: column;
   }
@@ -266,39 +280,6 @@
     width: 80%;
   }
 
-  .completed-project-value {
-    font-size: 12px;
-    border-radius: 20px;
-    padding: 2px 16px;
-    align-self: flex-start;
-    margin-bottom: 0.5rem;
-  }
-
-  .completed-project-value.money {
-    background-color: var(--purple-100);
-    color: var(--pure-white-100);
-  }
-
-  .completed-project-value.time {
-    background-color: var(--yellow-100);
-    color: var(--dark-100);
-  }
-
-  .completed-project-value.sanity {
-    background-color: var(--dark-pink-100);
-    color: var(--pure-white-100);
-  }
-
-  .completed-project-value.fun {
-    background-color: var(--dark-orange-100);
-    color: var(--pure-white-100);
-  }
-
-  .completed-project-value.insight {
-    background-color: var(--plum-100);
-    color: var(--pure-white-100)
-  }
-
   .completed-project-title {
     font-family: 'DM Serif Text', serif;
     font-size: 32px;
@@ -320,37 +301,26 @@
     box-sizing: border-box;
   }
 
-  /* svelte-ignore css-unused-selector */
   .completed-project-description {
     padding-top: 20px;
-    margin-bottom: 1.5rem;
-  }
-
-  /* svelte-ignore css-unused-selector */
-  .completed-project-description p {
-    margin-bottom: 1.5rem;
-    display: block;
-  }
-
-  /* svelte-ignore css-unused-selector */
-  .completed-project-description p:last-child {
-    margin-bottom: 0;
+    margin-bottom: 1rem;
   }
 
   .completed-project-image-column {
-    flex: 1.5;
-    width: auto;
-    max-width: 300px;
-    height: auto;
+    width: 30%; /* Take up 30% of the available space */
+    min-width: 180px; /* But don't get smaller than this */
+    max-width: 300px; /* And don't get larger than this */
+    min-height: 180px;
     overflow: hidden;
     align-self: flex-start;
   }
 
   .completed-project-image-column img {
-    width: 90%;
+    width: 100%;
     height: auto;
     display: block;
-    transition: transform 0.3s ease;
+    border: 1px var(--dark-100) solid;
+    object-fit: contain;
   }
 
   .completed-project-tools {
@@ -376,7 +346,7 @@
     position: relative;
     width: 100%;
     overflow: hidden;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
   }
 
   .slider-container {
@@ -422,7 +392,6 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    margin-top: 1rem;
     gap: 1.5rem;
   }
 
@@ -470,44 +439,6 @@
   .completed-project-impact {
     padding-top: 20px;
     margin-bottom: 1.5rem;
-  }
-
-  /* svelte-ignore css-unused-selector */
-  .completed-project-impact p {
-    margin-bottom: 1.5rem;
-    line-height: 1.8;
-    display: block;
-  }
-
-  /* svelte-ignore css-unused-selector */
-  .completed-project-impact p:last-child {
-    margin-bottom: 0;
-  }
-
-  /* svelte-ignore css-unused-selector */
-  .completed-project-extra {
-    padding-top: 20px;
-    margin-bottom: 1.5rem;
-  }
-  
-  /* svelte-ignore css-unused-selector */
-  .completed-project-extra p {
-    margin-bottom: 1.5rem;
-    line-height: 1.8;
-    display: block;
-  }
-  
-  /* svelte-ignore css-unused-selector */
-  .completed-project-extra p:last-child {
-    margin-bottom: 0;
-  }
-
-  /* Only keep the global styles for the dynamically injected content */
-  :global(.completed-project-description p),
-  :global(.completed-project-impact p),
-  :global(.completed-project-extra p) {
-    margin-bottom: 1.5rem;
-    display: block;
   }
   
   :global(.completed-project-description p:last-child),
@@ -602,32 +533,26 @@
   /* ===== TABLET BREAKPOINT (max-width: 768px) ===== */
   @media (max-width: 768px) {
     .completed-project-content {
-      gap: 30px; /* Reduce the gap between columns but keep horizontal layout */
+      gap: 20px;
     }
     
     .completed-project-left-column {
-      flex: 2.8; /* Give more space to the content column */
+      width: 65%; /* Slightly less on tablet */
     }
     
     .completed-project-image-column {
-      flex: 1.2; /* Reduce the image column size */
-      max-width: 250px; /* Constrain the image size */
-    }
-    
-    .completed-project-image-column img {
-      width: 100%; /* Use full width of the constrained container */
+      width: 35%; /* Slightly more on tablet */
     }
     
     .completed-project-title {
-      font-size: 28px; /* Slightly smaller title */
+      font-size: 28px;
       margin-bottom: 15px;
     }
     
     .completed-project-header {
-      margin-bottom: 1rem; /* Smaller margin */
+      margin-bottom: 1rem;
     }
     
-    /* Use more compact styling for other elements */
     .slider-controls {
       gap: 0.5rem;
     }
@@ -635,59 +560,60 @@
 
   /* ===== MOBILE BREAKPOINT (max-width: 576px) ===== */
   @media (max-width: 576px) {
-    .completed-project-content {
-      flex-direction: column; /* Stack vertically on mobile */
-      gap: 10px;
-    }
-    
-    .completed-project-left-column {
-      width: 100%;
+    /* Keep the header at the top on mobile */
+    .completed-project-card {
       display: flex;
       flex-direction: column;
     }
     
     .completed-project-header {
-      margin-bottom: 1rem;
-      order: -1; /* Keep the header/title at the top */
+      order: 1;
+      flex-direction: column;
+      margin-bottom: 20px;
     }
     
-    .completed-project-image-column {
-      order: 0; /* Place image after header but before slider */
-      max-width: 100%;
+    .completed-project-header-left {
       width: 100%;
-      margin: 0 0 20px 0; /* Reduced top and bottom margins */
       display: flex;
-      justify-content: flex-start; /* Left align the image */
+    }
+    
+    .completed-project-title {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    
+    /* Structure the content */
+    .completed-project-content {
+      order: 2;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Force the image above the content on mobile */
+    .completed-project-image-column {
+      width: 100%;
+      order: 1;
+      margin-bottom: 20px;
+    }
+    
+    .completed-project-left-column {
+      width: 100%;
+      order: 2;
+    }
+    
+    /* Tools come last */
+    .completed-project-tools {
+      order: 3;
+      margin-top: 20px;
+      margin-bottom: 40px;
     }
     
     .completed-project-image-column img {
       width: 70%;
       min-width: 220px;
       height: auto;
-      margin: 0; /* Remove auto centering */
+      margin: 0;
       object-fit: contain;
-    }
-    
-    .completed-project-slider {
-      order: 1; /* Place description after the image */
-      margin-bottom: 40px;
-    }
-    
-    .completed-project-title {
-      font-size: 24px; /* Even smaller title on mobile */
-      margin-bottom: 10px;
-    }
-    
-    .dual-pill-label {
-      font-size: 11px; /* Smaller label text */
-    }
-    
-    .completed-project-tools {
-      margin-bottom: 40px; /* Less bottom margin */
-    }
-    
-    .slider-controls {
-      gap: 40px; /* Increased gap between slider links and dots on mobile */
     }
   }
 </style>

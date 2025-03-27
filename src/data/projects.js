@@ -8,25 +8,25 @@ export const projects = [
         value: "time",
         beneficiary: "work/business",
         shortDescription: "Web scraper + email notification",
-        longDescription: "My tennis video company's workflow requires constant monitoring of tennis club court schedules to determine when to send videos, which courts they're from, and who should receive them. This process used to require manual checks several times daily.\n\nI built a web scraper to automate this entirely, sending updates to Google Sheets and triggering email notifications as needed.",
-        impact: "This solution saves me 15 minutes a day. It eliminates a small yet significant cognitive load from my days, allowing me to focus on other work and enjoy personal time without interruptions.",
+        longDescription: "My tennis video company's workflow requires constant monitoring of tennis club court schedules to determine when to send videos, which courts they're from, and who should receive them. This process used to require manual checks several times daily.\n\nI built a web scraper to automate this entirely, sending updates to Google Sheets and triggering email notifications as needed.\n\nThis solution saves me 15 minutes a day. It eliminates a small yet significant cognitive load from my days, allowing me to focus on other work and enjoy personal time without interruptions.",
+        impact: "",
         extraContent: null,
-        linkText: "See impact >",
+        linkText: "See calculations >",
         extraContentLinkText: null,
         launchDate: new Date(2024, 4, 10), // May 10, 2024
         image: "scraper.gif",
         tools: ["Google Sheets", "Node.js"],
         timeSaved: {
             daily: 15, // minutes saved per day
-            hasCalculator: true
+            hasCalculator: true,
+            alternativeUses: [
+                "take 22 hiking trips.", 
+                "play 60 tennis matches.", 
+                "walk from Las Vegas to Mexico.",
+                "watch Stranger Things seasons 1-3 4x.",
+                "drive from NYC to LA and back."
+            ]
         },
-        alternativeUses: [
-            "take 22 hiking trips.", 
-            "play 60 tennis matches.", 
-            "walk from Las Vegas to Mexico.",
-            "watch Stranger Things seasons 1-3 4x.",
-            "drive from NYC to LA and back."
-        ],
         likes: 0,
         follows: 0,
         show: true
@@ -48,15 +48,15 @@ export const projects = [
         tools: ["Google Calendar", "Node.js"],
         timeSaved: {
             daily: 15, // minutes saved per day
-            hasCalculator: true
+            hasCalculator: true,
+            alternativeUses: [
+                "eat 72 extra meals.", 
+                "get 182 foot massages.", 
+                "fly around the world twice.",
+                "read 15 books.",
+                "explore 30 museums."
+            ]
         },
-        alternativeUses: [
-            "eat 72 extra meals.", 
-            "get 182 foot massages.", 
-            "fly around the world twice.",
-            "read 15 books.",
-            "explore 30 museums."
-        ],
         likes: 0,
         follows: 0,
         show: true
@@ -68,19 +68,25 @@ export const projects = [
         value: "time",
         beneficiary: "work/business",
         shortDescription: "Parse emails and turn them into a database",
-        longDescription: "A tennis club's after-school program was drowning in paper: application submissions arrived as emails that were printed and filed, forcing the program director to either manage everything from hard copies or manually transfer hundreds of applications to spreadsheets.\n\nUsing Google Apps Script, I automated the transfer of application data from emails to Google Sheets, organizing students by semester and schedule, tracking dismissal times and transportation needs, managing staff assignments, maintaining contact details, and categorizing program revenues.",
-        impact: "Impact metrics...",
+        longDescription: "A tennis club's after-school program was drowning in paper: application submissions arrived as emails that were printed and filed, forcing the program director to either manage everything from hard copies or manually transfer hundreds of applications to spreadsheets.\n\nUsing Google Apps Script, I automated the transfer of application data from emails to Google Sheets, organizing students by semester and schedule, tracking dismissal times and transportation needs, managing staff assignments, maintaining contact details, and categorizing program revenues.\n\nThis solution saved the program director approximately an hour per week.",
+        impact: "",
         extraContent: null,
-        linkText: "See impact >",
+        linkText: "See calculations >",
         extraContentLinkText: null,
         launchDate: new Date(2024, 7, 14), // August 14, 2024
         image: "jdp.gif",
         tools: ["Google Apps Script", "Google Sheets"],
         timeSaved: {
             weekly: 60, // minutes saved per week
-            hasCalculator: true
+            hasCalculator: true,
+            alternativeUses: [
+                "become a proficient ukulele player.",
+                "run 11 marathons at a moderate pace.",
+                "build a bench for your entryway.",
+                "write a children's book.",
+                "create a small garden."
+            ]
         },
-        alternativeUses: [],
         likes: 0,
         follows: 0,
         show: true
@@ -102,9 +108,15 @@ export const projects = [
         tools: ["Anthropic", "Heroku", "Node.js", "Perplexity", "Python + Quart", "React + Vite", "REST API"],
         timeSaved: {
             weekly: 30, // minutes saved per week
-            hasCalculator: true
+            hasCalculator: true,
+            alternativeUses: [
+                "prepare for a presentation",
+                "do a yoga session",
+                "call an old friend",
+                "take a relaxing bath",
+                "meditate for stress relief"
+            ]
         },
-        alternativeUses: [],
         likes: 0,
         follows: 0,
         show: true
@@ -116,19 +128,25 @@ export const projects = [
         value: "money",
         beneficiary: "household",
         shortDescription: "Daily text to track expenses against budget",
-        longDescription: "Despite monthly vows to spend more mindfully, I consistently blew our family budget on restaurants and impulse Amazon purchases, largely because I lacked real-time insight into my spending habits.\n\nMiss Penny fixes this by sending a daily 8 AM text showing exactly how I'm tracking against our dining out and shopping budgets.",
+        longDescription: "Despite monthly vows to spend more mindfully, I consistently blew our family budget on restaurants and impulse Amazon purchases, largely because I lacked real-time insight into my spending habits.\n\nMiss Penny fixes this by sending a daily 8 AM text showing exactly how I'm tracking against our dining out and shopping budgets.\n\nSo far, the daily text messages have helped us reduce our spending by $680 a month on average.",
         impact: "",
-        extraContent: "Role of AI",
+        extraContent: "",
         linkText: "See impact >",
-        extraContentLinkText: "Role of AI >",
+        extraContentLinkText: "",
         launchDate: new Date(2025, 1, 1), // February 1, 2025
         image: "miss-penny.gif",
         tools: ["GitHub Actions", "Google Apps Script", "Google Sheets", "OpenAI", "Python", "Sheet SMS", "Tiller Money"],
-        timeSaved: {
-            daily: 0, // minutes saved per day
-            hasCalculator: false
+        moneySaved: {
+            daily: 22.36, // dollars saved per day
+            hasCalculator: false,
+            alternativeUses: [
+                "invest in index funds",
+                "start an emergency fund",
+                "save for a vacation",
+                "pay down debt faster",
+                "contribute to retirement"
+            ]
         },
-        alternativeUses: [],
         likes: 0,
         follows: 0,
         show: true
@@ -148,11 +166,16 @@ export const projects = [
         launchDate: new Date(2025, 1, 1), // February 1, 2025
         image: "miss-penny.gif",
         tools: ["GitHub Actions", "Google Apps Script", "Google Sheets", "OpenAI", "Python", "Sheet SMS", "Tiller Money"],
-        timeSaved: {
-            daily: 0, // minutes saved per day
-            hasCalculator: false
+        moneySaved: {
+            daily: 5.5, // $5.50 saved per day ($2000/365)
+            alternativeUses: [
+                "buy a high-end camera", 
+                "take a weekend trip to a nearby city",
+                "upgrade your computer",
+                "get a year's worth of streaming services",
+                "eat at 10 nice restaurants"
+            ]
         },
-        alternativeUses: [],
         likes: 0,
         follows: 0,
         show: false
@@ -175,9 +198,15 @@ export const projects = [
         timeSaved: {
             daily: 0,
             weekly: 0,
-            hasCalculator: false
+            hasCalculator: false,
+            alternativeUses: [
+                "review video footage more efficiently",
+                "focus on technique improvements",
+                "create highlight reels faster",
+                "increase productive practice time",
+                "share specific coaching moments"
+            ]
         },
-        alternativeUses: [],
         likes: 0,
         follows: 8,
         show: true
@@ -199,9 +228,15 @@ export const projects = [
         tools: ["AI"],
         timeSaved: {
             weekly: 60,
-            hasCalculator: true
+            hasCalculator: true,
+            alternativeUses: [
+                "have weekly game nights with family",
+                "take a cooking class",
+                "start a creative hobby",
+                "exercise twice a week",
+                "read a book each month"
+            ]
         },
-        alternativeUses: [],
         likes: 24,
         follows: 13,
         show: false
@@ -221,11 +256,17 @@ export const projects = [
         launchDate: null,
         image: "placeholder.gif",
         tools: [],
-        timeSaved: {
+        moneySaved: {
             daily: 0,
-            hasCalculator: false
+            hasCalculator: false,
+            alternativeUses: [
+                "save 15% more for retirement",
+                "reduce debt by $2,400 annually",
+                "increase emergency fund by $200/month",
+                "afford one extra vacation each year",
+                "upgrade home appliances without financing"
+            ]
         },
-        alternativeUses: [],
         likes: 31,
         follows: 0,
         show: false
@@ -247,9 +288,15 @@ export const projects = [
         tools: [],
         timeSaved: {
             daily: 0,
-            hasCalculator: false
+            hasCalculator: false,
+            alternativeUses: [
+                "create weekly business strategy reviews",
+                "develop a thought leadership blog",
+                "research competitors more thoroughly",
+                "design better products with deeper insights",
+                "keep up with industry trends effortlessly"
+            ]
         },
-        alternativeUses: [],
         likes: 26,
         follows: 15,
         show: true
@@ -271,9 +318,15 @@ export const projects = [
         tools: ["Browser Extension"],
         timeSaved: {
             daily: 0,
-            hasCalculator: false
+            hasCalculator: false,
+            alternativeUses: [
+                "reduce daily anxiety levels",
+                "maintain better emotional balance",
+                "make more rational decisions",
+                "improve sleep quality",
+                "develop a more balanced worldview"
+            ]
         },
-        alternativeUses: [],
         likes: 43,
         follows: 27,
         show: true
@@ -293,11 +346,17 @@ export const projects = [
         launchDate: null,
         image: "placeholder.gif",
         tools: [],
-        timeSaved: {
+        moneySaved: {
             daily: 0,
-            hasCalculator: false
+            hasCalculator: false,
+            alternativeUses: [
+                "save $2,500 on a 36-month lease",
+                "avoid $900 in hidden fees",
+                "negotiate $45 lower monthly payments",
+                "get better terms on excess mileage",
+                "understand the real cost of a lease buyout"
+            ]
         },
-        alternativeUses: [],
         likes: 19,
         follows: 11,
         show: true
@@ -309,7 +368,7 @@ export const projects = [
         value: "fun", 
         beneficiary: "personal",
         shortDescription: "AI-powered small talk practice environment",
-        longDescription: "I want to be a better communicator, and like with everything else, practice is key. While I am familiar with techniques such as active listening, appropriate sharing, and avoiding yes/no questions, practicing them \"in the wild\" feels risky. (The last thing I need is to weird out my conversation partners even more!)\n\nI'd love to build a tool to let myself and others practice communication skills with AI conversation partners. It will allow the user to isolate specific techniques, receive real-time feedback, and review recordings to track progress. Unlike real-world interactions, one can practice without fear of messing up.",
+        longDescription: "I want to be a better communicator, and like with everything else, practice is key. While I am familiar with techniques such as active listening and avoiding yes/no questions, practicing them \"in the wild\" feels risky. (The last thing I need is to weird out my conversation partners even more!)\n\nI'd love to build a tool to let myself and others practice communication skills with AI conversation partners. It will allow the user to isolate specific techniques, receive real-time feedback, and review recordings to track progress. Unlike real-world interactions, one can practice without fear of messing up.",
         impact: "Coming soon...",
         extraContent: null,
         linkText: "Follow for updates >",
@@ -357,7 +416,7 @@ export const projects = [
         value: "fun",
         beneficiary: "community",
         shortDescription: "Swipe to discover local fashion",
-        longDescription: "I want to shop in person at neighborhood boutiques, but I lack the patience to browse the stores blindly or research their websites one by one.\n\nI'd love to build an app that pulls all clothing images from the local store websites and presents them in a swipeable, Tinder-like interface. I can see myself swiping left and right while waiting for the bus or in line at Sweetgreen. After swiping through items I love, I'd know exactly which local stores to visit. Also, the swiping data could provide valuable insights to boutique owners about people's preferences.",
+        longDescription: "I want to shop in person at neighborhood boutiques, but I lack the patience to browse the stores blindly or research their websites one by one.\n\nI'd love to build an app that pulls all clothing images from the local store websites and presents them in a swipeable, Tinder-like interface. I could swipe left and right while waiting for the bus or my salad. After swiping through items, I'd know exactly which local stores to check out. Also, the swiping data could provide valuable insights to boutique owners about what people like and don't like.",
         impact: "Coming soon...",
         extraContent: null,
         linkText: "Follow for updates >",
@@ -381,7 +440,7 @@ export const projects = [
         value: "fun",
         beneficiary: "household",
         shortDescription: "AI-curated perfect weekend activities",
-        longDescription: "Every weekend, my husband and I feel the pressure to find meaningful activities for our young son. We want great ideas without spending hours scrolling through newsletters and websites. We find the signal-to-noise ratio of these resources kinda low.\n\nI'd love to have an AI agent that automatically scans information sources and delivers a personalized email each Friday with five curated activities matching our family's vibe.",
+        longDescription: "Every weekend, my husband and I feel the pressure to find 'good' activities for our young son. We want great ideas without spending hours scrolling through newsletters and websites. The signal-to-noise ratio of these resources can be kinda low.\n\nI'd love to have a tool that automatically scans information sources and delivers a personalized email each Friday with five curated activities that match the vibe we're looking for.",
         impact: "Coming soon...",
         extraContent: null,
         linkText: "Follow for updates >",
@@ -405,7 +464,7 @@ export const projects = [
         value: "fun",
         beneficiary: "personal",
         shortDescription: "Call your friends automatically to gather intel about them",
-        longDescription: "As time goes by, my friends and I get busier with family and work. It's harder to stay in touch, and we slowly—and sadly—fade from each other's immediate consciousness.\n\nGrowing new friendships is also challenging. Spontaneous hangouts and random chitchats that are so helpful for exploring new connections are disappearing from our culture. (Doesn't it feel like everything needs to be scheduled, agenda-ed and calendar-invited these days?)\n\nAs silly as it may sound—actually, the silliness may be the point here—I'd love to have a robot call my friends periodically to say hello and find out what's going on in their lives. My friends will hopefully find it amusing to be interviewed by a robot, and the topics uncovered will hopefully lead to real, engaging, robotless conversations afterward.",
+        longDescription: "As time goes by, my friends and I get busier with family and work. It's harder to stay in touch. We slowly and sadly fade from each other's immediate consciousness.\n\nGrowing new friendships is also challenging. Spontaneous hangouts and random chitchats that are so helpful for exploring new connections are disappearing from our culture. (Doesn't it feel like everything needs to be scheduled, agenda-ed and calendar-invited these days?)\n\nAs silly as it may sound—actually, the silliness may be the point here—I'd love to have a robot call my friends periodically to say hello and find out what's going on in their lives. My friends will hopefully find it amusing to be interviewed by a robot, and the topics uncovered will hopefully lead to real, engaging, robotless conversations afterward.",
         impact: "Coming soon...",
         extraContent: null,
         linkText: "Follow for updates >",
@@ -429,7 +488,7 @@ export const projects = [
         value: "time",
         beneficiary: "household",
         shortDescription: "Recommendation system for meals, books, and science activities",
-        longDescription: "Each week, our family needs to plan meals; every three weeks, we pick new children's books; and every two weeks, we choose a science activity. Researching and evaluating all the options takes a huge amount of energy. Automating these tasks would be a huge help. With a database of recipes, books, and science activities, a recommender system could learn our preferences and deliver tailored suggestions on schedule.",
+        longDescription: "Our family needs to plan meals every week, pick new children's books every three weeks, and come up with a science activity every two weeks. Researching and evaluating all the options takes a huge amount of energy.\n\nAutomating these tasks would be a huge help. Given a database of recipes, books, and science activities, a recommender system could learn our family's preferences and deliver tailored suggestions on schedule. Heck, it could even order the books from the library for us.",
         impact: "Coming soon...",
         extraContent: null,
         linkText: "Follow for updates >",

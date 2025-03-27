@@ -60,11 +60,11 @@
       <div class="column">
         <p>Before the advent of these powerful AI assistants, owing to my disjointed coding skills, I would've had to hire a developer or toil for months to build each piece of software, which would have been a silly use of resources.</p>
 
-        <p>It's really fun to see the economic forces now enabling, maybe even favoring, hyperpersonal software creation. I'm excited to share my take on it with you here.</p>
+        <p>It's really fun to see the economic forces now enabling, maybe even favoring, hyperpersonal software creation. I'm excited to share my take on it here.</p>
 
         <p>Btw, one of the things I built was a friendly voice robot called Mr. Benedict. If you have your own project in mind, how about <a href="/mr-benedict">giving it a call</a> to get some feedback?</p>
 
-        <p class="asterisk-explanation">*Popularly known as '<a href="https://en.wikipedia.org/wiki/Vibe_coding" target=_blank>vibe coding</a>' since Andrej Karpathy coined the term in February 2025.</p>
+        <p class="asterisk-explanation">*Known as '<a href="https://en.wikipedia.org/wiki/Vibe_coding" target=_blank>vibe coding</a>,' a term Andrej Karpathy coined in February 2025.</p>
       </div>
     </div>
   </div>
@@ -108,7 +108,7 @@
     border-top: 1px solid var(--dark-100);
     margin-top: 20px;
     padding-top: 10px;
-    font-size: 13px;
+    font-size: 12px;
     text-align: right;
     line-height: 1.6;
   }
