@@ -244,6 +244,7 @@
     flex-direction: row;
     gap: 40px;
     width: 100%;
+    align-items: stretch; /* Make all children stretch to same height */
   }
 
   .completed-project-left-column {
@@ -308,11 +309,12 @@
 
   .completed-project-image-column {
     width: 30%; /* Take up 30% of the available space */
-    min-width: 180px; /* But don't get smaller than this */
-    max-width: 300px; /* And don't get larger than this */
-    min-height: 180px;
+    max-width: 300px;
     overflow: hidden;
-    align-self: flex-start;
+    align-self:flex-start;
+    display: flex;
+    align-items: flex-start;
+    justify-content: left;
   }
 
   .completed-project-image-column img {
@@ -534,14 +536,6 @@
   @media (max-width: 768px) {
     .completed-project-content {
       gap: 20px;
-    }
-    
-    .completed-project-left-column {
-      width: 65%; /* Slightly less on tablet */
-    }
-    
-    .completed-project-image-column {
-      width: 35%; /* Slightly more on tablet */
     }
     
     .completed-project-title {
