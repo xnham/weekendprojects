@@ -140,11 +140,11 @@ export const projects = [
             daily: 22.36, // dollars saved per day
             hasCalculator: false,
             alternativeUses: [
-                "invest in index funds",
-                "start an emergency fund",
-                "save for a vacation",
-                "pay down debt faster",
-                "contribute to retirement"
+                "rent a private island in Belize for a week.",
+                "commission two life-size ice sculptures of yourself.",
+                "buy 16 high-end smart toilets.",
+                "fly business class round-trip from NYC to Singapore.",
+                "rent a billboard in Times Square for 3 hours."
             ]
         },
         likes: 0,

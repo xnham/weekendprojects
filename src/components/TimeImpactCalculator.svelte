@@ -219,7 +219,7 @@
 <style>
   /* Time calculator container */
   .time-calculator-container {
-    width: 80%;
+    width: 100%;
     height: 200px;
     margin: 10px 0;
     display: flex;
@@ -412,12 +412,5 @@
   @keyframes slideInDown {
     0% { transform: translateY(-30px); opacity: 0; }
     100% { transform: translateY(0); opacity: 1; }
-  }
-  
-  /* Responsive styles */
-  @media (max-width: 768px) {
-    .time-calculator-container {
-      width: 100%; /* Full width on tablet and smaller screens */
-    }
   }
 </style>
