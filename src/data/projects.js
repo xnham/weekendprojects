@@ -128,7 +128,7 @@ export const projects = [
         value: "money",
         beneficiary: "household",
         shortDescription: "Daily text to track expenses against budget",
-        longDescription: "Despite monthly vows to spend more mindfully, I consistently blew our family budget on restaurants and impulse Amazon purchases, largely because I lacked real-time insight into my spending habits.\n\nMiss Penny fixes this by sending a daily 8 AM text showing exactly how I'm tracking against our dining out and shopping budgets.\n\nSo far, the daily text messages have helped us reduce our spending by $680 a month on average.",
+        longDescription: "Despite monthly vows to spend more mindfully, our family consistently blew the budget on restaurants and impulse Amazon purchases, largely because we lacked real-time insight into our spending habits.\n\nMiss Penny fixes this by sending a daily 8 AM text showing exactly how we're tracking against our dining out and shopping budgets.\n\nSo far, the daily text messages have helped us reduce our spending by $680 a month on average.",
         impact: "",
         extraContent: "",
         linkText: "See impact >",
@@ -140,11 +140,11 @@ export const projects = [
             daily: 22.36, // dollars saved per day
             hasCalculator: false,
             alternativeUses: [
-                "rent a private island in Belize for a week.",
-                "commission two life-size ice sculptures of yourself.",
-                "buy 16 high-end smart toilets.",
+                "rent a private island in Belize for a night.",
+                "commission three life-size ice sculptures of yourself.",
+                "buy two high-end smart toilets.",
                 "fly business class round-trip from NYC to Singapore.",
-                "rent a billboard in Times Square for 3 hours."
+                "display a selfie on a massive billboard in Times Square for 13 minutes."
             ]
         },
         likes: 0,
