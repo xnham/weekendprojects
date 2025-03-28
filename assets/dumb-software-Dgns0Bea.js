@@ -1,1 +1,0 @@
-import"./index-BKgQXcvj.js";const t={title:"Dumb software also rules",description:"Don't forget dumb softwares.",date:"2025-03-11",published:!1,image:null,tags:[],exceprt:null},{title:s,description:o,date:i,published:l,image:r,tags:d,exceprt:n}=t;function u(e){}export{u as default,t as metadata};
