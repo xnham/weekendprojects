@@ -9,13 +9,13 @@ excerpt: "The economics of software creation have fundamentally changed, and wit
 ---
 For decades, software followed a predictable pattern. First, identify a large market with a common problem. Next, build a solution that works well enough for most people in that market. Finally, scale it to as many users as possible to justify the enormous investment required to build it in the first place. This approach made perfect sense in a world where software development was prohibitively expensive, requiring teams of skilled programmers, project managers, designers, and testers.
 
-But we're witnessing the dawn of a new era—one where software can be built for a single user. The economics of software creation have fundamentally changed, and with it, our assumptions about what's possible. Welcome to the age of "Software for One."
+But we're witnessing the dawn of a new era—one where software can be built for a single user. The economics of software creation have fundamentally changed, and with it, our assumptions about what's possible. We are in the age of "Software for One."
 
 ## The Old Economics: Scale or Die
 
-Traditional software development has been an expensive endeavor. A competent developer in the United States commands a six-figure salary. For any reasonably complex application, you'd need a team—frontend developers, backend developers, DevOps engineers, and a product manager to coordinate them all.
+Traditional software development has been an expensive endeavor. A competent developer in the US commands a six-figure salary. For any reasonably complex application, you'd need a team—frontend developers, backend developers, DevOps engineers, and a product manager to coordinate them all.
 
-This coordination isn't trivial. As Fred Brooks noted in "The Mythical Man-Month," adding more people to a software project often makes it later, not faster. The communication overhead grows exponentially with team size. A five-person team doesn't merely have five lines of communication, but ten. Scale to twenty people, and you're managing 190 potential communication channels.
+This coordination isn't trivial. As Fred Brooks noted in "The Mythical Man-Month," adding more people to a software project often makes it slower, not faster. The communication overhead grows exponentially with team size. A five-person team doesn't merely have five lines of communication, but ten. Scale to twenty people, and you're managing 190 potential communication channels.
 
 With such high fixed costs, software companies needed significant funding and, crucially, a large addressable market to justify the investment. Venture capitalists didn't get excited about niche solutions; they wanted products that could serve millions. The holy grail became "product-market fit"—that magical moment when your offering perfectly matched what a large market desperately needed.
 
@@ -23,7 +23,7 @@ Companies obsessed over defining their Ideal Customer Profile (ICP). Who exactly
 
 ## The User's Compromise
 
-From the user's perspective, this model had clear drawbacks. Software built for the masses inevitably included features irrelevant to many individual users. The professional video editor using Premiere Pro might use just 20% of its features, but still had to navigate the complexity of the entire application.
+From the user's perspective, this model had clear drawbacks. Software built for the masses inevitably included features irrelevant to many individual users. The professional video editor using Premiere Pro might use just 10% of its features, but still had to navigate the complexity of the entire application.
 
 This one-size-fits-most approach created an inherent tension. Make the software too specialized, and your market shrinks. Make it too generic, and users feel frustrated by bloat and irrelevance.
 
