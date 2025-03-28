@@ -198,7 +198,7 @@
 <style>
   /* Money calculator container */
   .money-calculator-container {
-    width: 80%;
+    width: 100%;
     height: 200px;
     margin: 10px 0;
     display: flex;
@@ -335,7 +335,7 @@
   
   .money-counter-values td {
     text-align: center;
-    min-width: 60px;
+    min-width: 20px;
   }
   
   .money-counter-values td:last-child {
@@ -384,12 +384,5 @@
   @keyframes slideInDown {
     0% { transform: translateY(-30px); opacity: 0; }
     100% { transform: translateY(0); opacity: 1; }
-  }
-
-  /* Responsive styles */
-  @media (max-width: 768px) {
-    .money-calculator-container {
-      width: 100%; /* Full width on tablet and smaller screens */
-    }
   }
 </style>
