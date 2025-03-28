@@ -600,11 +600,13 @@
   .completed-project-impact {
     padding-top: 0;
     width: 100%;
+    height: 100%;
   }
 
   /* If there's any additional wrapper div around the impact content */
   .impact-container {
     width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: flex-start;

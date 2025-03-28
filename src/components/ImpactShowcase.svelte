@@ -104,6 +104,7 @@
     justify-content: center;
     align-items: flex-start;
     width: 100%;
+    height: 100%;
     margin: 0;
   }
   
