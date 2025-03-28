@@ -59,7 +59,7 @@
     <h2 class="small-bottom-margin">Thoughts about <span class="purple">Software.</span></h2>
     
     <div class="future-project-intro">
-      <p>These essays are about how our natural behaviors, cognitive patterns, and lived experiences as humans uncover opportunities to rethink software design to create tools that <span class="small-font">quietly</span> complement how we think and live.</p>
+      <p>These essays are about how our natural behaviors, cognitive patterns, and lived experiences uncover opportunities to rethink software design to create tools that <span class="small-font">quietly</span> complement how we think and live.</p>
     </div>
     
     <Essays />
@@ -73,7 +73,7 @@
   }
 
   .small-font {
-    font-size: 14px;
+    font-size: 12px;
   }
   
   /* Responsive adjustments */
