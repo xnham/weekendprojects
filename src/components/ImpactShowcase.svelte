@@ -98,36 +98,16 @@
 {/if}
 
 <style>
-  :global(.impact-text p:last-child) {
-    margin-bottom: 0;
-  }
-  
-  /* These were previously global styles in CompletedPortfolio.svelte */
-  :global(.completed-project-description p),
-  :global(.completed-project-impact p),
-  :global(.completed-project-extra p) {
-    margin-bottom: 1.5rem;
-    display: block;
-  }
-  
-  :global(.completed-project-description p:last-child),
-  :global(.completed-project-impact p:last-child),
-  :global(.completed-project-extra p:last-child) {
-    margin-bottom: 0;
-  }
-  
-  /* Container styles */
-  :global(.completed-project-description),
-  :global(.completed-project-impact),
-  :global(.completed-project-extra) {
-    padding-top: 20px;
-    margin-bottom: 1.5rem;
-  }
   
   .calculator-wrapper {
     display: flex;
     justify-content: center;
+    align-items: flex-start;
     width: 100%;
-    margin: 1rem 0;
+    margin: 0;
+  }
+  
+  .impact-text {
+    margin-bottom: 0;
   }
 </style>

@@ -134,14 +134,43 @@ p a:hover {
     100% { transform: scale(1); }
 }
 
+/* Standardize the animation keyframes that were duplicated */
+@keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes slideOutDown {
     0% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(40px); opacity: 0; }
+    100% { transform: translateY(30px); opacity: 0; }
 }
 
 @keyframes slideInDown {
-    0% { transform: translateY(-40px); opacity: 0; }
+    0% { transform: translateY(-30px); opacity: 0; }
     100% { transform: translateY(0); opacity: 1; }
+}
+
+/* ===== COMMON IMPACT STYLES ===== */
+/* These styles were duplicated across components */
+.completed-project-description p,
+.completed-project-impact p,
+.completed-project-extra p {
+    margin-bottom: 1.5rem;
+    display: block;
+}
+
+.completed-project-description p:last-child,
+.completed-project-impact p:last-child,
+.completed-project-extra p:last-child,
+.impact-text p:last-child {
+    margin-bottom: 0;
+}
+
+.completed-project-description,
+.completed-project-impact,
+.completed-project-extra {
+    padding-top: 20px;
+    margin-bottom: 1.5rem;
 }
 
 /* ===== BREAKPOINTS ===== */
