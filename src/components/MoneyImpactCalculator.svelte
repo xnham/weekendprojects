@@ -259,6 +259,7 @@
     position: relative;
     flex: 1;
     overflow: hidden;
+    margin-top: 0;
   }
   
   .slides-container {
@@ -336,7 +337,6 @@
   
   .money-counter-values td {
     text-align: center;
-    min-width: 20px;
   }
   
   .money-counter-values td:last-child {
@@ -368,7 +368,7 @@
     font-size: 12px;
     color: var(--dark-60);
     text-align: center;
-    margin-top: 20px;
+    margin-top: 10px;
   }
   
   /* ===== RESPONSIVE DESIGN ===== */
@@ -386,6 +386,17 @@
     @media (max-width: 768px) {
       .money-tab {
         font-size: 13px;
+      }
+
+      .money-calculator-content {
+        margin-top: 20px;
+      }
+    }
+
+    /* ===== MOBILE BREAKPOINT (max-width: 576px) ===== */
+    @media (max-width: 576px) {
+      .money-calculator-content {
+        margin-top: 10px;
       }
     }
   }

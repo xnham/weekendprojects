@@ -302,6 +302,7 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    justify-content: center;
     opacity: 0.5;
     transition: opacity 0.4s ease;
   }
@@ -314,8 +315,8 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    margin-top: 20px;
+    justify-content: center;
+    align-items: center;
   }
   
   /* Annual value styling */
