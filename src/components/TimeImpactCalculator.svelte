@@ -372,7 +372,8 @@
   /* Target seconds column specifically */
   .time-counter-values td:nth-child(5),
   .time-counter-labels td:nth-child(5) {
-    width: 100px !important;
+    /* width: 100px !important; */
+    padding-left: 13px;
   }
   
   /* Make separators narrow in both rows */
