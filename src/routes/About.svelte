@@ -24,7 +24,7 @@
       <div class="about-content">
         <p>I cofounded a SaaS company called <a href="https://www.ocamsclub.com" target="_blank" rel="noopener">Ocams</a>. It was among the early systems for automating video recording and delivery for tennis players.</p>
         
-        <p>In my interactions with clients, two patterns kept surfacing: traditional software often <a href="/awkward-software">awkwardly shoehorned itself</a> into a person’s unique workflow, and people experienced <a href="/interface-fatigue">interface fatigue</a>—the mental load of learning yet another set of menus, buttons, and layouts. These observations got me especially excited about AI’s potential to help us build software that adapts to humans, not the other way around.</p>
+        <p>In my interactions with clients, <a href="/ocams-observations">two patterns kept surfacing</a>: traditional software often awkwardly shoehorned itself into a person’s unique workflow, and people experienced interface fatigue—the mental load of learning yet another set of menus, buttons, and layouts. These observations got me especially excited about AI’s potential to help us build software that adapts to humans, not the other way around.</p>
       </div>
     </div>
     
