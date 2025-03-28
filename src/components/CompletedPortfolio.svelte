@@ -12,7 +12,7 @@
     show: boolean;
     value: string;
     longDescription: string;
-    impact: string;
+    impact: boolean;
     image: string;
     tools: string[];
     beneficiary: string;
@@ -64,9 +64,17 @@
     return description.split('\n\n').map(paragraph => `<p>${paragraph}</p>`).join('');
   }
   
-  // Helper function to format impact with paragraphs
-  function formatImpact(impact: string): string {
-    return impact.split('\n').map(line => `<p>${line}</p>`).join('');
+  // Helper function to check if a project has impact
+  function hasImpact(project: Project): boolean {
+    return project.impact === true;
+  }
+  
+  // Helper function to get total slides for a project
+  function getTotalSlides(project: Project): number {
+    let count = 1; // Description slide is always present
+    if (hasImpact(project)) count++; // Impact slide if flag is true
+    if (project.extraContent) count++; // Extra content slide if present
+    return count;
   }
   
   // Function to navigate to a specific slide
@@ -76,7 +84,7 @@
   
   // Function to go forward one slide
   function goForward(projectId: number, project: Project): void {
-    const numSlides = project.extraContent ? 3 : 2;
+    const numSlides = getTotalSlides(project);
     if (currentSlides[projectId] < numSlides - 1) {
       currentSlides[projectId]++;
     }
@@ -133,28 +141,30 @@
           <div class="completed-project-slider">
             <div class="slider-container">
               <div class="slider-track" 
-                   style="width: {project.extraContent ? 300 : 200}%; 
-                          transform: translateX(-{currentSlides[project.id] * (project.extraContent ? 33.333 : 50)}%);">
+                   style="width: {getTotalSlides(project) * 100}%; 
+                          transform: translateX(-{currentSlides[project.id] * (100 / getTotalSlides(project))}%);">
                 
                 <!-- Slide 1: Long Description -->
-                <div class="slider-slide">
+                <div class="slider-slide" style="min-width: {100 / getTotalSlides(project)}%">
                   <div class="completed-project-description">
                     {@html formatDescription(project.longDescription)}
                   </div>
                 </div>
                 
-                <!-- Slide 2: Impact -->
-                <div class="slider-slide">
-                  <div class="completed-project-impact">
-                    <div class="impact-container">
-                      <ImpactShowcase project={project} />
+                <!-- Slide 2: Impact (if impact is true) -->
+                {#if hasImpact(project)}
+                  <div class="slider-slide" style="min-width: {100 / getTotalSlides(project)}%">
+                    <div class="completed-project-impact">
+                      <div class="impact-container">
+                        <ImpactShowcase project={{...project, impact: project.impact.toString()}} />
+                      </div>
                     </div>
                   </div>
-                </div>
+                {/if}
                 
                 <!-- Slide 3: Extra Content (if available) -->
                 {#if project.extraContent}
-                  <div class="slider-slide">
+                  <div class="slider-slide" style="min-width: {100 / getTotalSlides(project)}%">
                     <div class="completed-project-extra">
                       {@html formatDescription(project.extraContent)}
                     </div>
@@ -175,7 +185,7 @@
                     </a>
                   </div>
                   <div class="slider-forward" 
-                       style="visibility: {currentSlides[project.id] === (project.extraContent ? 2 : 1) ? 'hidden' : 'visible'}">
+                       style="visibility: {currentSlides[project.id] === (getTotalSlides(project) - 1) ? 'hidden' : 'visible'}">
                     <a href="#next"
                        class="slider-link" 
                        on:click|preventDefault={() => goForward(project.id, project)}
@@ -186,19 +196,24 @@
                   </div>
                 </div>
                 
-                <div class="slider-nav">
-                  <button class="slider-dot {currentSlides[project.id] === 0 ? 'active' : ''}" 
-                          on:click={() => goToSlide(project.id, 0)}
-                          aria-label="Go to slide 1"></button>
-                  <button class="slider-dot {currentSlides[project.id] === 1 ? 'active' : ''}" 
-                          on:click={() => goToSlide(project.id, 1)}
-                          aria-label="Go to slide 2"></button>
-                  {#if project.extraContent}
-                    <button class="slider-dot {currentSlides[project.id] === 2 ? 'active' : ''}" 
-                            on:click={() => goToSlide(project.id, 2)}
-                            aria-label="Go to slide 3"></button>
-                  {/if}
-                </div>
+                <!-- Only show slider navigation dots when there are multiple slides -->
+                {#if getTotalSlides(project) > 1}
+                  <div class="slider-nav">
+                    <button class="slider-dot {currentSlides[project.id] === 0 ? 'active' : ''}" 
+                            on:click={() => goToSlide(project.id, 0)}
+                            aria-label="Go to slide 1"></button>
+                    {#if hasImpact(project)}
+                      <button class="slider-dot {currentSlides[project.id] === 1 ? 'active' : ''}" 
+                              on:click={() => goToSlide(project.id, 1)}
+                              aria-label="Go to slide 2"></button>
+                    {/if}
+                    {#if project.extraContent}
+                      <button class="slider-dot {currentSlides[project.id] === (hasImpact(project) ? 2 : 1) ? 'active' : ''}" 
+                              on:click={() => goToSlide(project.id, hasImpact(project) ? 2 : 1)}
+                              aria-label="Go to slide {hasImpact(project) ? 3 : 2}"></button>
+                    {/if}
+                  </div>
+                {/if}
               </div>
             </div>
           </div>
@@ -280,7 +295,7 @@
   .completed-project-header-left {
     display: flex;
     flex-direction: column;
-    width: 80%;
+    width: 70%;
   }
 
   .completed-project-title {
@@ -313,15 +328,16 @@
     width: 25%; /* Take up 25% of the available space */
     max-width: 300px;
     overflow: hidden;
-    align-self:flex-start;
+    align-self: flex-start;
     display: flex;
     align-items: flex-start;
     justify-content: left;
+    aspect-ratio: 1 / 1; /* Make container a perfect square */
   }
 
   .completed-project-image-column img {
     width: 100%;
-    height: auto;
+    height: 100%; /* Set height to 100% instead of auto */
     display: block;
     border: 1px var(--dark-100) solid;
     object-fit: contain;
@@ -590,7 +606,7 @@
     .completed-project-image-column img {
       width: 80%;
       min-width: 220px;
-      height: auto;
+      height: 80%; /* Match the width percentage */
       margin: 0;
       object-fit: contain;
     }
