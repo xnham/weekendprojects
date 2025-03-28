@@ -146,7 +146,9 @@
                 <!-- Slide 2: Impact -->
                 <div class="slider-slide">
                   <div class="completed-project-impact">
-                    <ImpactShowcase project={project} />
+                    <div class="impact-container">
+                      <ImpactShowcase project={project} />
+                    </div>
                   </div>
                 </div>
                 
@@ -242,13 +244,13 @@
   .completed-project-content {
     display: flex;
     flex-direction: row;
-    gap: 40px;
+    gap: clamp(20px, 2.5vw, 40px);
     width: 100%;
     align-items: stretch; /* Make all children stretch to same height */
   }
 
   .completed-project-left-column {
-    width: 70%; /* Take up 70% of the available space */
+    width: 75%; /* Take up 75% of the available space */
     min-width: 0; /* Allow proper text wrapping */
     display: flex;
     flex-direction: column;
@@ -260,7 +262,7 @@
     justify-content: space-between;
     align-items: flex-start;
     padding: 0px 0px 20px 0;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2.5rem;
     box-shadow: 0 1px 0 var(--dark-100);
     position: relative;
   }
@@ -303,12 +305,12 @@
   }
 
   .completed-project-description {
-    padding-top: 20px;
-    margin-bottom: 1rem;
+    padding: 0;
+    margin: 0;
   }
 
   .completed-project-image-column {
-    width: 30%; /* Take up 30% of the available space */
+    width: 25%; /* Take up 25% of the available space */
     max-width: 300px;
     overflow: hidden;
     align-self:flex-start;
@@ -365,11 +367,13 @@
   .slider-slide {
     flex: 1;
     min-width: 33.333%; /* Each slide takes up 1/3 of the track by default */
-    padding-right: 20px;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
   }
 
-  /* Styling for buttons that replaced links */
   .slider-link, .slider-back-link {
     display: inline-block;
     margin-right: 15px;
@@ -394,7 +398,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
   /* Center the dots horizontally */
@@ -427,34 +431,11 @@
   .slider-dot.active {
     background-color: var(--dark-80);
   }
-
-  /* ===== TIME CALCULATOR - COMPONENT ===== */
-  .time-calculator-container {
-    margin: 20px auto;
-    border-radius: 0px;
-    width: 75%;
-    height: 200px;
-    border: 1px var(--dark-100) solid;
-  }
-
-  /* svelte-ignore css-unused-selector */
-  .completed-project-impact {
-    padding-top: 20px;
-    margin-bottom: 1.5rem;
-  }
   
   :global(.completed-project-description p:last-child),
   :global(.completed-project-impact p:last-child),
   :global(.completed-project-extra p:last-child) {
     margin-bottom: 0;
-  }
-
-  /* You may want to add these global container styles too */
-  :global(.completed-project-description),
-  :global(.completed-project-impact),
-  :global(.completed-project-extra) {
-    padding-top: 20px;
-    margin-bottom: 1.5rem;
   }
 
   /* Add these new styles for the link components */
@@ -534,20 +515,25 @@
   /* ===== RESPONSIVE DESIGN ===== */
   /* ===== TABLET BREAKPOINT (max-width: 768px) ===== */
   @media (max-width: 768px) {
-    .completed-project-content {
-      gap: 20px;
-    }
-    
     .completed-project-title {
       font-size: 28px;
       margin-bottom: 15px;
     }
     
     .completed-project-header {
-      margin-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .completed-project-left-column {
+      width: 70%;  
+    }
+
+    .completed-project-image-column {
+      width: 30%;
     }
     
     .slider-controls {
+      margin-top: 20px;
       gap: 0.5rem;
     }
   }
@@ -563,7 +549,6 @@
     .completed-project-header {
       order: 1;
       flex-direction: column;
-      margin-bottom: 20px;
     }
     
     .completed-project-header-left {
@@ -603,11 +588,28 @@
     }
     
     .completed-project-image-column img {
-      width: 70%;
+      width: 80%;
       min-width: 220px;
       height: auto;
       margin: 0;
       object-fit: contain;
     }
   }
+
+  /* Look for any container that might be wrapping the impact section */
+  .completed-project-impact {
+    padding-top: 0;
+    width: 100%;
+  }
+
+  /* If there's any additional wrapper div around the impact content */
+  .impact-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+  
+  /* Moved redundant global styles to app.css */
 </style>

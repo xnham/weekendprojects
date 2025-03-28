@@ -68,7 +68,7 @@ export const projects = [
         value: "time",
         beneficiary: "work/business",
         shortDescription: "Parse emails and turn them into a database",
-        longDescription: "A tennis club's after-school program was drowning in paper: application submissions arrived as emails that were printed and filed, forcing the program director to either manage everything from hard copies or manually transfer hundreds of applications to spreadsheets.\n\nUsing Google Apps Script, I automated the transfer of application data from emails to Google Sheets, organizing students by semester and schedule, tracking dismissal times and transportation needs, managing staff assignments, maintaining contact details, and categorizing program revenues.\n\nThis solution saved the program director approximately an hour per week.",
+        longDescription: "A tennis club's after-school program was overwhelmed with paper: applications arrived via email, were printed and filed, forcing the director to manage from hard copies or manually transfer data to spreadsheets.\n\nUsing Google Apps Script, I automated the transfer of application data from emails to Google Sheets, organizing students by semester, tracking dismissal times and transportation needs, managing staff assignments, and maintaining contact details.\n\nThis solution saved the program director approximately an hour per week.",
         impact: "",
         extraContent: null,
         linkText: "See calculations >",
@@ -143,8 +143,8 @@ export const projects = [
                 "rent a private island in Belize for a night.",
                 "commission three life-size ice sculptures of yourself.",
                 "buy two high-end smart toilets.",
-                "fly business class round-trip from NYC to Singapore.",
-                "display a selfie on a massive billboard in Times Square for 13 minutes."
+                "fly business class from NYC to Singapore and back.",
+                "rent a giant billboard in Times Square for 13 minutes."
             ]
         },
         likes: 0,

@@ -220,8 +220,9 @@
   /* Time calculator container */
   .time-calculator-container {
     width: 100%;
-    height: 200px;
-    margin: 10px 0;
+    height: 100%;
+    margin: 0;
+    padding-bottom: 20px;
     display: flex;
     flex-direction: column;
     border: 1px solid var(--dark-100);
@@ -261,7 +262,7 @@
   .tab-slider {
     position: absolute;
     height: calc(100% - 10px);
-    width: calc(50% - 10px);
+    width: calc(50% - 5px);
     background-color: var(--yellow-100);
     top: 5px;
     left: 5px;
@@ -300,7 +301,7 @@
     min-width: 50%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     opacity: 0.5;
     transition: opacity 0.4s ease;
   }
@@ -313,8 +314,8 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    margin-top: -10px;
+    justify-content: flex-start;
+    margin-top: 20px;
   }
   
   /* Annual value styling */
@@ -397,20 +398,23 @@
     text-align: center;
     margin-top: 20px;
   }
-  
-  /* Animation keyframes */
-  @keyframes fadeIn {
-    0% { opacity: 0; transform: translateY(-10px); }
-    100% { opacity: 1; transform: translateY(0); }
+
+  /* ===== RESPONSIVE DESIGN ===== */
+  /* ===== SMALL DESKTOP BREAKPOINT (max-width: 900px) ===== */
+  @media (max-width: 900px) {
+    .time-annual-value {
+      font-size: 20px;
+    }
+
+    .time-counter {
+      font-size: 20px;
+    }
   }
-  
-  @keyframes slideOutDown {
-    0% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(30px); opacity: 0; }
-  }
-  
-  @keyframes slideInDown {
-    0% { transform: translateY(-30px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
+
+  /* ===== TABLET BREAKPOINT (max-width: 768px) ===== */
+  @media (max-width: 768px) {
+    .time-tab {
+      font-size: 13px;
+    }
   }
 </style>
