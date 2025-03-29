@@ -108,6 +108,37 @@
       return { main: text.replace(/\s+>$/, ''), arrow: '>' };
     }
   }
+  
+  // Touch handling for swipe gestures
+  let touchStartX = 0;
+  let touchEndX = 0;
+  
+  function handleTouchStart(e: TouchEvent): void {
+    touchStartX = e.touches[0].clientX;
+  }
+  
+  function handleTouchMove(e: TouchEvent): void {
+    touchEndX = e.touches[0].clientX;
+  }
+  
+  function handleTouchEnd(projectId: number, project: Project): void {
+    const swipeThreshold = 50; // Minimum distance required for a swipe
+    const swipeDistance = touchEndX - touchStartX;
+    
+    if (Math.abs(swipeDistance) > swipeThreshold) {
+      if (swipeDistance > 0) {
+        // Swiped right - go back
+        goBack(projectId);
+      } else {
+        // Swiped left - go forward
+        goForward(projectId, project);
+      }
+    }
+    
+    // Reset touch positions
+    touchStartX = 0;
+    touchEndX = 0;
+  }
 </script>
 
 <div id="completed-projects" class="completed-projects">
@@ -139,7 +170,10 @@
       <div class="completed-project-content">
         <div class="completed-project-left-column">
           <div class="completed-project-slider">
-            <div class="slider-container">
+            <div class="slider-container"
+                 on:touchstart={handleTouchStart}
+                 on:touchmove={handleTouchMove}
+                 on:touchend={() => handleTouchEnd(project.id, project)}>
               <div class="slider-track" 
                    style="width: {getTotalSlides(project) * 100}%; 
                           transform: translateX(-{currentSlides[project.id] * (100 / getTotalSlides(project))}%);">
