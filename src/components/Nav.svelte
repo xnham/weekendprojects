@@ -205,6 +205,9 @@
     .nav-links a {
       color: var(--pure-white-90);
       font-weight: 600;
+      display: block;
+      width: 85vw; /* Use viewport width instead of percentage */
+      padding: 10px 0; /* Add vertical padding */
     }
     
     .nav-links.active {
