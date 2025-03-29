@@ -10,7 +10,7 @@
     show: boolean;
     value: string;
     longDescription: string;
-    impact: string;
+    impact: boolean;
     image: string;
     tools: string[];
     beneficiary: string;
@@ -71,11 +71,6 @@
   }
 </script>
 
-<!-- Text-only impact always displays -->
-<div class="impact-text">
-  {@html project.impact}
-</div>
-
 <!-- Show the appropriate calculator based on project value type -->
 {#if calculatorType === 'time' && project.timeSaved}
   <div class="calculator-wrapper">
@@ -106,9 +101,5 @@
     width: 100%;
     height: 100%;
     margin: 0;
-  }
-  
-  .impact-text {
-    margin-bottom: 0;
   }
 </style>

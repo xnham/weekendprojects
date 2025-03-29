@@ -156,7 +156,7 @@
                   <div class="slider-slide" style="min-width: {100 / getTotalSlides(project)}%">
                     <div class="completed-project-impact">
                       <div class="impact-container">
-                        <ImpactShowcase project={{...project, impact: project.impact.toString()}} />
+                        <ImpactShowcase project={project} />
                       </div>
                     </div>
                   </div>
@@ -295,7 +295,7 @@
   .completed-project-header-left {
     display: flex;
     flex-direction: column;
-    width: 70%;
+    width: 75%;
   }
 
   .completed-project-title {
@@ -531,9 +531,15 @@
   /* ===== RESPONSIVE DESIGN ===== */
   /* ===== TABLET BREAKPOINT (max-width: 768px) ===== */
   @media (max-width: 768px) {
+
+    .completed-projects {
+      gap: 2rem;
+    }
+
     .completed-project-title {
       font-size: 28px;
-      margin-bottom: 15px;
+      margin-bottom: 0.5rem;
+      width: 90%;
     }
     
     .completed-project-header {
@@ -582,13 +588,22 @@
       order: 2;
       display: flex;
       flex-direction: column;
+      gap: 20px;
     }
     
     /* Force the image above the content on mobile */
     .completed-project-image-column {
-      width: 100%;
+      width: 60%;
       order: 1;
-      margin-bottom: 20px;
+      margin-bottom: 0;
+    }
+
+    .completed-project-image-column img {
+      width: 100%;
+      min-width: 220px;
+      height: 100%; /* Match the width percentage */
+      margin: 0;
+      object-fit: contain;
     }
     
     .completed-project-left-column {
@@ -602,14 +617,7 @@
       margin-top: 20px;
       margin-bottom: 40px;
     }
-    
-    .completed-project-image-column img {
-      width: 80%;
-      min-width: 220px;
-      height: 80%; /* Match the width percentage */
-      margin: 0;
-      object-fit: contain;
-    }
+  
   }
 
   /* Look for any container that might be wrapping the impact section */
