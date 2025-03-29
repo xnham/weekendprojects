@@ -46,13 +46,9 @@
   // Track current slide for each project
   let currentSlides: Record<number, number> = {};
   
-  // Touch and mouse handling for swipe gestures
+  // Touch handling for swipe gestures
   let touchStartX = 0;
   let touchEndX = 0;
-  let mouseStartX = 0;
-  let mouseEndX = 0;
-  let isMouseDown = false;
-  let scrollAccumulator = 0; // Track accumulated scroll distance
   
   function handleTouchStart(e: TouchEvent): void {
     touchStartX = e.touches[0].clientX;
@@ -81,80 +77,9 @@
     touchEndX = 0;
   }
   
-  // Track wheel/scroll events for trackpad gestures
-  function handleWheel(e: WheelEvent, projectId: number, project: Project): void {
-    // Prevent the default scroll behavior
-    e.preventDefault();
-    
-    // Add to scroll accumulator (deltaX tracks horizontal scroll)
-    scrollAccumulator += e.deltaX;
-    
-    // Define threshold for swipe recognition
-    const swipeThreshold = 50;
-    
-    // Check if accumulated scroll passes threshold
-    if (Math.abs(scrollAccumulator) > swipeThreshold) {
-      if (scrollAccumulator < 0) {
-        // Scrolled right (negative deltaX) - go back
-        goBack(projectId);
-      } else {
-        // Scrolled left (positive deltaX) - go forward
-        goForward(projectId, project);
-      }
-      
-      // Reset accumulator after triggering an action
-      scrollAccumulator = 0;
-    }
-  }
-  
-  // Mouse handling for desktop swipe gestures
-  function handleMouseDown(e: MouseEvent): void {
-    isMouseDown = true;
-    mouseStartX = e.clientX;
-  }
-  
-  function handleMouseMove(e: MouseEvent): void {
-    if (isMouseDown) {
-      mouseEndX = e.clientX;
-    }
-  }
-  
-  function handleMouseUp(projectId: number, project: Project): void {
-    if (isMouseDown) {
-      const swipeThreshold = 50; // Minimum distance required for a swipe
-      const swipeDistance = mouseEndX - mouseStartX;
-      
-      if (Math.abs(swipeDistance) > swipeThreshold) {
-        if (swipeDistance > 0) {
-          // Swiped right - go back
-          goBack(projectId);
-        } else {
-          // Swiped left - go forward
-          goForward(projectId, project);
-        }
-      }
-      
-      // Reset mouse state
-      isMouseDown = false;
-      mouseStartX = 0;
-      mouseEndX = 0;
-    }
-  }
-  
-  // Handle mouse leaving the element while dragging
-  function handleMouseLeave(projectId: number, project: Project): void {
-    handleMouseUp(projectId, project);
-  }
-  
-  // Initialize event listeners for document-level mouse up
   onMount(() => {
     completedProjects.forEach(project => {
       currentSlides[project.id] = 0;
-    });
-    
-    // Add document-level mouse up handler to catch mouse releases outside the element
-    document.addEventListener('mouseup', () => {
-      isMouseDown = false;
     });
     
     // Optional: Check if fonts are loaded
@@ -162,13 +87,6 @@
       // All fonts are loaded
       console.log('Fonts loaded');
     });
-    
-    // Clean up event listener on component unmount
-    return () => {
-      document.removeEventListener('mouseup', () => {
-        isMouseDown = false;
-      });
-    };
   });
   
   // Helper function to format description with paragraphs
@@ -254,12 +172,7 @@
             <div class="slider-container"
                  on:touchstart={handleTouchStart}
                  on:touchmove={handleTouchMove}
-                 on:touchend={() => handleTouchEnd(project.id, project)}
-                 on:mousedown={handleMouseDown}
-                 on:mousemove={handleMouseMove}
-                 on:mouseup={() => handleMouseUp(project.id, project)}
-                 on:mouseleave={() => handleMouseLeave(project.id, project)}
-                 on:wheel|preventDefault={(e) => handleWheel(e, project.id, project)}>
+                 on:touchend={() => handleTouchEnd(project.id, project)}>
               <div class="slider-track" 
                    style="width: {getTotalSlides(project) * 100}%; 
                           transform: translateX(-{currentSlides[project.id] * (100 / getTotalSlides(project))}%);">
@@ -536,6 +449,7 @@
     flex-direction: column;
     align-items: flex-end;
     gap: 1rem;
+    margin-top: 10px;
   }
 
   /* Center the dots horizontally */
