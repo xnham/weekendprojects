@@ -11,7 +11,7 @@ export const projects = [
         longDescription: "My tennis video company's workflow requires constant monitoring of tennis club court schedules to determine when to send videos, which courts they're from, and who should receive them. This process used to require manual checks several times daily.\n\nI built a web scraper to automate this entirely, sending updates to Google Sheets and triggering email notifications as needed.\n\nThis solution saves me 15 minutes a day. It eliminates a small yet significant cognitive load from my days, allowing me to focus on other work and enjoy personal time without interruptions.",
         impact: true,
         extraContent: null,
-        linkText: "See calculations >",
+        linkText: "Impact calculator >",
         extraContentLinkText: null,
         launchDate: new Date(2024, 4, 10), // May 10, 2024
         image: "scraper.gif",
@@ -71,7 +71,7 @@ export const projects = [
         longDescription: "A tennis club's after-school program was overwhelmed with paper: applications arrived via email, were printed and filed, forcing the director to manage from hard copies or manually transfer data to spreadsheets.\n\nUsing Google Apps Script, I automated the transfer of application data from emails to Google Sheets, organizing students by semester, tracking dismissal times and transportation needs, managing staff assignments, and maintaining contact details.\n\nThis solution saved the program director approximately an hour per week.",
         impact: true,
         extraContent: null,
-        linkText: "See calculations >",
+        linkText: "Impact calculator >",
         extraContentLinkText: null,
         launchDate: new Date(2024, 7, 14), // August 14, 2024
         image: "jdp.gif",
@@ -131,7 +131,7 @@ export const projects = [
         longDescription: "Despite monthly vows to spend more mindfully, our family consistently blew the budget on restaurants and impulse Amazon purchases, largely because we lacked real-time insight into our spending habits.\n\nMiss Penny fixes this by sending a daily 8 AM text showing exactly how we're tracking against our dining out and shopping budgets.\n\nSo far, the daily text messages have helped us reduce our spending by $680 a month on average.",
         impact: true,
         extraContent: "",
-        linkText: "See impact >",
+        linkText: "Impact calculator >",
         extraContentLinkText: "",
         launchDate: new Date(2025, 1, 1), // February 1, 2025
         image: "miss-penny.gif",
@@ -165,7 +165,7 @@ export const projects = [
         extraContentLinkText: "",
         launchDate: new Date(2025, 1, 1), // February 1, 2025
         image: "wp.gif",
-        tools: ["GitHub Actions", "Google Apps Script", "Google Sheets", "OpenAI", "Python", "Sheet SMS", "Tiller Money"],
+        tools: ["GitHub Pages", "Supabase", "Svelte", "Vite"],
         moneySaved: {
             daily: 5.5, // $5.50 saved per day ($2000/365)
             alternativeUses: [
