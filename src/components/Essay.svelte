@@ -67,7 +67,19 @@
   }
   
   function formatDate(dateString: string) {
-    return new Date(dateString).toLocaleDateString('en-US', { 
+    // Add debugging to see what we're receiving
+    console.log('Original date string:', dateString);
+    
+    // More robust approach: force the date to be interpreted as local timezone
+    // by adding a time component (12 noon) to avoid any date shifting
+    const [year, month, day] = dateString.split('-').map(num => parseInt(num, 10));
+    console.log('Parsed components:', year, month, day);
+    
+    // Create date at noon to avoid timezone boundary issues
+    const date = new Date(year, month - 1, day, 12, 0, 0);
+    console.log('Created date object:', date);
+    
+    return date.toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric' 

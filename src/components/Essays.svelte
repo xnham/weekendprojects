@@ -44,7 +44,9 @@
 
 <style>
     .essays {
-        display: flex;    
+        display: flex;   
+        flex-direction: column;
+        gap: 60px;
         width: 75%;
     }
     
