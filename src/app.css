@@ -60,8 +60,8 @@ body {
 h1,
 h2,
 h3 {
-    font-family: 'DM Serif Text', 'adobe-garamond-pro', serif;
-    font-weight: 600;
+    font-family: 'DM Serif Text', serif;
+    font-weight: 700;
     color: var(--dark-100);
     text-align: left;
 }
