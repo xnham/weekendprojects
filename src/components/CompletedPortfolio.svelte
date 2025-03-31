@@ -498,7 +498,6 @@
     display: flex;
     align-items: flex-start;
     justify-content: left;
-    border: 1px var(--dark-100) solid;
     aspect-ratio: 1 / 1; /* Make container a perfect square */
   }
 
@@ -506,6 +505,7 @@
     width: 100%;
     height: 100%; /* Set height to 100% instead of auto */
     display: block;
+    border: 1px var(--dark-100) solid;
     object-fit: contain;
   }
 

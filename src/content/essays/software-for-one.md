@@ -1,6 +1,6 @@
 ---
 title: "Software for One"
-description: "You should use software designed specifically for you."
+description: "The economics of software creation have fundamentally changed, and with it, our assumptions about what's possible."
 date: "2025-03-08"
 published: true
 image:
