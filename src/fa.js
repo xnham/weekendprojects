@@ -6,7 +6,9 @@ import {
   faPerson, 
   faHouseChimneyWindow, 
   faBriefcase,
-  faTreeCity
+  faTreeCity,
+  faAngleLeft,
+  faAngleRight
 } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as farHeart, faBell as farBell } from '@fortawesome/free-regular-svg-icons';
 
@@ -20,5 +22,7 @@ library.add(
   faPerson,
   faHouseChimneyWindow,
   faBriefcase,
-  faTreeCity
+  faTreeCity,
+  faAngleLeft,
+  faAngleRight
 );
