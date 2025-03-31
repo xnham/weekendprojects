@@ -2,33 +2,33 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&family=Roboto:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 :root {
-  --light-100: #FFFFF7;
-  --pure-white-100: rgba(255, 255, 255, 1);
-  --pure-white-90: rgba(255, 255, 255, 0.9);
-  --pure-white-80: rgba(255, 255, 255, 0.8);
-  --dark-100: #292633;
-  --dark-95: rgba(41, 38, 51, 0.95);
-  --dark-90: rgba(41, 38, 51, 0.9);
-  --dark-85: rgba(41, 38, 51, 0.85);
-  --dark-80: rgba(41, 38, 51, 0.8);
-  --dark-70: rgba(41, 38, 51, 0.7);
-  --dark-60: rgba(41, 38, 51, 0.6);
-  --dark-50: rgba(41, 38, 51, 0.5);
-  --dark-40: rgba(41, 38, 51, 0.4);
-  --dark-30: rgba(41, 38, 51, 0.3);
-  --dark-25: rgba(41, 38, 51, 0.25);
-  --dark-20: rgba(41, 38, 51, 0.2);
-  --dark-10: rgba(41, 38, 51, 0.1);
-  --dark-5: rgba(41, 38, 51, 0.05);
-  --light-grey-100: #ECECED;
-  --purple-100: #5D3FD3;
-  --dark-purple-100: rgba(84, 57, 191, 1);
-  --purple-30: rgba(93, 63, 211, 0.3);
-  --yellow-100: #FFE103;
-  --dark-pink-100: #FF4980;
-  --dark-orange-100: #FF5900;
-  --light-pink-100: #FF819C;
-  --plum-100: #69324A;
+    --light-100: #FFFFF7;
+    --pure-white-100: rgba(255, 255, 255, 1);
+    --pure-white-90: rgba(255, 255, 255, 0.9);
+    --pure-white-80: rgba(255, 255, 255, 0.8);
+    --dark-100: #292633;
+    --dark-95: rgba(41, 38, 51, 0.95);
+    --dark-90: rgba(41, 38, 51, 0.9);
+    --dark-85: rgba(41, 38, 51, 0.85);
+    --dark-80: rgba(41, 38, 51, 0.8);
+    --dark-70: rgba(41, 38, 51, 0.7);
+    --dark-60: rgba(41, 38, 51, 0.6);
+    --dark-50: rgba(41, 38, 51, 0.5);
+    --dark-40: rgba(41, 38, 51, 0.4);
+    --dark-30: rgba(41, 38, 51, 0.3);
+    --dark-25: rgba(41, 38, 51, 0.25);
+    --dark-20: rgba(41, 38, 51, 0.2);
+    --dark-10: rgba(41, 38, 51, 0.1);
+    --dark-5: rgba(41, 38, 51, 0.05);
+    --light-grey-100: #ECECED;
+    --purple-100: #5D3FD3;
+    --dark-purple-100: rgba(84, 57, 191, 1);
+    --purple-30: rgba(93, 63, 211, 0.3);
+    --yellow-100: #FFE103;
+    --dark-pink-100: #FF4980;
+    --dark-orange-100: #FF5900;
+    --light-pink-100: #FF819C;
+    --plum-100: #69324A;
 }
 
 * {
@@ -56,25 +56,35 @@ body {
 }
 
 /* ===== TYPOGRAPHY - GLOBAL ===== */
-h1, h2 {
+h1,
+h2,
+h4 {
     font-family: 'DM Serif Text', serif;
     color: var(--dark-100);
-    line-height: 1.2;
+    line-height: 1.1;
     text-align: left;
-    margin-bottom: 60px;
 }
 
 h1 {
     font-size: 78px;
+    margin-bottom: 60px;
 }
 
 h2 {
     font-size: 48px;
+    margin-bottom: 60px;
 }
 
 h3 {
     font-size: 16px;
+    line-height: 1.2;
     color: var(--dark-100);
+}
+
+h4 {
+    font-size: 28px;
+    margin-top: 30px;
+    margin-bottom: 20px;
 }
 
 .bold {
@@ -123,8 +133,15 @@ p a:hover {
 
 /* ===== ANIMATIONS ===== */
 @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
 }
 
 .blink {
@@ -133,25 +150,54 @@ p a:hover {
 }
 
 @keyframes heartPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.3); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 /* Standardize the animation keyframes that were duplicated */
 @keyframes fadeIn {
-    0% { opacity: 0; transform: translateY(-10px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes slideOutDown {
-    0% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(30px); opacity: 0; }
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(30px);
+        opacity: 0;
+    }
 }
 
 @keyframes slideInDown {
-    0% { transform: translateY(-30px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
+    0% {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 /* ===== COMMON IMPACT STYLES ===== */
@@ -178,12 +224,26 @@ p a:hover {
 }
 
 /* ===== BREAKPOINTS ===== */
-
 /* Small desktop breakpoint */
-    
 @media (max-width: 1200px) {
     .container {
         padding-left: 5vw;
         padding-right: 5vw;
+    }
+
+    /* Tablet breakpoint */
+    @media (max-width: 768px) {
+        h2 {
+            font-size: 40px;
+            margin-bottom: 40px;
+        }
+    }
+
+    /* Mobile breakpoint */
+    @media (max-width: 576px) {
+        h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
     }
 }

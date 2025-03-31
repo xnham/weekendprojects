@@ -15,14 +15,6 @@
 
 <style>
   
-  .small-bottom-margin {
-    margin-bottom: 20px;
-  }
-  
-  .purple {
-    color: var(--purple-100);
-  }
-  
   .future-project-intro {
     margin-bottom: 60px;
     width: 75%
@@ -39,12 +31,8 @@
     opacity: 0.7;
   }
   
-  /* Mobile responsiveness */
+  /* Tablet responsiveness */
   @media (max-width: 768px) {
-    h2 {
-      font-size: 42px;
-    }
-
     .future-project-intro {
       margin-bottom: 40px;
       width: 100%;

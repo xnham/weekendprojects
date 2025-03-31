@@ -170,13 +170,14 @@
     }
   }
 
-  /* Mobile styles */
+  /* Tablet and mobile styles */
   @media (max-width: 768px) {
     .nav {
       margin-bottom: 20px;
     }
 
     .nav-logo img {
+      height: clamp(100px, 20vw, 120px);
       padding: 20px 0px 5px 3vw;
     }
 
