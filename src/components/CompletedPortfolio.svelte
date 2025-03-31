@@ -270,31 +270,30 @@
                   </div>
                   
                   <!-- Slider controls -->
-                  <div class="slider-controls">
-                    <div class="slider-links">
-                      <div class="slider-back" style="visibility: {currentSlides[project.id] === 0 ? 'hidden' : 'visible'}">
-                        <a href="#back"
-                           class="slider-back-link" 
-                           on:click|preventDefault={() => goBack(project.id)}
-                           on:keydown={(e) => e.key === 'Enter' && goBack(project.id)}
-                           aria-label="Go to previous slide">
-                          <span class="link-arrow">&lt;</span><span class="link-text">Back</span>
-                        </a>
+                  {#if getTotalSlides(project) > 1}
+                    <div class="slider-controls">
+                      <div class="slider-links">
+                        <div class="slider-back" style="display: {currentSlides[project.id] === 0 ? 'none' : 'block'}">
+                          <a href="#back"
+                             class="slider-back-link" 
+                             on:click|preventDefault={() => goBack(project.id)}
+                             on:keydown={(e) => e.key === 'Enter' && goBack(project.id)}
+                             aria-label="Go to previous slide">
+                            <span class="link-arrow">&lt;</span><span class="link-text">Back</span>
+                          </a>
+                        </div>
+                        <div class="slider-forward" 
+                             style="display: {currentSlides[project.id] === (getTotalSlides(project) - 1) ? 'none' : 'block'}">
+                          <a href="#next"
+                             class="slider-link" 
+                             on:click|preventDefault={() => goForward(project.id, project)}
+                             on:keydown={(e) => e.key === 'Enter' && goForward(project.id, project)}
+                             aria-label="Go to next slide">
+                            <span class="link-text">{getLinkText(project, currentSlides[project.id]).main}</span><span class="link-arrow">{getLinkText(project, currentSlides[project.id]).arrow}</span>
+                          </a>
+                        </div>
                       </div>
-                      <div class="slider-forward" 
-                           style="visibility: {currentSlides[project.id] === (getTotalSlides(project) - 1) ? 'hidden' : 'visible'}">
-                        <a href="#next"
-                           class="slider-link" 
-                           on:click|preventDefault={() => goForward(project.id, project)}
-                           on:keydown={(e) => e.key === 'Enter' && goForward(project.id, project)}
-                           aria-label="Go to next slide">
-                          <span class="link-text">{getLinkText(project, currentSlides[project.id]).main}</span><span class="link-arrow">{getLinkText(project, currentSlides[project.id]).arrow}</span>
-                        </a>
-                      </div>
-                    </div>
-                    
-                    <!-- Only show slider navigation dots when there are multiple slides -->
-                    {#if getTotalSlides(project) > 1}
+                      
                       <div class="slider-nav">
                         <button class="slider-dot {currentSlides[project.id] === 0 ? 'active' : ''}" 
                                 on:click={() => goToSlide(project.id, 0)}
@@ -310,8 +309,8 @@
                                   aria-label="Go to slide {hasImpact(project) ? 3 : 2}"></button>
                         {/if}
                       </div>
-                    {/if}
-                  </div>
+                    </div>
+                  {/if}
                 </div>
               </div>
             </div>
@@ -587,6 +586,16 @@
     width: 100%;
   }
 
+  .slider-forward {
+    margin-left: auto; /* Push to the right side */
+    text-align: right; /* Right-align the text */
+  }
+  
+  .slider-back {
+    margin-right: auto; /* Push to the left side */
+    text-align: left; /* Left-align the text */
+  }
+
   .slider-nav {
     display: flex;
     gap: 0.5rem;
@@ -827,9 +836,16 @@
     
     /* Tools come last */
     .completed-project-tools {
+      padding-top: 10px;
       order: 3;
-      margin-top: 20px;
-      margin-bottom: 40px;
+    }
+
+    .slider-nav {
+      margin: 10px 0;
+    }
+
+    .slider-controls {
+      margin-top: 6px;
     }
     
     /* Slider arrow adjustments for mobile */
