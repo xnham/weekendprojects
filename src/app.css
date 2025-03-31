@@ -60,6 +60,7 @@ h1,
 h2,
 h4 {
     font-family: 'DM Serif Text', 'EB Garamond', serif;
+    font-weight: 600;
     color: var(--dark-100);
     line-height: 1.1;
     text-align: left;

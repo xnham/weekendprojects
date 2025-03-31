@@ -101,7 +101,7 @@
     margin-bottom: 0;
   }
   
-  /* Mobile responsiveness */
+  /* Tablet responsiveness */
   @media (max-width: 768px) {
     h2 {
       margin-bottom: 80px;
