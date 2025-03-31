@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, afterUpdate } from 'svelte';
   import { projects } from '../data/projects.js';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import ImpactShowcase from './ImpactShowcase.svelte';
@@ -50,6 +50,11 @@
   let touchStartX = 0;
   let touchEndX = 0;
   
+  // References for description elements and arrow buttons - properly typed now
+  let descriptionElements: Record<number, HTMLElement> = {};
+  let leftArrows: Record<number, HTMLElement> = {};
+  let rightArrows: Record<number, HTMLElement> = {};
+  
   function handleTouchStart(e: TouchEvent): void {
     touchStartX = e.touches[0].clientX;
   }
@@ -77,6 +82,40 @@
     touchEndX = 0;
   }
   
+  // Function to position arrows relative to description
+  function positionArrows() {
+    completedProjects.forEach(project => {
+      const descEl = descriptionElements[project.id];
+      const leftArrow = leftArrows[project.id];
+      const rightArrow = rightArrows[project.id];
+      
+      if (descEl && leftArrow && rightArrow) {
+        const descRect = descEl.getBoundingClientRect();
+        const descMiddle = descRect.top + descRect.height / 2;
+        const container = descEl.closest('.slider-outer-container');
+        
+        // Add null check for container
+        if (container) {
+          const containerRect = container.getBoundingClientRect();
+          
+          // Set position relative to the container
+          const relativeMiddle = descMiddle - containerRect.top;
+          
+          leftArrow.style.top = `${relativeMiddle}px`;
+          leftArrow.style.transform = 'translateY(-50%)';
+          
+          rightArrow.style.top = `${relativeMiddle}px`;
+          rightArrow.style.transform = 'translateY(-50%)';
+        }
+      }
+    });
+  }
+  
+  // Run positioning after DOM updates and on window resize
+  afterUpdate(() => {
+    positionArrows();
+  });
+  
   onMount(() => {
     completedProjects.forEach(project => {
       currentSlides[project.id] = 0;
@@ -87,6 +126,17 @@
       // All fonts are loaded
       console.log('Fonts loaded');
     });
+    
+    // Add window resize listener
+    const handleResize = () => {
+      positionArrows();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   });
   
   // Helper function to format description with paragraphs
@@ -168,87 +218,113 @@
       
       <div class="completed-project-content">
         <div class="completed-project-left-column">
-          <div class="completed-project-slider">
-            <div class="slider-container"
-                 on:touchstart={handleTouchStart}
-                 on:touchmove={handleTouchMove}
-                 on:touchend={() => handleTouchEnd(project.id, project)}>
-              <div class="slider-track" 
-                   style="width: {getTotalSlides(project) * 100}%; 
-                          transform: translateX(-{currentSlides[project.id] * (100 / getTotalSlides(project))}%);">
-                
-                <!-- Slide 1: Long Description -->
-                <div class="slider-slide" style="min-width: {100 / getTotalSlides(project)}%">
-                  <div class="completed-project-description">
-                    {@html formatDescription(project.longDescription)}
-                  </div>
-                </div>
-                
-                <!-- Slide 2: Impact (if impact is true) -->
-                {#if hasImpact(project)}
-                  <div class="slider-slide" style="min-width: {100 / getTotalSlides(project)}%">
-                    <div class="completed-project-impact">
-                      <div class="impact-container">
-                        <ImpactShowcase project={project} />
+          <!-- Containing div with relative positioning -->
+          <div class="slider-outer-container">
+            <!-- Left button positioned as direct child of outer container -->
+            <button 
+              class="slider-arrow-button slider-arrow-left outside-positioned"
+              bind:this={leftArrows[project.id]}
+              on:click={() => goBack(project.id)}
+              disabled={currentSlides[project.id] === 0}
+              aria-label="Previous slide">
+              <FontAwesomeIcon icon={['fas', 'angle-left']} />
+            </button>
+            
+            <!-- The slider wrapper without buttons -->
+            <div class="completed-project-slider-wrapper">
+              <div class="completed-project-slider">
+                <div class="slider-container"
+                     on:touchstart={handleTouchStart}
+                     on:touchmove={handleTouchMove}
+                     on:touchend={() => handleTouchEnd(project.id, project)}>
+                  
+                  <div class="slider-track" 
+                       style="width: {getTotalSlides(project) * 100}%; 
+                              transform: translateX(-{currentSlides[project.id] * (100 / getTotalSlides(project))}%);">
+                    <!-- Slide 1: Long Description -->
+                    <div class="slider-slide" style="min-width: {100 / getTotalSlides(project)}%">
+                      <div class="completed-project-description" bind:this={descriptionElements[project.id]}>
+                        {@html formatDescription(project.longDescription)}
                       </div>
                     </div>
+                    
+                    <!-- Slide 2: Impact (if impact is true) -->
+                    {#if hasImpact(project)}
+                      <div class="slider-slide" style="min-width: {100 / getTotalSlides(project)}%">
+                        <div class="completed-project-impact">
+                          <div class="impact-container">
+                            <ImpactShowcase project={project} />
+                          </div>
+                        </div>
+                      </div>
+                    {/if}
+                    
+                    <!-- Slide 3: Extra Content (if available) -->
+                    {#if project.extraContent}
+                      <div class="slider-slide" style="min-width: {100 / getTotalSlides(project)}%">
+                        <div class="completed-project-extra">
+                          {@html formatDescription(project.extraContent)}
+                        </div>
+                      </div>
+                    {/if}
                   </div>
-                {/if}
-                
-                <!-- Slide 3: Extra Content (if available) -->
-                {#if project.extraContent}
-                  <div class="slider-slide" style="min-width: {100 / getTotalSlides(project)}%">
-                    <div class="completed-project-extra">
-                      {@html formatDescription(project.extraContent)}
+                  
+                  <!-- Slider controls -->
+                  <div class="slider-controls">
+                    <div class="slider-links">
+                      <div class="slider-back" style="visibility: {currentSlides[project.id] === 0 ? 'hidden' : 'visible'}">
+                        <a href="#back"
+                           class="slider-back-link" 
+                           on:click|preventDefault={() => goBack(project.id)}
+                           on:keydown={(e) => e.key === 'Enter' && goBack(project.id)}
+                           aria-label="Go to previous slide">
+                          <span class="link-arrow">&lt;</span><span class="link-text">Back</span>
+                        </a>
+                      </div>
+                      <div class="slider-forward" 
+                           style="visibility: {currentSlides[project.id] === (getTotalSlides(project) - 1) ? 'hidden' : 'visible'}">
+                        <a href="#next"
+                           class="slider-link" 
+                           on:click|preventDefault={() => goForward(project.id, project)}
+                           on:keydown={(e) => e.key === 'Enter' && goForward(project.id, project)}
+                           aria-label="Go to next slide">
+                          <span class="link-text">{getLinkText(project, currentSlides[project.id]).main}</span><span class="link-arrow">{getLinkText(project, currentSlides[project.id]).arrow}</span>
+                        </a>
+                      </div>
                     </div>
-                  </div>
-                {/if}
-              </div>
-              
-              <!-- Slider Controls: Links + Navigation -->
-              <div class="slider-controls">
-                <div class="slider-links">
-                  <div class="slider-back" style="visibility: {currentSlides[project.id] === 0 ? 'hidden' : 'visible'}">
-                    <a href="#back"
-                       class="slider-back-link" 
-                       on:click|preventDefault={() => goBack(project.id)}
-                       on:keydown={(e) => e.key === 'Enter' && goBack(project.id)}
-                       aria-label="Go to previous slide">
-                      <span class="link-arrow">&lt;</span><span class="link-text">Back</span>
-                    </a>
-                  </div>
-                  <div class="slider-forward" 
-                       style="visibility: {currentSlides[project.id] === (getTotalSlides(project) - 1) ? 'hidden' : 'visible'}">
-                    <a href="#next"
-                       class="slider-link" 
-                       on:click|preventDefault={() => goForward(project.id, project)}
-                       on:keydown={(e) => e.key === 'Enter' && goForward(project.id, project)}
-                       aria-label="Go to next slide">
-                      <span class="link-text">{getLinkText(project, currentSlides[project.id]).main}</span><span class="link-arrow">{getLinkText(project, currentSlides[project.id]).arrow}</span>
-                    </a>
+                    
+                    <!-- Only show slider navigation dots when there are multiple slides -->
+                    {#if getTotalSlides(project) > 1}
+                      <div class="slider-nav">
+                        <button class="slider-dot {currentSlides[project.id] === 0 ? 'active' : ''}" 
+                                on:click={() => goToSlide(project.id, 0)}
+                                aria-label="Go to slide 1"></button>
+                        {#if hasImpact(project)}
+                          <button class="slider-dot {currentSlides[project.id] === 1 ? 'active' : ''}" 
+                                  on:click={() => goToSlide(project.id, 1)}
+                                  aria-label="Go to slide 2"></button>
+                        {/if}
+                        {#if project.extraContent}
+                          <button class="slider-dot {currentSlides[project.id] === (hasImpact(project) ? 2 : 1) ? 'active' : ''}" 
+                                  on:click={() => goToSlide(project.id, hasImpact(project) ? 2 : 1)}
+                                  aria-label="Go to slide {hasImpact(project) ? 3 : 2}"></button>
+                        {/if}
+                      </div>
+                    {/if}
                   </div>
                 </div>
-                
-                <!-- Only show slider navigation dots when there are multiple slides -->
-                {#if getTotalSlides(project) > 1}
-                  <div class="slider-nav">
-                    <button class="slider-dot {currentSlides[project.id] === 0 ? 'active' : ''}" 
-                            on:click={() => goToSlide(project.id, 0)}
-                            aria-label="Go to slide 1"></button>
-                    {#if hasImpact(project)}
-                      <button class="slider-dot {currentSlides[project.id] === 1 ? 'active' : ''}" 
-                              on:click={() => goToSlide(project.id, 1)}
-                              aria-label="Go to slide 2"></button>
-                    {/if}
-                    {#if project.extraContent}
-                      <button class="slider-dot {currentSlides[project.id] === (hasImpact(project) ? 2 : 1) ? 'active' : ''}" 
-                              on:click={() => goToSlide(project.id, hasImpact(project) ? 2 : 1)}
-                              aria-label="Go to slide {hasImpact(project) ? 3 : 2}"></button>
-                    {/if}
-                  </div>
-                {/if}
               </div>
             </div>
+            
+            <!-- Right button positioned as direct child of outer container -->
+            <button 
+              class="slider-arrow-button slider-arrow-right outside-positioned"
+              bind:this={rightArrows[project.id]}
+              on:click={() => goForward(project.id, project)}
+              disabled={currentSlides[project.id] === (getTotalSlides(project) - 1)}
+              aria-label="Next slide">
+              <FontAwesomeIcon icon={['fas', 'angle-right']} />
+            </button>
           </div>
         </div>
         
@@ -267,7 +343,7 @@
 </div>
 
 <style>
-  /* ===== COMPLETED PROJECT CARDS ===== */
+  /* ===== BASE LAYOUT STYLES ===== */
   .completed-projects {
     display: flex;
     flex-direction: column;
@@ -279,7 +355,7 @@
     display: flex;
     flex-direction: column;
     background-color: var(--light-100);
-    overflow: hidden;
+    overflow: visible;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     width: 100%;
     margin-bottom: 80px;
@@ -297,13 +373,7 @@
     align-items: stretch; /* Make all children stretch to same height */
   }
 
-  .completed-project-left-column {
-    width: 75%; /* Take up 75% of the available space */
-    min-width: 0; /* Allow proper text wrapping */
-    display: flex;
-    flex-direction: column;
-  }
-
+  /* ===== PROJECT HEADER STYLES ===== */
   .completed-project-header {
     display: flex;
     flex-direction: row;
@@ -352,162 +422,7 @@
     box-sizing: border-box;
   }
 
-  .completed-project-description {
-    padding: 0;
-    margin: 0;
-  }
-
-  .completed-project-image-column {
-    width: 25%; /* Take up 25% of the available space */
-    max-width: 300px;
-    overflow: hidden;
-    align-self: flex-start;
-    display: flex;
-    align-items: flex-start;
-    justify-content: left;
-    border: 1px var(--dark-100) solid;
-    aspect-ratio: 1 / 1; /* Make container a perfect square */
-  }
-
-  .completed-project-image-column img {
-    width: 100%;
-    height: 100%; /* Set height to 100% instead of auto */
-    display: block;
-
-    object-fit: contain;
-  }
-
-  .completed-project-tools {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: center;
-    margin-bottom: 60px;
-    padding-top: 1.5rem;
-  }
-
-  .completed-project-tool {
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--dark-60);
-    background-color: var(--dark-5);
-    border-radius: 20px;
-    padding: 2px 16px;
-  }
-
-  /* ===== PROJECT SLIDER ===== */
-  .completed-project-slider {
-    position: relative;
-    width: 100%;
-    overflow: hidden;
-    margin-bottom: 0.5rem;
-  }
-
-  .slider-container {
-    position: relative;
-    width: 100%;
-  }
-
-  .slider-track {
-    display: flex;
-    transition: transform 0.5s ease;
-    width: 300%; /* Support up to 3 slides by default */
-  }
-
-  .slider-slide {
-    flex: 1;
-    min-width: 33.333%; /* Each slide takes up 1/3 of the track by default */
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-  }
-
-  .slider-link, .slider-back-link {
-    display: inline-block;
-    margin-right: 15px;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 400;
-    color: var(--dark-85);
-    transition: opacity 0.2s ease;
-    text-align: left;
-    text-decoration: none; /* Remove default underline */
-  }
-
-  .slider-link:hover, .slider-back-link:hover {
-    opacity: 0.8;
-  }
-
-  /* Update slider controls to stack vertically */
-  .slider-controls {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 1rem;
-    margin-top: 10px;
-  }
-
-  /* Center the dots horizontally */
-  .slider-nav {
-    display: flex;
-    gap: 0.5rem;
-    width: 100%;
-    justify-content: center;
-  }
-
-  /* Container for navigation links */
-  .slider-links {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-  }
-
-  /* Slider dots styling */
-  .slider-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: var(--dark-20);
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-
-  .slider-dot.active {
-    background-color: var(--dark-80);
-  }
-  
-  :global(.completed-project-description p:last-child),
-  :global(.completed-project-impact p:last-child),
-  :global(.completed-project-extra p:last-child) {
-    margin-bottom: 0;
-  }
-
-  /* Add these new styles for the link components */
-  .slider-link .link-text {
-    text-decoration: underline;
-  }
-  
-  .slider-link .link-arrow {
-    text-decoration: none;
-    margin-left: 3px; /* Add a small space between text and arrow */
-  }
-  
-  .slider-back-link .link-text {
-    text-decoration: underline;
-  }
-  
-  .slider-back-link .link-arrow {
-    text-decoration: none;
-    margin-right: 3px; /* Add a small space between arrow and text */
-  }
-
+  /* ===== PROJECT LABEL STYLES ===== */
   .dual-pill-label {
     display: inline-flex;
     border-radius: 20px;
@@ -537,7 +452,6 @@
     border-left: none;
   }
   
-  /* Keep these existing value styles, but we can remove the standalone .completed-project-value class */
   .value-side.money {
     background-color: var(--purple-100);
     color: var(--pure-white-100);
@@ -563,10 +477,273 @@
     color: var(--pure-white-100)
   }
 
+  /* ===== PROJECT CONTENT COLUMNS ===== */
+  .completed-project-left-column {
+    width: 75%; /* Take up 75% of the available space */
+    min-width: 0; /* Allow proper text wrapping */
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  .completed-project-description {
+    padding-right: 20px;
+    margin: 0;
+  }
+
+  .completed-project-image-column {
+    width: 25%; /* Take up 25% of the available space */
+    max-width: 300px;
+    overflow: hidden;
+    align-self: flex-start;
+    display: flex;
+    align-items: flex-start;
+    justify-content: left;
+    border: 1px var(--dark-100) solid;
+    aspect-ratio: 1 / 1; /* Make container a perfect square */
+  }
+
+  .completed-project-image-column img {
+    width: 100%;
+    height: 100%; /* Set height to 100% instead of auto */
+    display: block;
+    object-fit: contain;
+  }
+
+  /* ===== PROJECT TOOLS SECTION ===== */
+  .completed-project-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 60px;
+    padding-top: 1.5rem;
+  }
+
+  .completed-project-tool {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--dark-60);
+    background-color: var(--dark-5);
+    border-radius: 20px;
+    padding: 2px 16px;
+  }
+
+  /* ===== SLIDER CONTAINER STRUCTURE ===== */
+  .slider-outer-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 0.5rem;
+    overflow: visible;
+  }
+
+  .completed-project-slider-wrapper {
+    position: relative;
+    width: 100%;
+    overflow: visible; /* Allow buttons to be visible outside */
+    margin-bottom: 0.5rem;
+  }
+  
+  .completed-project-slider {
+    position: relative;
+    width: 100%;
+    overflow: hidden; /* Keep slides hidden */
+  }
+
+  .slider-container {
+    position: relative;
+    width: 100%;
+  }
+
+  /* ===== SLIDER TRACK AND SLIDES ===== */
+  .slider-track {
+    display: flex;
+    transition: transform 0.5s ease;
+    width: 300%; /* Support up to 3 slides by default */
+  }
+
+  .slider-slide {
+    flex: 1;
+    min-width: 33.333%; /* Each slide takes up 1/3 of the track by default */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  /* ===== SLIDER CONTROLS ===== */
+  .slider-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1rem;
+    margin-top: 10px;
+  }
+
+  .slider-links {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .slider-nav {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* ===== SLIDER NAVIGATION DOTS ===== */
+  .slider-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--dark-20);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .slider-dot.active {
+    background-color: var(--dark-80);
+  }
+
+  /* ===== SLIDER NAVIGATION ARROWS ===== */
+  .slider-arrow-button {
+    background-color: var(--light-100); 
+    border: none;
+    color: var(--dark-70);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 100;
+  }
+
+  .slider-arrow-button.outside-positioned {
+    position: absolute;
+    transform: translateY(-50%);
+    z-index: 100;
+    /* Layered shadow with adjusted light direction and top outline */
+    box-shadow:
+      /* Subtle inset shadow to create top edge definition */
+      inset 0 1px 1px rgba(0, 0, 0, 0.05),
+      /* Main shadow layers with slight directional shift */
+      0 1px 2px rgba(0, 0, 0, 0.08),
+      0 2px 4px rgba(0, 0, 0, 0.08),
+      0 4px 6px rgba(0, 0, 0, 0.08),
+      0 6px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .slider-arrow-button:hover {
+    /* Enhanced hover effect with maintained top edge */
+    box-shadow:
+      inset 0 1px 1px rgba(0, 0, 0, 0.05),
+      0 2px 4px rgba(0, 0, 0, 0.12),
+      0 4px 6px rgba(0, 0, 0, 0.12),
+      0 8px 10px rgba(0, 0, 0, 0.12),
+      0 12px 16px rgba(0, 0, 0, 0.08);
+    transform: translateY(calc(-50% - 1px)); /* Maintain vertical centering while moving up 1px */
+  }
+
+  .slider-arrow-left.outside-positioned {
+    left: -18px;
+  }
+
+  .slider-arrow-right.outside-positioned {
+    right: -18px;
+  }
+  
+  .slider-arrow-button.center-positioned {
+    position: absolute;
+    transform: translateY(calc(-50% - 40px)); /* Move 40px up from center */
+    z-index: 100; /* Increased z-index significantly */
+    pointer-events: auto; /* Ensure clicks work */
+  }
+  
+  .slider-arrow-left.center-positioned {
+    left: 0px; /* Position at the edge instead of outside */
+  }
+  
+  .slider-arrow-right.center-positioned {
+    right: 0px; /* Position at the edge instead of outside */
+  }
+  
+  .slider-arrow-button:disabled {
+    opacity: 0; /* Hide completely when disabled instead of faded */
+    cursor: not-allowed;
+  }
+
+  /* ===== SLIDER LINKS STYLING ===== */
+  .slider-link, .slider-back-link {
+    display: inline-block;
+    margin-right: 15px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--dark-85);
+    transition: opacity 0.2s ease;
+    text-align: left;
+    text-decoration: none; /* Remove default underline */
+  }
+
+  .slider-link:hover, .slider-back-link:hover {
+    opacity: 0.8;
+  }
+
+  .slider-link .link-text {
+    text-decoration: underline;
+  }
+  
+  .slider-link .link-arrow {
+    text-decoration: none;
+    margin-left: 3px; /* Add a small space between text and arrow */
+  }
+  
+  .slider-back-link .link-text {
+    text-decoration: underline;
+  }
+  
+  .slider-back-link .link-arrow {
+    text-decoration: none;
+    margin-right: 3px; /* Add a small space between arrow and text */
+  }
+
+  /* ===== IMPACT SECTION ===== */
+  .completed-project-impact {
+    padding-top: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .impact-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+  
+  /* ===== CONTENT FORMATTING ===== */
+  :global(.completed-project-description p:last-child),
+  :global(.completed-project-impact p:last-child),
+  :global(.completed-project-extra p:last-child) {
+    margin-bottom: 0;
+  }
+
   /* ===== RESPONSIVE DESIGN ===== */
   /* ===== TABLET BREAKPOINT (max-width: 768px) ===== */
   @media (max-width: 768px) {
-
     .completed-projects {
       gap: 2rem;
     }
@@ -624,6 +801,7 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
+      overflow: visible;
     }
     
     /* Force the image above the content on mobile */
@@ -653,25 +831,27 @@
       margin-top: 20px;
       margin-bottom: 40px;
     }
-  
-  }
+    
+    /* Slider arrow adjustments for mobile */
+    .slider-arrow-button {
+      width: 32px;
+      height: 32px;
+    }
 
-  /* Look for any container that might be wrapping the impact section */
-  .completed-project-impact {
-    padding-top: 0;
-    width: 100%;
-    height: 100%;
-  }
+    .slider-arrow-left.outside-positioned {
+      left: -12px;
+    }
 
-  /* If there's any additional wrapper div around the impact content */
-  .impact-container {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
+    .slider-arrow-right.outside-positioned {
+      right: -12px;
+    }
+    
+    .slider-arrow-left.center-positioned {
+      left: -5px; /* Further reduced for mobile */
+    }
+    
+    .slider-arrow-right.center-positioned {
+      right: -5px; /* Keeping symmetry */
+    }
   }
-  
-  /* Moved redundant global styles to app.css */
 </style>
