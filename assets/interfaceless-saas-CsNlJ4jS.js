@@ -1,0 +1,1 @@
+import"./index-DM2ZuHer.js";const e={title:"Interfaceless SaaS",description:"Not having an interface can be a luxury.",date:"2025-03-11",published:!1,image:null,tags:[],exceprt:null},{title:s,description:n,date:i,published:l,image:c,tags:r,exceprt:d}=e;function o(a){}export{o as default,e as metadata};

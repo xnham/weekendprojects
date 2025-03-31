@@ -1,1 +1,0 @@
-import"./index-Dg_-zYTV.js";const e={title:"Software Should be Small",description:"Software should be modular.",date:"2025-03-08",published:!1,image:null,tags:[],excerpt:"tbd."},{title:l,description:o,date:d,published:s,image:i,tags:r,excerpt:u}=e;function c(t){}export{c as default,e as metadata};
