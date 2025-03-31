@@ -162,8 +162,8 @@
 
 <div class="future-projects" id="projectList">
   {#each displayProjects as project (project.id)}
-    <div class="future-project-post-it">
-      <div class="future-project-post-it-header">
+    <div class="future-project-card">
+      <div class="future-project-card-header">
         <div class="dual-pill-label">
           <span class="beneficiary-side">
             {#if project.beneficiary === "personal"}
@@ -180,11 +180,11 @@
           <span class="value-side {project.value}">↑ {project.value}</span>
         </div>
       </div>
-      <h3 class="future-project-post-it-title">{project.title}</h3>
-      <div class="future-project-post-it-details">
+      <h3 class="future-project-card-title">{project.title}</h3>
+      <div class="future-project-card-details">
         {@html project.longDescription}
       </div>
-      <div class="future-project-post-it-actions">
+      <div class="future-project-card-actions">
         <div class="future-project-buttons">
           <button 
             class="future-project-like-button {userData.likes[project.id.toString()] ? 'future-project-liked' : ''}" 
@@ -257,7 +257,9 @@
 {/if}
 
 <style>
-  /* Post-it styling */
+  /* --------------------
+     Layout and containers
+     -------------------- */
   .future-projects {
     display: flex;
     flex-direction: column;
@@ -268,7 +270,10 @@
     margin: 0;
   }
   
-  .future-project-post-it {
+  /* --------------------
+     Card styling
+     -------------------- */
+  .future-project-card {
     position: relative;
     width: 100%;
     max-width: 600px;
@@ -280,16 +285,44 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
   
-  .future-project-post-it-header {
+  /* Card header and title */
+  .future-project-card-header {
     padding-left: 20px;
     margin-bottom: 10px;
   }
   
+  .future-project-card-title {
+    padding-left: 20px;
+    margin-bottom: 10px;
+    word-wrap: break-word;
+  }
+  
+  /* Card content and details */
+  .future-project-card-details {
+    flex-grow: 1;
+    padding-left: 20px;
+    margin-bottom: 30px;
+    color: var(--dark-85);
+    white-space: pre-wrap;
+    line-height: 1.6;
+  }
+  
+  .future-project-card-details :global(a) {
+    color: var(--dark-85);
+    text-decoration: none;
+    border-bottom: 1px solid var(--dark-100);
+    transition: opacity 0.2s ease;
+  }
+  
+  .future-project-card-details :global(a:hover) {
+    opacity: 0.7;
+  }
+  
+  /* Pill labels */
   .dual-pill-label {
     display: inline-flex;
     border-radius: 20px;
     overflow: hidden;
-    margin-bottom: 10px;
     font-size: 12px;
   }
   
@@ -339,44 +372,12 @@
     color: var(--pure-white-100);
   }
   
-  .future-project-post-it-title {
-    padding-left: 20px;
-    font-family: 'DM Serif Text', serif;
-    font-size: 24px;
-    line-height: 1.3;
-    margin-top: 0;
-    margin-bottom: 20px;
-    color: var(--dark-100);
-    word-wrap: break-word;
-  }
-  
-  .future-project-post-it-details {
-    flex-grow: 1;
-    padding-left: 20px;
-    margin-bottom: 30px;
-    color: var(--dark-85);
-    white-space: pre-wrap;
-    line-height: 1.6;
-  }
-  
-  .future-project-post-it-details :global(a) {
-    color: var(--dark-85);
-    text-decoration: none;
-    border-bottom: 1px solid var(--dark-100);
-    transition: opacity 0.2s ease;
-  }
-  
-  .future-project-post-it-details :global(a:hover) {
-    opacity: 0.7;
-  }
-  
-  .future-project-post-it-actions {
+  /* Card actions area */
+  .future-project-card-actions {
     display: flex;
     justify-content: space-between; 
     gap: 0px;
-    padding-top: 14px;
-    padding-bottom: 14px;
-    padding-left: 20px;
+    padding: 14px 0 14px 20px;
     margin-top: auto;
     border-top: 1px var(--dark-100) solid;
   }
@@ -384,14 +385,6 @@
   .future-project-buttons {
     display: flex;
     justify-content: column;
-  }
-  
-  .future-project-like-button {
-    width: 80px;
-  }
-  
-  .future-project-follow-button {
-    width: 100px;
   }
   
   .future-project-like-button, 
@@ -408,16 +401,18 @@
   }
   
   .future-project-like-button {
+    width: 80px;
     stroke: var(--dark-100);
+  }
+  
+  .future-project-follow-button {
+    width: 100px;
+    color: var(--dark-100);
   }
   
   .future-project-liked :global(svg) {
     color: var(--dark-pink-100);
     animation: heartPulse 0.3s ease-in-out;
-  }
-  
-  .future-project-follow-button {
-    color: var(--dark-100);
   }
   
   .future-project-following :global(svg) {
@@ -433,7 +428,9 @@
     color: var(--dark-100);
   }
   
-  /* Modal styling */
+  /* --------------------
+     Modal styling
+     -------------------- */
   .future-project-modal {
     position: fixed;
     top: 0;
@@ -455,6 +452,15 @@
     width: 90%;
     position: relative;
     box-shadow: 0 5px 20px var(--dark-20);
+  }
+  
+  .future-project-modal-title {
+    font-family: 'DM Serif Text', serif;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.4;
+    padding: 60px 0 20px 0;
   }
   
   .future-project-close-modal {
@@ -480,15 +486,7 @@
     transition: transform 0.3s ease;
   }
   
-  .future-project-modal-title {
-    font-family: 'DM Serif Text', serif;
-    text-align: center;
-    font-size: 24px;
-    font-weight: 500;
-    line-height: 1.4;
-    padding: 60px 0 20px 0;
-  }
-  
+  /* Modal form elements */
   .future-project-form-and-button {
     display: flex;
     flex-direction: column;
@@ -496,6 +494,10 @@
     align-items: center;
     width: 100%;
     margin: 0 auto;
+  }
+  
+  .future-project-form-and-button form {
+    width: 100%;
   }
   
   .future-project-form-group {
@@ -511,6 +513,7 @@
     border-radius: 5px;
     font-size: 16px;
     transition: border-color 0.3s ease;
+    box-sizing: border-box;
   }
   
   .future-project-form-group input:focus {
@@ -529,6 +532,7 @@
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s;
+    box-sizing: border-box;
   }
   
   .future-project-submit-button:hover {
@@ -549,27 +553,21 @@
     padding-bottom: 40px;
   }
   
+  /* --------------------
+     Animations 
+     -------------------- */
   @keyframes heartPulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.3); }
     100% { transform: scale(1); }
   }
   
-  /* Responsive adjustments */
+  /* --------------------
+     Responsive styles
+     -------------------- */
   @media (max-width: 768px) {
-    .future-project-post-it {
+    .future-project-card {
       max-width: 90%;
     }
-  }
-  
-  .future-project-form-and-button form {
-    width: 100%;
-  }
-  
-  /* Ensure input and button take full width */
-  .future-project-form-group input,
-  .future-project-submit-button {
-    width: 100%;
-    box-sizing: border-box;
   }
 </style>
