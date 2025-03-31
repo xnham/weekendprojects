@@ -343,7 +343,7 @@
     padding-left: 20px;
     font-family: 'DM Serif Text', serif;
     font-size: 24px;
-    line-height: 1.4;
+    line-height: 1.3;
     margin-top: 0;
     margin-bottom: 20px;
     color: var(--dark-100);

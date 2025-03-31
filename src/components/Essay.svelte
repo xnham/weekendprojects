@@ -90,7 +90,7 @@
   <div class="loading">Loading essay...</div>
 {:else if error}
   <div class="error">
-    <h1>Essay Not Found</h1>
+    <h2 class="small-bottom-margin">Essay Not Found</h2>
     <p>{error}</p>
     <a href="/writing" on:click={goBackToWriting}>&lt; Back to essays</a>
   </div>
@@ -100,7 +100,7 @@
     {#if metadata}
       <header>
         <time class="essay-date" datetime={metadata.date}>{formatDate(metadata.date)}</time>
-        <h1>{metadata.title}</h1>
+        <h2 class="small-bottom-margin">{metadata.title}</h2>
         <div class="metadata">
           {#if metadata.tags && metadata.tags.length > 0}
             <div class="tags">
@@ -154,24 +154,10 @@
 
   .essay-date {
     text-transform: uppercase;
-    letter-spacing: 0.05rem;
-    color: var(--dark-60);
-    font-size: 14px;
-    font-weight: 500;
-  }
-  
-  h1 {
-    font-size: 48px;
-    margin-top: 5px;
-    margin-bottom: 0;
-  }
-
-  .content :global(h2) {
-    font-family: 'DM Serif Text', serif; /* Match your title font */
-    font-size: 28px;                   /* Large size for subheadings */                
-    line-height: 1.2; 
-    margin-top: 30px;
-    margin-bottom: 20px;                   /* Tighter line height for headings */
+    letter-spacing: 0.08rem;
+    color: var(--dark-80);
+    font-size: 13px;
+    font-weight: 400;
   }
 
   .content :global(p) {
@@ -258,6 +244,14 @@
   @media (max-width: 768px) {
     article {
       width: 100%;
+    }
+
+    .essay-date {
+      font-size: 12px;
+    }
+
+    .back-link {
+      font-size: 12px;
     }
   }
 </style>

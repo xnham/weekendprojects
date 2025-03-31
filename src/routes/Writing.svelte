@@ -67,6 +67,7 @@
 </main>
 
 <style>
+
   .future-project-intro {
     width: 75%;
     margin-bottom: 80px;
