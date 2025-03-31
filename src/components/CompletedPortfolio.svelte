@@ -487,6 +487,7 @@
   .completed-project-description {
     padding-right: 18px;
     margin: 0;
+    padding-top: 0;
   }
 
   .completed-project-image-column {
