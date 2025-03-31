@@ -487,7 +487,7 @@
   }
 
   .completed-project-description {
-    padding-right: 20px;
+    padding-right: 18px;
     margin: 0;
   }
 
