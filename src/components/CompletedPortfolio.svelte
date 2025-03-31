@@ -346,7 +346,6 @@
   .completed-projects {
     display: flex;
     flex-direction: column;
-    gap: 3rem;
     margin: 0;
   }
 
@@ -357,7 +356,7 @@
     overflow: visible;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     width: 100%;
-    margin-bottom: 80px;
+    margin-bottom: 100px;
   }
 
   .completed-project-card:last-child {
@@ -753,8 +752,8 @@
   /* ===== RESPONSIVE DESIGN ===== */
   /* ===== TABLET BREAKPOINT (max-width: 768px) ===== */
   @media (max-width: 768px) {
-    .completed-projects {
-      gap: 2rem;
+    .completed-project-card {
+      margin-bottom: 80px;
     }
 
     .completed-project-title {
@@ -783,10 +782,11 @@
 
   /* ===== MOBILE BREAKPOINT (max-width: 576px) ===== */
   @media (max-width: 576px) {
-    /* Keep the header at the top on mobile */
+
     .completed-project-card {
       display: flex;
       flex-direction: column;
+      margin-bottom: 40px
     }
     
     .completed-project-header {

@@ -115,7 +115,7 @@ p a:hover {
 }
 
 .divider {
-    margin: 80px auto 120px auto;
+    margin: 80px auto 100px auto;
     border-bottom: 1px var(--dark-100) solid;
     width: 50%;
     display: block;
@@ -235,6 +235,10 @@ p a:hover {
             font-size: 40px;
             margin-bottom: 40px;
         }
+
+        .divider {
+            margin: 60px auto 80px auto;
+        }
     }
 
     /* Mobile breakpoint */
@@ -242,6 +246,10 @@ p a:hover {
         h2 {
             font-size: 36px;
             margin-bottom: 20px;
+        }
+
+        .divider {
+            margin: 60px auto 80px auto;
         }
     }
 }
