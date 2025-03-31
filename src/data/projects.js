@@ -68,7 +68,7 @@ export const projects = [
         value: "time",
         beneficiary: "work/business",
         shortDescription: "Parse emails and turn them into a database",
-        longDescription: "A tennis club's after-school program was overwhelmed with paper: applications arrived via email, were printed and filed, forcing the director to manage from hard copies or manually transfer data to spreadsheets.\n\nUsing Google Apps Script, I automated the transfer of application data from emails to Google Sheets, organizing students by semester, tracking dismissal times and transportation needs, managing staff assignments, and maintaining contact details.\n\nThis solution saved the program director approximately an hour per week.",
+        longDescription: "A tennis club’s after-school program was overwhelmed with paper: applications arrived via email, were printed and filed, and the director had to manage from hard copies or manually enter data into spreadsheets.\n\nI used Google Apps Script to automate the transfer of application data into Google Sheets, organizing students by semester, tracking dismissal times and transportation, managing staff assignments, and storing contact details.\n\nThis saved the program director about an hour per week.",
         impact: true,
         extraContent: null,
         linkText: "Impact calculator >",
