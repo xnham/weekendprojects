@@ -10,7 +10,7 @@
   <div class="about-layout">
     <div class="about-row">
       <div class="about-timeline">
-        <p>2024 →</p>
+        <p><span class="year">2024</span> <span class="arrow">→</span></p>
       </div>
       <div class="about-content">
         <p>Having accumulated a long list of business and personal micro-problems, I started using AI tools to build various pieces of '<a href="/writing/software-for-one" class="essay-card-link">software for one</a>' to solve them. Surprised by the meaningful impact they delivered, particularly given their simplicity, I felt encouraged to build more hyper-custom solutions and uncover the implications of this new style of software development. </p>
@@ -19,18 +19,18 @@
     
     <div class="about-row">
       <div class="about-timeline">
-        <p>2015 →</p>
+        <p><span class="year">2015</span> <span class="arrow">→</span></p>
       </div>
       <div class="about-content">
         <p>I cofounded a SaaS company called <a href="https://www.ocamsclub.com" target="_blank" rel="noopener">Ocams</a>. It was among the early systems for automating video recording and delivery for tennis players.</p>
         
-        <p>In my interactions with clients, <a href="/ocams-observations">two patterns kept surfacing</a>: traditional software often awkwardly shoehorned itself into a person’s unique workflow, and people experienced interface fatigue—the mental load of learning yet another set of menus, buttons, and layouts. These observations got me especially excited about AI’s potential to help us build software that adapts to humans, not the other way around.</p>
+        <p>In my interactions with clients, <a href="/ocams-observations">two patterns kept surfacing</a>: traditional software often awkwardly shoehorned itself into a person's unique workflow, and people experienced interface fatigue—the mental load of learning yet another set of menus, buttons, and layouts. These observations got me especially excited about AI's potential to help us build software that adapts to humans, not the other way around.</p>
       </div>
     </div>
     
     <div class="about-row">
       <div class="about-timeline">
-        <p>← 2015</p>
+        <p><span class="arrow">←</span> <span class="year">2015</span></p>
       </div>
       <div class="about-content">
         <p>Before Ocams, I spent many years in academia. (One reason was visa restrictions, which limited my career mobility.)</p> 
@@ -45,7 +45,7 @@
     
     <div class="about-row">
       <div class="about-timeline">
-        <p>← all that</p>
+        <p><span class="arrow">←</span> <span class="year">all that</span></p>
       </div>
       <div class="about-content">
         <p>I grew up in Jakarta, Indonesia.</p>
@@ -119,6 +119,26 @@
     
     .about-content {
       padding-left: 20px;
+    }
+  }
+  
+  /* Mobile responsiveness */
+  @media (max-width: 576px) {
+
+    .about-timeline {
+      flex: 0 0 60px;
+      width: 60px;
+    }
+
+    .about-timeline p {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .about-timeline .arrow,
+    .about-timeline .year {
+      display: block;
     }
   }
 </style>
