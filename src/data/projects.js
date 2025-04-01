@@ -29,7 +29,9 @@ export const projects = [
         },
         likes: 0,
         follows: 0,
-        show: true
+        show: true,
+        beforeImpact: "Before using the web scraper, I had to manually check schedules several times a day.",
+        afterImpact: "After implementing the web scraper, the process is automated, saving me 15 minutes daily."
     },
     {
         id: 2,
@@ -59,7 +61,9 @@ export const projects = [
         },
         likes: 0,
         follows: 0,
-        show: true
+        show: true,
+        beforeImpact: "Instructors had to call the front desk to check schedules.",
+        afterImpact: "Schedules are now automatically posted to Google Calendar."
     },
     {
         id: 3,
@@ -68,7 +72,7 @@ export const projects = [
         value: "time",
         beneficiary: "work/business",
         shortDescription: "Parse emails and turn them into a database",
-        longDescription: "A tennis club’s after-school program was overwhelmed with paper: applications arrived via email, were printed and filed, and the director had to manage from hard copies or manually enter data into spreadsheets.\n\nI used Google Apps Script to automate the transfer of application data into Google Sheets, organizing students by semester, tracking dismissal times and transportation, managing staff assignments, and storing contact details.\n\nThis saved the program director about an hour per week.",
+        longDescription: "A tennis club's after-school program was overwhelmed with paper: applications arrived via email, were printed and filed, and the director had to manage from hard copies or manually enter data into spreadsheets.\n\nI used Google Apps Script to automate the transfer of application data into Google Sheets, organizing students by semester, tracking dismissal times and transportation, managing staff assignments, and storing contact details.\n\nThis saved the program director about an hour per week.",
         impact: true,
         extraContent: null,
         linkText: "Impact calculator >",
@@ -89,7 +93,9 @@ export const projects = [
         },
         likes: 0,
         follows: 0,
-        show: true
+        show: true,
+        beforeImpact: "The director managed applications manually from hard copies.",
+        afterImpact: "Data is now automatically transferred to Google Sheets."
     },
     {
         id: 4,
@@ -119,7 +125,9 @@ export const projects = [
         },
         likes: 0,
         follows: 0,
-        show: true
+        show: true,
+        beforeImpact: "Meal planning involved juggling multiple browser tabs.",
+        afterImpact: "Recipe URLs are consolidated into one ingredient list."
     },
     {
         id: 6,
@@ -149,7 +157,9 @@ export const projects = [
         },
         likes: 0,
         follows: 0,
-        show: true
+        show: true,
+        beforeImpact: "We lacked real-time insight into our spending habits.",
+        afterImpact: "Daily texts help us track expenses and reduce spending."
     },
     {
         id: 5,
@@ -209,7 +219,9 @@ export const projects = [
         },
         likes: 0,
         follows: 8,
-        show: true
+        show: true,
+        beforeImpact: "Finding important moments in footage was tedious.",
+        afterImpact: "Timestamp markers allow easy navigation to key events."
     },
     {
         id: 107,
