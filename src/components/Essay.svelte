@@ -115,6 +115,7 @@
       <header>
         <time class="essay-date" datetime={metadata.date}>{formatDate(metadata.date)}</time>
         <h2 class="small-bottom-margin">{metadata.title}</h2>
+        <p class="essay-description">{metadata.description}</p>
         <div class="metadata">
           {#if metadata.tags && metadata.tags.length > 0}
             <div class="tags">
@@ -174,10 +175,16 @@
     font-weight: 400;
   }
 
+  .essay-description {
+    font-size: 17px;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+  }
+
   .content :global(p) {
     margin-top: 0;            /* Space above paragraphs */
     margin-bottom: 1.5rem;    /* Space below paragraphs */
-    font-size: 16px;        /* Paragraph text size */
+    font-size: 15px;        /* Paragraph text size */
   }
   
   .metadata {
