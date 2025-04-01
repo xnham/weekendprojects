@@ -19,6 +19,8 @@
     extraContent?: string | null;
     extraContentLinkText?: string | null;
     linkText?: string | null;
+    beforeImpact?: string | null;
+    afterImpact?: string | null;
     
     // Updated time saved structure
     timeSaved?: {
@@ -253,7 +255,9 @@
                       <div class="slider-slide" style="min-width: {100 / getTotalSlides(project)}%">
                         <div class="completed-project-impact">
                           <div class="impact-container">
-                            <ImpactShowcase project={project} />
+                            <ImpactShowcase 
+                              {project}
+                            />
                           </div>
                         </div>
                       </div>

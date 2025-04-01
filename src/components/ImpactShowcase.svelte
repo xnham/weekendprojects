@@ -1,6 +1,9 @@
 <script lang="ts">
   import TimeImpactCalculator from './TimeImpactCalculator.svelte';
   import MoneyImpactCalculator from './MoneyImpactCalculator.svelte';
+  import InsightImpactShowcase from './InsightImpactShowcase.svelte';
+  import SanityImpactShowcase from './SanityImpactShowcase.svelte';
+  import FunImpactShowcase from './FunImpactShowcase.svelte';
   
   // Updated Project interface with correct launchDate type
   interface Project {
@@ -18,6 +21,8 @@
     extraContentLinkText?: string | null;
     linkText?: string | null;
     launchDate?: Date | null;
+    beforeImpact?: string | null;
+    afterImpact?: string | null;
     
     // Time saved structure with alternativeUses inside
     timeSaved?: {
@@ -43,6 +48,12 @@
       return 'time';
     } else if (project.value === 'money' && project.moneySaved) {
       return 'money';
+    } else if (project.value === 'insight') {
+      return 'insight';
+    } else if (project.value === 'sanity') {
+      return 'sanity';
+    } else if (project.value === 'fun') {
+      return 'fun';
     }
     return null;
   }
@@ -88,6 +99,27 @@
       weekly={project.moneySaved.weekly || 0}
       launchDate={project.launchDate || new Date('1900-01-01')}
       alternativeUses={getMoneyAlternatives()}
+    />
+  </div>
+{:else if calculatorType === 'insight'}
+  <div class="calculator-wrapper">
+    <InsightImpactShowcase 
+      beforeImpact={project.beforeImpact || "Before impact description."} 
+      afterImpact={project.afterImpact || "After impact description."}
+    />
+  </div>
+{:else if calculatorType === 'sanity'}
+  <div class="calculator-wrapper">
+    <SanityImpactShowcase 
+      beforeImpact={project.beforeImpact || "Before impact description."} 
+      afterImpact={project.afterImpact || "After impact description."}
+    />
+  </div>
+{:else if calculatorType === 'fun'}
+  <div class="calculator-wrapper">
+    <FunImpactShowcase 
+      beforeImpact={project.beforeImpact || "Before impact description."} 
+      afterImpact={project.afterImpact || "After impact description."}
     />
   </div>
 {/if}
