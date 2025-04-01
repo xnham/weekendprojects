@@ -67,23 +67,25 @@
   }
   
   function formatDate(dateString: string) {
-    // Add debugging to see what we're receiving
-    console.log('Original date string:', dateString);
+    // Simple date formatter that doesn't use the Date object at all
+    // This prevents any timezone conversions
+    const [year, month, day] = dateString.split('-');
     
-    // More robust approach: force the date to be interpreted as local timezone
-    // by adding a time component (12 noon) to avoid any date shifting
-    const [year, month, day] = dateString.split('-').map(num => parseInt(num, 10));
-    console.log('Parsed components:', year, month, day);
+    // Convert month number to name
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June', 
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
     
-    // Create date at noon to avoid timezone boundary issues
-    const date = new Date(year, month - 1, day, 12, 0, 0);
-    console.log('Created date object:', date);
+    // Parse month as integer and subtract 1 to get the correct index (months are 1-based in the string)
+    const monthIndex = parseInt(month, 10) - 1;
+    const monthName = monthNames[monthIndex];
     
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
+    // Remove leading zero from day if present
+    const dayFormatted = day.startsWith('0') ? day.substring(1) : day;
+    
+    // Return formatted date string
+    return `${monthName} ${dayFormatted}, ${year}`;
   }
   
   // This function integrates with your custom router
