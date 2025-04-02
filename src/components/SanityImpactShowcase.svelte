@@ -173,7 +173,7 @@
     text-align: left;
     font-size: 15px;
     color: var(--dark-85);
-    margin: 0 20px 1.5rem;
+    margin: 0 40px 1.5rem;
   }
 
   :global(.sanity-slide p:last-child) {
