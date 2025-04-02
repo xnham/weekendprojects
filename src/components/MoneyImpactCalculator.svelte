@@ -204,7 +204,8 @@
     padding-bottom: 20px;
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--dark-100);
+    background-color: var(--dark-2);
+    /* border: 1px solid var(--dark-100); */
   }
   
   /* Tabs styling */
@@ -219,7 +220,7 @@
   }
   
   .money-tab {
-    padding: 14px;
+    padding: 10px;
     background: none;
     border: none;
     cursor: pointer;
@@ -240,11 +241,9 @@
   /* Tab slider for smooth transition */
   .tab-slider {
     position: absolute;
-    height: calc(100% - 10px);
-    width: calc(50% - 5px);
+    height: 100%;
+    width: 50%;
     background-color: var(--purple-100);
-    top: 5px;
-    left: 5px;
     border-radius: 2px;
     transition: transform 0.3s ease;
     z-index: 1;
@@ -296,7 +295,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    transform: translateY(-10px);
+    padding: 10px 0;
   }
   
   /* Annual value styling */
