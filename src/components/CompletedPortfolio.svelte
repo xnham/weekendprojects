@@ -691,6 +691,7 @@
   .slider-arrow-button:disabled {
     opacity: 0; /* Hide completely when disabled instead of faded */
     cursor: not-allowed;
+    pointer-events: none; /* Make it completely undetectable to mouse events */
   }
 
   /* ===== SLIDER LINKS STYLING ===== */

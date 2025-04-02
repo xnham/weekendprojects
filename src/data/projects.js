@@ -178,6 +178,7 @@ export const projects = [
         tools: ["GitHub Pages", "Supabase", "Svelte", "Vite"],
         moneySaved: {
             daily: 5.5, // $5.50 saved per day ($2000/365)
+            hasCalculator: false,
             alternativeUses: [
                 "buy a high-end camera", 
                 "take a weekend trip to a nearby city",
@@ -390,9 +391,15 @@ export const projects = [
         tools: ["AI"],
         timeSaved: {
             daily: 0,
-            hasCalculator: false
+            hasCalculator: false,
+            alternativeUses: [
+                "improve interviewing skills",
+                "become more confident in social settings",
+                "learn how to navigate difficult conversations",
+                "practice cultural communication differences",
+                "develop better listening habits"
+            ]
         },
-        alternativeUses: [],
         likes: 1,
         follows: 1,
         show: true
@@ -414,9 +421,15 @@ export const projects = [
         tools: [],
         timeSaved: {
             daily: 0,
-            hasCalculator: false
+            hasCalculator: false,
+            alternativeUses: [
+                "save money on store-bought costumes",
+                "engage in creative family activities",
+                "develop crafting skills",
+                "create unique party decorations",
+                "build imaginative play items for children"
+            ]
         },
-        alternativeUses: [],
         likes: 12,
         follows: 0,
         show: false
@@ -438,9 +451,15 @@ export const projects = [
         tools: ["Mobile App"],
         timeSaved: {
             daily: 0,
-            hasCalculator: false
+            hasCalculator: false,
+            alternativeUses: [
+                "discover unique local fashion",
+                "support small businesses efficiently",
+                "reduce time spent in uninteresting stores",
+                "create a personal style profile",
+                "connect with like-minded fashion enthusiasts"
+            ]
         },
-        alternativeUses: [],
         likes: 21,
         follows: 9,
         show: true
@@ -454,6 +473,7 @@ export const projects = [
         shortDescription: "AI-curated perfect weekend activities",
         longDescription: "Every weekend, my husband and I feel the pressure to find 'good' activities for our young son. We want great ideas without spending hours scrolling through newsletters and websites. The signal-to-noise ratio of these resources can be kinda low.\n\nI'd love to have a tool that automatically scans information sources and delivers a personalized email each Friday with five curated activities that match the vibe we're looking for.",
         impact: false,
+        extraContent: null,
         linkText: "Follow for updates >",
         extraContentLinkText: null,
         launchDate: null,
@@ -461,9 +481,15 @@ export const projects = [
         tools: ["AI"],
         timeSaved: {
             daily: 0,
-            hasCalculator: false
+            hasCalculator: false,
+            alternativeUses: [
+                "enjoy more quality family time",
+                "discover hidden local gems",
+                "try activities outside your comfort zone",
+                "create memorable childhood experiences",
+                "reduce parent decision fatigue"
+            ]
         },
-        alternativeUses: [],
         likes: 35,
         follows: 22,
         show: true
@@ -485,9 +511,15 @@ export const projects = [
         tools: ["AI"],
         timeSaved: {
             daily: 0,
-            hasCalculator: false
+            hasCalculator: false,
+            alternativeUses: [
+                "maintain long-distance friendships",
+                "reconnect with old friends",
+                "discover interesting conversation starters",
+                "strengthen your social network",
+                "create amusing shared experiences"
+            ]
         },
-        alternativeUses: [],
         likes: 24,
         follows: 17,
         show: true
@@ -509,11 +541,17 @@ export const projects = [
         tools: ["AI"],
         timeSaved: {
             daily: 0,
-            hasCalculator: false
+            hasCalculator: false,
+            alternativeUses: [
+                "discover new family activities",
+                "expose children to diverse learning experiences",
+                "reduce planning stress for parents",
+                "create consistent family routines",
+                "build a personalized educational curriculum"
+            ]
         },
-        alternativeUses: [],
         likes: 13,
         follows: 11,
         show: true
-    },
+    }
 ];

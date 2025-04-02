@@ -110,6 +110,6 @@
       text-align: center;
       font-size: 15px;
       color: var(--dark-85);
-      margin: 20px;
+      margin: 0 40px 1.5rem;
     }
   </style>
