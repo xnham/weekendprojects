@@ -40,10 +40,10 @@ export const projects = [
         value: "insight",
         beneficiary: "work/business",
         shortDescription: "Custom Google Calendar integration",
-        longDescription: "The tennis instructors at a local club had to constantly call the front desk to check their lesson schedules because the club's scheduling system lacked mobile-friendly access.\n\nI made a simple web scraper to automatically post each instructor's lesson schedule and court assignments directly to their Google Calendar.",
+        longDescription: "At a local tennis club, instructors had to resort to an inconvenient method of checking their lesson schedules: they had to call the front desk several times a day. This was because the club's scheduling web app was poorly formatted for mobile viewing. The frequent calls were not only tedious for the instructors but also frustrated the front desk staff who needed to focus on serving club members.\n\nTo solve this problem, I created a web scraper that extracts lesson schedules and court assignments from the club's web app, filters them by instructor, and posts them directly to Google Calendar. This integration transforms club-level lesson schedules into a personalized, mobile-friendly calendar view. \n\nInstructors now have immediate access to their schedules anytime, anywhere. The solution not only improved instructor organization but also allowed front desk staff to refocus on member service, resolving a point of tension.",
         impact: true,
         extraContent: null,
-        linkText: "See impact >",
+        linkText: "User impact >",
         extraContentLinkText: null,
         launchDate: new Date(2024, 7, 6), // July 6, 2024
         image: "joe-calendar.gif",
@@ -62,8 +62,8 @@ export const projects = [
         likes: 0,
         follows: 0,
         show: true,
-        beforeImpact: "Instructors had to call the front desk to check schedules.",
-        afterImpact: "Schedules are now automatically posted to Google Calendar."
+        beforeImpact: "One instructor tracked his lessons primarily through memory and frequent phone calls to the front desk. With visibility limited to only the next day or two, he operated in a perpetual short-term planning cycle. This made it difficult to coordinate personal activities with his work schedule or plan effectively with others.\n\nHe had previously attempted to centralize his calendar by writing personal appointments directly onto the physical court sheet at the club, creating a makeshift master calendar. This solution was suboptimal, as he could only access the calendar when physically present at the club, leaving him disconnected from his schedule whenever he was away.",
+        afterImpact: "With his schedule now automatically synced to his phone, this instructor gained complete weekly visibility at a glance.\n\nBeyond saving time, the solution sparked an unexpected transformation in his organizational habits. He began using the calendar app comprehensively for personal appointments, family events, and even tracking his wife's schedule.\n\nWhat started as a simple work tool became a catalyst for improved time management across his entire life."
     },
     {
         id: 3,
@@ -104,10 +104,10 @@ export const projects = [
         value: "sanity",
         beneficiary: "household",
         shortDescription: "Consolidate recipe URLs into one ingredient list",
-        longDescription: "Meal planning used to mean an hour of weekly torture: juggling multiple browser tabs for recipes while searching for ingredients on FreshDirect, often adding common items like garlic multiple times.\n\nExpeditr solves this headache by automatically converting up to 10 recipe URLs into one consolidated ingredient list, organized by category.",
+        longDescription: "Meal planning was weekly torture for our family: juggling multiple browser tabs for recipes while searching for ingredients on FreshDirect, often adding common items like lemons multiple times. It was mind-numbingly tedious.\n\nExpeditr solves this by automatically converting up to 10 recipe URLs into one consolidated ingredient list, organized by category.\n\nAn LLM intelligently consolidates ingredients listed under different names (like \"scallions\" and \"spring onions\") and combines different measurement units into single, sensible quantities. It categorizes pantry items separately, helping identify ingredients we likely already have at home.",
         impact: true,
         extraContent: "",
-        linkText: "See impact >",
+        linkText: "Domino effect >",
         extraContentLinkText: "",
         launchDate: new Date(2024, 10, 10), // November 10, 2024
         image: "expeditr.gif",
@@ -126,8 +126,8 @@ export const projects = [
         likes: 0,
         follows: 0,
         show: true,
-        beforeImpact: "Meal planning involved juggling multiple browser tabs.",
-        afterImpact: "Recipe URLs are consolidated into one ingredient list."
+        beforeImpact: "Because we dreaded the complicated meal planning and grocery shopping process, we'd frequently procrastinate until ordering takeout became our only option.\n\nOur takeout portions rarely left enough leftovers for the next day's lunch, forcing us into another round of takeout orders. This takeout domino effect led to unnecessary spending and compromised our nutrition goals.",
+        afterImpact: "Meal planning has become a quick Sunday afternoon task we no longer avoid. With a streamlined process, we consistently prepare home-cooked meals with plenty of leftovers.\n\nWe've cut our food spending substantially, enjoy healthier eating habits, and appreciate better-tasting meals throughout the week. The simple removal of one planning hurdle has improved both our diet and our budget."
     },
     {
         id: 6,
@@ -136,7 +136,7 @@ export const projects = [
         value: "money",
         beneficiary: "household",
         shortDescription: "Daily text to track expenses against budget",
-        longDescription: "Despite monthly vows to spend more mindfully, our family consistently blew the budget on restaurants and impulse Amazon purchases, largely because we lacked real-time insight into our spending habits.\n\nMiss Penny fixes this by sending a daily 8 AM text showing exactly how we're tracking against our dining out and shopping budgets.\n\nSo far, the daily text messages have helped us reduce our spending by $680 a month on average.",
+        longDescription: "Despite monthly vows to spend more mindfully, our family consistently blew the budget on restaurants and impulse Amazon purchases, largely because we lacked real-time insight into our spending habits.\n\nMiss Penny fixes this by sending a daily 8 AM text showing exactly how we're tracking against our dining out and shopping budgets.\n\nSo far, the daily text messages have helped us reduce our spending by $334 a month on average. (I update this figure monthly.)",
         impact: true,
         extraContent: "",
         linkText: "Impact calculator >",
@@ -145,21 +145,21 @@ export const projects = [
         image: "miss-penny.gif",
         tools: ["GitHub Actions", "Google Apps Script", "Google Sheets", "OpenAI", "Python", "Sheet SMS", "Tiller Money"],
         moneySaved: {
-            daily: 22.36, // dollars saved per day
+            daily: 10.98, // dollars saved per day
             hasCalculator: false,
             alternativeUses: [
-                "rent a private island in Belize for a night.",
-                "commission three life-size ice sculptures.",
-                "buy two high-end smart toilets.",
-                "fly business class from NYC to Singapore and back.",
-                "rent a giant billboard in Times Square for 13 minutes."
+                "commission two life-size ice sculptures.",
+                "feed 450 people a large burrito each.",
+                "buy an original Dali print.",
+                "donate 200 board games to a community center.",
+                "rent a giant billboard in Times Square for 7 minutes."
             ]
         },
         likes: 0,
         follows: 0,
         show: true,
-        beforeImpact: "We lacked real-time insight into our spending habits.",
-        afterImpact: "Daily texts help us track expenses and reduce spending."
+        beforeImpact: "",
+        afterImpact: ""
     },
     {
         id: 5,
