@@ -1,0 +1,1 @@
+import"./index-B54rZvG4.js";const e={title:"Growth kills experience",description:"Growth messes up quality.",date:"2025-03-11",published:!1,image:null,tags:[],exceprt:null},{title:l,description:s,date:a,published:o,image:r,tags:n,exceprt:p}=e;function c(t){}export{c as default,e as metadata};
