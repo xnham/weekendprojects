@@ -24,7 +24,7 @@
       <div class="about-content">
         <p>I cofounded a SaaS company called <a href="https://www.ocamsclub.com" target="_blank" rel="noopener">Ocams</a>. It was among the early systems for automating video recording and delivery for tennis players.</p>
         
-        <p>In my interactions with clients, <a href="/ocams-observations">two patterns kept surfacing</a>: traditional software often awkwardly shoehorned itself into a person's unique workflow, and people experienced interface fatigue—the mental load of learning yet another set of menus, buttons, and layouts. These observations got me especially excited about AI's potential to help us build software that adapts to humans, not the other way around.</p>
+        <p>In my interactions with clients, I kept noticing that technology often faltered not because of any technical shortcomings but because there was no interface capable of delivering it smoothly to users with complex and diverse behaviors, creating a '<a href="/writing/the-last-mile" class="essay-card-link">last mile</a>' problem. This observation got me especially excited about AI's potential to help us build software that adapts to humans, not the other way around.</p>
       </div>
     </div>
     

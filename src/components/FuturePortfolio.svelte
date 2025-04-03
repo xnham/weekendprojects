@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { projects } from '../data/projects.js'; // Adjust path as needed
+  import { projectService } from '../services/projectService';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   
   // Define interfaces for our data structures
@@ -22,8 +22,10 @@
     likes: { [key: string]: boolean };
   }
   
-  // Filtered projects (future status and show=true)
+  // Projects state
   let displayProjects: Project[] = [];
+  let loading = true;
+  let error: string | null = null;
   
   // State for email modal
   let showEmailModal = false;
@@ -43,12 +45,25 @@
     // Load user data from localStorage
     loadUserData();
     
-    // Filter projects to display
-    displayProjects = projects.filter(project => 
-      project.status === 'future' && project.show === true
-    );
+    // Move async part to a separate function
+    async function loadProjects() {
+      try {
+        // Fetch projects from Supabase
+        displayProjects = await projectService.getFutureProjects();
+        loading = false;
+      } catch (err) {
+        console.error('Error loading projects:', err);
+        error = err instanceof Error ? err.message : 'Failed to load projects';
+        loading = false;
+      }
+    }
+    
+    // Call the async function
+    loadProjects();
+    
+    // Return empty cleanup function if needed
+    return () => {};
   });
-  
   // User data management functions
   function loadUserData() {
     const data = localStorage.getItem('nextUserData');
@@ -74,13 +89,17 @@
   
   // Handle like button click
   function handleLike(projectId: number): void {
-    const project = projects.find(p => p.id === projectId);
+    const project = displayProjects.find(p => p.id === projectId);
     
     if (project) {
       if (userData.likes[projectId.toString()]) {
         delete userData.likes[projectId.toString()];
+        // Update project likes count in UI
+        project.likes = Math.max(0, project.likes - 1);
       } else {
         userData.likes[projectId.toString()] = true;
+        // Update project likes count in UI
+        project.likes++;
       }
       userData = { ...userData };
       saveUserData();
@@ -89,7 +108,7 @@
   
   // Handle follow button click
   function handleFollow(projectId: number): void {
-    const project = projects.find(p => p.id === projectId);
+    const project = displayProjects.find(p => p.id === projectId);
     
     if (project) {
       const projectIdStr = projectId.toString();
@@ -97,11 +116,15 @@
       
       if (isFollowing) {
         userData.follows = userData.follows.filter(id => id !== projectIdStr);
+        // Update project follows count in UI
+        project.follows = Math.max(0, project.follows - 1);
         userData = { ...userData };
         saveUserData();
       } else {
         if (userData.email) {
           userData.follows = [...userData.follows, projectIdStr];
+          // Update project follows count in UI
+          project.follows++;
           saveUserData();
         } else {
           currentProjectId = projectIdStr;
@@ -120,6 +143,12 @@
       // Add project to follows
       if (!userData.follows.includes(currentProjectId)) {
         userData.follows.push(currentProjectId);
+        
+        // Update project follows count in UI
+        const project = displayProjects.find(p => p.id.toString() === currentProjectId);
+        if (project) {
+          project.follows++;
+        }
       }
       
       // Save user data
@@ -161,64 +190,70 @@
 </script>
 
 <div class="future-projects" id="projectList">
-  {#each displayProjects as project (project.id)}
-    <div class="future-project-card">
-      <div class="future-project-card-header">
-        <div class="dual-pill-label">
-          <span class="beneficiary-side">
-            {#if project.beneficiary === "personal"}
-              <FontAwesomeIcon icon={['fas', 'person']} size="sm" />
-            {:else if project.beneficiary === "household"}
-              <FontAwesomeIcon icon={['fas', 'house-chimney-window']} size="sm" />
-            {:else if project.beneficiary === "work/business"}
-              <FontAwesomeIcon icon={['fas', 'briefcase']} size="sm" />
-            {:else if project.beneficiary === "community"}
-              <FontAwesomeIcon icon={['fas', 'tree-city']} size="sm" />
-            {/if}
-            {project.beneficiary}
-          </span>
-          <span class="value-side {project.value}">↑ {project.value}</span>
+  {#if loading}
+    <div class="loading-state">Loading projects...</div>
+  {:else if error}
+    <div class="error-state">Error: {error}</div>
+  {:else}
+    {#each displayProjects as project (project.id)}
+      <div class="future-project-card">
+        <div class="future-project-card-header">
+          <div class="dual-pill-label">
+            <span class="beneficiary-side">
+              {#if project.beneficiary === "personal"}
+                <FontAwesomeIcon icon={['fas', 'person']} size="sm" />
+              {:else if project.beneficiary === "household"}
+                <FontAwesomeIcon icon={['fas', 'house-chimney-window']} size="sm" />
+              {:else if project.beneficiary === "work/business"}
+                <FontAwesomeIcon icon={['fas', 'briefcase']} size="sm" />
+              {:else if project.beneficiary === "community"}
+                <FontAwesomeIcon icon={['fas', 'tree-city']} size="sm" />
+              {/if}
+              {project.beneficiary}
+            </span>
+            <span class="value-side {project.value}">↑ {project.value}</span>
+          </div>
+        </div>
+        <h3 class="future-project-card-title">{project.title}</h3>
+        <div class="future-project-card-details">
+          {@html project.longDescription}
+        </div>
+        <div class="future-project-card-actions">
+          <div class="future-project-buttons">
+            <button 
+              class="future-project-like-button {userData.likes[project.id.toString()] ? 'future-project-liked' : ''}" 
+              on:click={() => handleLike(project.id)}
+              aria-label={userData.likes[project.id.toString()] ? 'Unlike this project' : 'Like this project'}
+            >
+              {#if userData.likes[project.id.toString()]}
+                <FontAwesomeIcon icon={['fas', 'heart']} />
+                <span>Liked</span>
+              {:else}
+                <FontAwesomeIcon icon={['far', 'heart']} />
+                <span>Like</span>
+              {/if}
+            </button>
+            <button 
+              class="future-project-follow-button {userData.follows.includes(project.id.toString()) ? 'future-project-following' : ''}" 
+              on:click={() => handleFollow(project.id)}
+              aria-label={userData.follows.includes(project.id.toString()) ? 'Unfollow this project' : 'Follow this project'}
+            >
+              {#if userData.follows.includes(project.id.toString())}
+                <FontAwesomeIcon icon={['fas', 'bell']} />
+                <span>Following</span>
+              {:else}
+                <FontAwesomeIcon icon={['far', 'bell']} />
+                <span>Follow</span>
+              {/if}
+            </button>
+          </div>
+          <div class="future-project-counters"> 
+            {formatCounters(project.likes, project.follows)}
+          </div>
         </div>
       </div>
-      <h3 class="future-project-card-title">{project.title}</h3>
-      <div class="future-project-card-details">
-        {@html project.longDescription}
-      </div>
-      <div class="future-project-card-actions">
-        <div class="future-project-buttons">
-          <button 
-            class="future-project-like-button {userData.likes[project.id.toString()] ? 'future-project-liked' : ''}" 
-            on:click={() => handleLike(project.id)}
-            aria-label={userData.likes[project.id.toString()] ? 'Unlike this project' : 'Like this project'}
-          >
-            {#if userData.likes[project.id.toString()]}
-              <FontAwesomeIcon icon={['fas', 'heart']} />
-              <span>Liked</span>
-            {:else}
-              <FontAwesomeIcon icon={['far', 'heart']} />
-              <span>Like</span>
-            {/if}
-          </button>
-          <button 
-            class="future-project-follow-button {userData.follows.includes(project.id.toString()) ? 'future-project-following' : ''}" 
-            on:click={() => handleFollow(project.id)}
-            aria-label={userData.follows.includes(project.id.toString()) ? 'Unfollow this project' : 'Follow this project'}
-          >
-            {#if userData.follows.includes(project.id.toString())}
-              <FontAwesomeIcon icon={['fas', 'bell']} />
-              <span>Following</span>
-            {:else}
-              <FontAwesomeIcon icon={['far', 'bell']} />
-              <span>Follow</span>
-            {/if}
-          </button>
-        </div>
-        <div class="future-project-counters"> 
-          {formatCounters(project.likes, project.follows)}
-        </div>
-      </div>
-    </div>
-  {/each}
+    {/each}
+  {/if}
 </div>
 
 <!-- Email Collection Modal -->
@@ -569,5 +604,21 @@
     .future-project-card {
       max-width: 90%;
     }
+  }
+  
+  /* Add styles for loading and error states */
+  .loading-state,
+  .error-state {
+    padding: 2rem;
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--dark-60);
+    width: 100%;
+    max-width: 600px;
+    margin: 40px 0;
+  }
+  
+  .error-state {
+    color: var(--dark-pink-100);
   }
 </style>
