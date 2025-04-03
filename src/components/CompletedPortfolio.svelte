@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, afterUpdate } from 'svelte';
-  import { projects } from '../data/projects.js';
+  import { projectService } from '../services/projectService';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import ImpactShowcase from './ImpactShowcase.svelte';
   
@@ -40,10 +40,58 @@
     launchDate?: Date | null;
   }
   
-  // Filter for completed projects only that are set to show, and sort by ID in descending order
-  const completedProjects = projects
-    .filter(project => project.status === 'completed' && project.show === true)
-    .sort((a, b) => b.id - a.id);
+  // State for projects
+  let completedProjects: Project[] = [];
+  let loading = true;
+  let error: string | null = null;
+  // Fetch projects from Supabase
+  onMount(() => {
+    // Move the async part into a separate function
+    async function loadProjects() {
+      try {
+        const data = await projectService.getCompletedProjects();
+        
+        // Ensure launchDate is properly converted to Date objects
+        completedProjects = data.map(project => ({
+          ...project,
+          launchDate: project.launchDate ? new Date(project.launchDate) : null
+        }));
+        
+        // Initialize current slides
+        completedProjects.forEach(project => {
+          currentSlides[project.id] = 0;
+        });
+        
+        loading = false;
+      } catch (err: any) {
+        console.error('Error loading projects:', err);
+        error = err instanceof Error ? err.message : 'Failed to load projects';
+        loading = false;
+      }
+    }
+    
+    // Call the async function
+    loadProjects();
+    
+    // Optional: Check if fonts are loaded
+    document.fonts.ready.then(() => {
+      // All fonts are loaded
+      console.log('Fonts loaded');
+      positionArrows();
+    });
+    
+    // Add window resize listener
+    const handleResize = () => {
+      positionArrows();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Return the cleanup function directly
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  });
   
   // Track current slide for each project
   let currentSlides: Record<number, number> = {};
@@ -52,7 +100,7 @@
   let touchStartX = 0;
   let touchEndX = 0;
   
-  // References for description elements and arrow buttons - properly typed now
+  // References for description elements and arrow buttons
   let descriptionElements: Record<number, HTMLElement> = {};
   let leftArrows: Record<number, HTMLElement> = {};
   let rightArrows: Record<number, HTMLElement> = {};
@@ -118,29 +166,6 @@
     positionArrows();
   });
   
-  onMount(() => {
-    completedProjects.forEach(project => {
-      currentSlides[project.id] = 0;
-    });
-    
-    // Optional: Check if fonts are loaded
-    document.fonts.ready.then(() => {
-      // All fonts are loaded
-      console.log('Fonts loaded');
-    });
-    
-    // Add window resize listener
-    const handleResize = () => {
-      positionArrows();
-    };
-    
-    window.addEventListener('resize', handleResize);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  });
-  
   // Helper function to format description with paragraphs
   function formatDescription(description: string): string {
     return description.split('\n\n').map(paragraph => `<p>${paragraph}</p>`).join('');
@@ -193,156 +218,162 @@
 </script>
 
 <div id="completed-projects" class="completed-projects">
-  {#each completedProjects as project (project.id)}
-    <div class="completed-project-card" data-project-id={project.id}>
-      <!-- Single unified header that works for both desktop and mobile -->
-      <div class="completed-project-header">
-        <div class="completed-project-header-left">
-          <div class="dual-pill-label">
-            <span class="beneficiary-side">
-              {#if project.beneficiary === "personal"}
-                <FontAwesomeIcon icon={['fas', 'person']} size="sm" />
-              {:else if project.beneficiary === "household"}
-                <FontAwesomeIcon icon={['fas', 'house-chimney-window']} size="sm" />
-              {:else if project.beneficiary === "work/business"}
-                <FontAwesomeIcon icon={['fas', 'briefcase']} size="sm" />
-              {:else if project.beneficiary === "community"}
-                <FontAwesomeIcon icon={['fas', 'tree-city']} size="sm" />
-              {/if}
-              {project.beneficiary}
-            </span>
-            <span class="value-side {project.value}">↑ {project.value}</span>
+  {#if loading}
+    <div class="loading-state">Loading projects...</div>
+  {:else if error}
+    <div class="error-state">Error: {error}</div>
+  {:else}
+    {#each completedProjects as project (project.id)}
+      <div class="completed-project-card" data-project-id={project.id}>
+        <!-- Single unified header that works for both desktop and mobile -->
+        <div class="completed-project-header">
+          <div class="completed-project-header-left">
+            <div class="dual-pill-label">
+              <span class="beneficiary-side">
+                {#if project.beneficiary === "personal"}
+                  <FontAwesomeIcon icon={['fas', 'person']} size="sm" />
+                {:else if project.beneficiary === "household"}
+                  <FontAwesomeIcon icon={['fas', 'house-chimney-window']} size="sm" />
+                {:else if project.beneficiary === "work/business"}
+                  <FontAwesomeIcon icon={['fas', 'briefcase']} size="sm" />
+                {:else if project.beneficiary === "community"}
+                  <FontAwesomeIcon icon={['fas', 'tree-city']} size="sm" />
+                {/if}
+                {project.beneficiary}
+              </span>
+              <span class="value-side {project.value}">↑ {project.value}</span>
+            </div>
+            <div class="completed-project-title">{project.title}</div>
           </div>
-          <div class="completed-project-title">{project.title}</div>
+          <div class="completed-project-id">{String(project.id).padStart(2, '0')}</div>
         </div>
-        <div class="completed-project-id">{String(project.id).padStart(2, '0')}</div>
-      </div>
-      
-      <div class="completed-project-content">
-        <div class="completed-project-left-column">
-          <!-- Containing div with relative positioning -->
-          <div class="slider-outer-container">
-            <!-- Left button positioned as direct child of outer container -->
-            <button 
-              class="slider-arrow-button slider-arrow-left outside-positioned"
-              bind:this={leftArrows[project.id]}
-              on:click={() => goBack(project.id)}
-              disabled={currentSlides[project.id] === 0}
-              aria-label="Previous slide">
-              <FontAwesomeIcon icon={['fas', 'angle-left']} />
-            </button>
-            
-            <!-- The slider wrapper without buttons -->
-            <div class="completed-project-slider-wrapper">
-              <div class="completed-project-slider">
-                <div class="slider-container"
-                     on:touchstart={handleTouchStart}
-                     on:touchmove={handleTouchMove}
-                     on:touchend={() => handleTouchEnd(project.id, project)}>
-                  
-                  <div class="slider-track" 
-                       style="width: {getTotalSlides(project) * 100}%; 
-                              transform: translateX(-{currentSlides[project.id] * (100 / getTotalSlides(project))}%);">
-                    <!-- Slide 1: Long Description -->
-                    <div class="slider-slide" style="min-width: {100 / getTotalSlides(project)}%">
-                      <div class="completed-project-description" bind:this={descriptionElements[project.id]}>
-                        {@html formatDescription(project.longDescription)}
-                      </div>
-                    </div>
+        
+        <div class="completed-project-content">
+          <div class="completed-project-left-column">
+            <!-- Containing div with relative positioning -->
+            <div class="slider-outer-container">
+              <!-- Left button positioned as direct child of outer container -->
+              <button 
+                class="slider-arrow-button slider-arrow-left outside-positioned"
+                bind:this={leftArrows[project.id]}
+                on:click={() => goBack(project.id)}
+                disabled={currentSlides[project.id] === 0}
+                aria-label="Previous slide">
+                <FontAwesomeIcon icon={['fas', 'angle-left']} />
+              </button>
+              
+              <!-- The slider wrapper without buttons -->
+              <div class="completed-project-slider-wrapper">
+                <div class="completed-project-slider">
+                  <div class="slider-container"
+                       on:touchstart={handleTouchStart}
+                       on:touchmove={handleTouchMove}
+                       on:touchend={() => handleTouchEnd(project.id, project)}>
                     
-                    <!-- Slide 2: Impact (if impact is true) -->
-                    {#if hasImpact(project)}
+                    <div class="slider-track" 
+                         style="width: {getTotalSlides(project) * 100}%; 
+                                transform: translateX(-{currentSlides[project.id] * (100 / getTotalSlides(project))}%);">
+                      <!-- Slide 1: Long Description -->
                       <div class="slider-slide" style="min-width: {100 / getTotalSlides(project)}%">
-                        <div class="completed-project-impact">
-                          <div class="impact-container">
-                            <ImpactShowcase 
-                              {project}
-                            />
-                          </div>
+                        <div class="completed-project-description" bind:this={descriptionElements[project.id]}>
+                          {@html formatDescription(project.longDescription)}
                         </div>
                       </div>
-                    {/if}
+                      
+                      <!-- Slide 2: Impact (if impact is true) -->
+                      {#if hasImpact(project)}
+                        <div class="slider-slide" style="min-width: {100 / getTotalSlides(project)}%">
+                          <div class="completed-project-impact">
+                            <div class="impact-container">
+                              <ImpactShowcase 
+                                {project}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      {/if}
+                      
+                      <!-- Slide 3: Extra Content (if available) -->
+                      {#if project.extraContent}
+                        <div class="slider-slide" style="min-width: {100 / getTotalSlides(project)}%">
+                          <div class="completed-project-extra">
+                            {@html formatDescription(project.extraContent)}
+                          </div>
+                        </div>
+                      {/if}
+                    </div>
                     
-                    <!-- Slide 3: Extra Content (if available) -->
-                    {#if project.extraContent}
-                      <div class="slider-slide" style="min-width: {100 / getTotalSlides(project)}%">
-                        <div class="completed-project-extra">
-                          {@html formatDescription(project.extraContent)}
+                    <!-- Slider controls -->
+                    {#if getTotalSlides(project) > 1}
+                      <div class="slider-controls">
+                        <div class="slider-links">
+                          <div class="slider-back" style="display: {currentSlides[project.id] === 0 ? 'none' : 'block'}">
+                            <a href="#back"
+                               class="slider-back-link" 
+                               on:click|preventDefault={() => goBack(project.id)}
+                               on:keydown={(e) => e.key === 'Enter' && goBack(project.id)}
+                               aria-label="Go to previous slide">
+                              <span class="link-arrow">&lt;</span><span class="link-text">Back</span>
+                            </a>
+                          </div>
+                          <div class="slider-forward" 
+                               style="display: {currentSlides[project.id] === (getTotalSlides(project) - 1) ? 'none' : 'block'}">
+                            <a href="#next"
+                               class="slider-link" 
+                               on:click|preventDefault={() => goForward(project.id, project)}
+                               on:keydown={(e) => e.key === 'Enter' && goForward(project.id, project)}
+                               aria-label="Go to next slide">
+                              <span class="link-text">{getLinkText(project, currentSlides[project.id]).main}</span><span class="link-arrow">{getLinkText(project, currentSlides[project.id]).arrow}</span>
+                            </a>
+                          </div>
+                        </div>
+                        
+                        <div class="slider-nav">
+                          <button class="slider-dot {currentSlides[project.id] === 0 ? 'active' : ''}" 
+                                  on:click={() => goToSlide(project.id, 0)}
+                                  aria-label="Go to slide 1"></button>
+                          {#if hasImpact(project)}
+                            <button class="slider-dot {currentSlides[project.id] === 1 ? 'active' : ''}" 
+                                    on:click={() => goToSlide(project.id, 1)}
+                                    aria-label="Go to slide 2"></button>
+                          {/if}
+                          {#if project.extraContent}
+                            <button class="slider-dot {currentSlides[project.id] === (hasImpact(project) ? 2 : 1) ? 'active' : ''}" 
+                                    on:click={() => goToSlide(project.id, hasImpact(project) ? 2 : 1)}
+                                    aria-label="Go to slide {hasImpact(project) ? 3 : 2}"></button>
+                          {/if}
                         </div>
                       </div>
                     {/if}
                   </div>
-                  
-                  <!-- Slider controls -->
-                  {#if getTotalSlides(project) > 1}
-                    <div class="slider-controls">
-                      <div class="slider-links">
-                        <div class="slider-back" style="display: {currentSlides[project.id] === 0 ? 'none' : 'block'}">
-                          <a href="#back"
-                             class="slider-back-link" 
-                             on:click|preventDefault={() => goBack(project.id)}
-                             on:keydown={(e) => e.key === 'Enter' && goBack(project.id)}
-                             aria-label="Go to previous slide">
-                            <span class="link-arrow">&lt;</span><span class="link-text">Back</span>
-                          </a>
-                        </div>
-                        <div class="slider-forward" 
-                             style="display: {currentSlides[project.id] === (getTotalSlides(project) - 1) ? 'none' : 'block'}">
-                          <a href="#next"
-                             class="slider-link" 
-                             on:click|preventDefault={() => goForward(project.id, project)}
-                             on:keydown={(e) => e.key === 'Enter' && goForward(project.id, project)}
-                             aria-label="Go to next slide">
-                            <span class="link-text">{getLinkText(project, currentSlides[project.id]).main}</span><span class="link-arrow">{getLinkText(project, currentSlides[project.id]).arrow}</span>
-                          </a>
-                        </div>
-                      </div>
-                      
-                      <div class="slider-nav">
-                        <button class="slider-dot {currentSlides[project.id] === 0 ? 'active' : ''}" 
-                                on:click={() => goToSlide(project.id, 0)}
-                                aria-label="Go to slide 1"></button>
-                        {#if hasImpact(project)}
-                          <button class="slider-dot {currentSlides[project.id] === 1 ? 'active' : ''}" 
-                                  on:click={() => goToSlide(project.id, 1)}
-                                  aria-label="Go to slide 2"></button>
-                        {/if}
-                        {#if project.extraContent}
-                          <button class="slider-dot {currentSlides[project.id] === (hasImpact(project) ? 2 : 1) ? 'active' : ''}" 
-                                  on:click={() => goToSlide(project.id, hasImpact(project) ? 2 : 1)}
-                                  aria-label="Go to slide {hasImpact(project) ? 3 : 2}"></button>
-                        {/if}
-                      </div>
-                    </div>
-                  {/if}
                 </div>
               </div>
+              
+              <!-- Right button positioned as direct child of outer container -->
+              <button 
+                class="slider-arrow-button slider-arrow-right outside-positioned"
+                bind:this={rightArrows[project.id]}
+                on:click={() => goForward(project.id, project)}
+                disabled={currentSlides[project.id] === (getTotalSlides(project) - 1)}
+                aria-label="Next slide">
+                <FontAwesomeIcon icon={['fas', 'angle-right']} />
+              </button>
             </div>
-            
-            <!-- Right button positioned as direct child of outer container -->
-            <button 
-              class="slider-arrow-button slider-arrow-right outside-positioned"
-              bind:this={rightArrows[project.id]}
-              on:click={() => goForward(project.id, project)}
-              disabled={currentSlides[project.id] === (getTotalSlides(project) - 1)}
-              aria-label="Next slide">
-              <FontAwesomeIcon icon={['fas', 'angle-right']} />
-            </button>
+          </div>
+          
+          <div class="completed-project-image-column">
+            <img src="images/{project.image}" alt={project.title}>
           </div>
         </div>
         
-        <div class="completed-project-image-column">
-          <img src="images/{project.image}" alt={project.title}>
+        <div class="completed-project-tools">
+          {#each project.tools as tool}
+            <span class="completed-project-tool">{tool}</span>
+          {/each}
         </div>
       </div>
-      
-      <div class="completed-project-tools">
-        {#each project.tools as tool}
-          <span class="completed-project-tool">{tool}</span>
-        {/each}
-      </div>
-    </div>
-  {/each}
+    {/each}
+  {/if}
 </div>
 
 <style>
@@ -875,5 +906,18 @@
     .slider-arrow-right.center-positioned {
       right: -5px; /* Keeping symmetry */
     }
+  }
+
+  /* Add styles for loading and error states */
+  .loading-state,
+  .error-state {
+    padding: 2rem;
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--dark-60);
+  }
+  
+  .error-state {
+    color: var(--dark-pink-100);
   }
 </style>
