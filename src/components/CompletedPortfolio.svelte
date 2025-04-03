@@ -50,13 +50,12 @@
     async function loadProjects() {
       try {
         const data = await projectService.getCompletedProjects();
-        
-        // Ensure launchDate is properly converted to Date objects
+        // Ensure launchDate is properly converted to Date objects and impact is boolean
         completedProjects = data.map(project => ({
           ...project,
-          launchDate: project.launchDate ? new Date(project.launchDate) : null
+          launchDate: project.launchDate ? new Date(project.launchDate) : null,
+          impact: typeof project.impact === 'string' ? project.impact === 'true' : Boolean(project.impact)
         }));
-        
         // Initialize current slides
         completedProjects.forEach(project => {
           currentSlides[project.id] = 0;
