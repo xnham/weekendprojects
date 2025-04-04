@@ -38,14 +38,73 @@
     } | null;
 
     launchDate?: Date | null;
+    likes?: number;
   }
   
   // State for projects
   let completedProjects: Project[] = [];
   let loading = true;
   let error: string | null = null;
+  
+  // Replace Set with object to match FuturePortfolio approach
+  let likedProjects: { [key: string]: boolean } = {};
+  
+  // Function to load liked projects from localStorage
+  function loadLikedProjects() {
+    const stored = localStorage.getItem('completedLikedProjects');
+    if (stored) {
+      likedProjects = JSON.parse(stored);
+    }
+  }
+  
+  // Function to save liked projects to localStorage
+  function saveLikedProjects() {
+    localStorage.setItem('completedLikedProjects', JSON.stringify(likedProjects));
+  }
+  
+  // Function to toggle like status (match FuturePortfolio approach)
+  async function toggleLike(projectId: number, event: MouseEvent) {
+    event.stopPropagation(); // Prevent event bubbling
+    
+    const projectIdStr = projectId.toString();
+    const wasLiked = likedProjects[projectIdStr];
+    
+    // Toggle the local state
+    if (wasLiked) {
+      delete likedProjects[projectIdStr];
+    } else {
+      likedProjects[projectIdStr] = true;
+    }
+    
+    // Create a new object to ensure reactivity
+    likedProjects = { ...likedProjects };
+    saveLikedProjects();
+    
+    try {
+      // Update the count in Supabase - increment if now liked, decrement if unliked
+      await projectService.updateLikeCount(projectId, !wasLiked);
+      
+      // Optionally update the local count display if you want to show it in the UI
+      const project = completedProjects.find(p => p.id === projectId);
+      if (project) {
+        project.likes = Math.max(0, project.likes + (!wasLiked ? 1 : -1));
+      }
+    } catch (err) {
+      console.error('Error updating like count:', err);
+      // Optionally revert the local state if the server update fails
+    }
+  }
+  
+  // Function to check if a project is liked (helps with reactivity)
+  function isProjectLiked(projectId: number): boolean {
+    return likedProjects[projectId.toString()] === true;
+  }
+  
   // Fetch projects from Supabase
   onMount(() => {
+    // Load liked projects from localStorage
+    loadLikedProjects();
+    
     // Move the async part into a separate function
     async function loadProjects() {
       try {
@@ -244,7 +303,20 @@
             </div>
             <div class="completed-project-title">{project.title}</div>
           </div>
-          <div class="completed-project-id">{String(project.id).padStart(2, '0')}</div>
+          <div class="completed-project-icon">
+            <button 
+              class="like-button {likedProjects[project.id.toString()] ? 'liked' : ''}"
+              on:click={(e) => toggleLike(project.id, e)}
+              aria-label={likedProjects[project.id.toString()] ? "Unlike project" : "Like project"}
+            >
+              {#if likedProjects[project.id.toString()]}
+                <FontAwesomeIcon icon={['fas', 'heart']} size="lg" />
+              {:else}
+                <FontAwesomeIcon icon={['far', 'heart']} size="lg" />
+              {/if}
+            </button>
+            {String(project.id).padStart(2, '0')}
+          </div>
         </div>
         
         <div class="completed-project-content">
@@ -441,17 +513,66 @@
     margin-bottom: 20px;
   }
 
-  .completed-project-id {
-    font-size: 14px;
+  .completed-project-icon {
+    font-size: 15px;
     font-weight: 300;
     letter-spacing: 2px;
     position: absolute;
     top: 0;
-    right: 10px;
+    right: 0px;
     display: flex;
     justify-content: flex-end;
-    align-items: flex-start;
+    align-items: center;
     box-sizing: border-box;
+    gap: 8px;
+  }
+  
+  /* Hide the project ID text but keep the container visible for the like button */
+  .completed-project-icon::after {
+    content: attr(data-project-id);
+    display: none; /* Hide the ID */
+  }
+  
+  /* Hide direct text nodes within .completed-project-icon */
+  .completed-project-icon {
+    font-size: 0; /* Hide the direct text node inside */
+  }
+
+  /* Keep normal font size for any children (like the button) */
+  .completed-project-icon * {
+    font-size: 15px; /* Reset font size for children */
+  }
+
+  .like-button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--dark-60);
+    transition: color 0.2s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    width: 30px;
+  }
+
+  .like-button:hover {
+    color: var(--dark-pink-100);
+    transform: scale(1.1);
+  }
+
+  /* Use more prominent color when active/liked */
+  .like-button.liked :global(svg) {
+    color: var(--dark-pink-100);
+    animation: heartPulse 0.3s ease-in-out;
+  }
+  
+  /* Add the heart pulse animation */
+  @keyframes heartPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
   }
 
   /* ===== PROJECT LABEL STYLES ===== */

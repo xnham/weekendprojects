@@ -68,5 +68,25 @@ export const projectService = {
     
     if (error) throw error;
     return data as Project;
+  },
+
+  async updateLikeCount(projectId: number, increment: boolean): Promise<void> {
+    // Update the like count by incrementing or decrementing
+    const { error } = await supabase.rpc('update_project_like_count', {
+      p_id: projectId,
+      increment_by: increment ? 1 : -1
+    });
+    
+    if (error) throw error;
+  },
+
+  async updateFollowCount(projectId: number, increment: boolean): Promise<void> {
+    // Update the follow count by incrementing or decrementing
+    const { error } = await supabase.rpc('update_project_follow_count', {
+      p_id: projectId,
+      increment_by: increment ? 1 : -1
+    });
+    
+    if (error) throw error;
   }
 }; 
