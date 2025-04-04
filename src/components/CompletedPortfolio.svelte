@@ -84,11 +84,16 @@
       // Update the count in Supabase - increment if now liked, decrement if unliked
       await projectService.updateLikeCount(projectId, !wasLiked);
       
-      // Optionally update the local count display if you want to show it in the UI
-      const project = completedProjects.find(p => p.id === projectId);
-      if (project) {
-        project.likes = Math.max(0, project.likes + (!wasLiked ? 1 : -1));
-      }
+      // Update the local count display and create a new array for reactivity
+      completedProjects = completedProjects.map(p => {
+        if (p.id === projectId) {
+          return {
+            ...p,
+            likes: Math.max(0, (p.likes || 0) + (!wasLiked ? 1 : -1))
+          };
+        }
+        return p;
+      });
     } catch (err) {
       console.error('Error updating like count:', err);
       // Optionally revert the local state if the server update fails
