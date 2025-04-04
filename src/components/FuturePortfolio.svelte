@@ -28,7 +28,7 @@
   let error: string | null = null;
   
   // State for email modal
-  let showEmailModal = false;
+  let showEmailModal = true;
   let currentProjectId: string = '';
   let email = '';
   let isEmailValid = false;
@@ -187,6 +187,13 @@
   function closeModal() {
     showEmailModal = false;
   }
+  
+  // Handle comment button click
+  function handleComment(projectId: number): void {
+    // Placeholder for comment functionality
+    console.log('Comment clicked for project:', projectId);
+    // TODO: Implement comment functionality
+  }
 </script>
 
 <div class="future-projects" id="projectList">
@@ -245,6 +252,14 @@
                 <FontAwesomeIcon icon={['far', 'bell']} />
                 <span>Follow</span>
               {/if}
+            </button>
+            <button 
+              class="future-project-comment-button" 
+              on:click={() => handleComment(project.id)}
+              aria-label="Comment on this project"
+            >
+              <FontAwesomeIcon icon={['far', 'comment']} />
+              <span>Comment</span>
             </button>
           </div>
           <div class="future-project-counters"> 
@@ -423,26 +438,34 @@
   }
   
   .future-project-like-button, 
-  .future-project-follow-button {
+  .future-project-follow-button,
+  .future-project-comment-button {
     display: flex;
     align-items: center;
     justify-content: left;
-    gap: 7px;
+    gap: 6px;
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
     font-size: 14px;
     background-color: var(--light-100);
+    padding-right: 24px;
   }
   
   .future-project-like-button {
-    width: 80px;
     stroke: var(--dark-100);
   }
   
   .future-project-follow-button {
-    width: 100px;
     color: var(--dark-100);
+  }
+  
+  .future-project-comment-button {
+    color: var(--dark-100);
+  }
+  
+  .future-project-buttons button:last-child {
+    padding-right: 0;
   }
   
   .future-project-liked :global(svg) {
@@ -456,7 +479,7 @@
   }
   
   .future-project-counters {
-    display: flex;
+    display: none; /* Hide the counters while keeping the element in the DOM */
     text-align: right;
     justify-content: flex-end;
     font-size: 14px;
@@ -603,6 +626,23 @@
   @media (max-width: 768px) {
     .future-project-card {
       max-width: 90%;
+    }
+  }
+  
+  /* Mobile styles */
+  @media (max-width: 576px) {   
+    .future-project-close-modal {
+      top: 16px;
+      right: 16px;
+    }
+
+    .future-project-modal-title {
+      padding: 40px 0 20px 0;
+    }
+
+    .future-project-modal-content {
+      padding: 30px 20px;
+      width: 95%;
     }
   }
   
