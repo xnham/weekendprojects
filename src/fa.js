@@ -8,9 +8,14 @@ import {
   faBriefcase,
   faTreeCity,
   faAngleLeft,
-  faAngleRight
+  faAngleRight,
+  faComment as fasComment
 } from '@fortawesome/free-solid-svg-icons';
-import { faHeart as farHeart, faBell as farBell } from '@fortawesome/free-regular-svg-icons';
+import { 
+  faHeart as farHeart, 
+  faBell as farBell,
+  faComment as farComment 
+} from '@fortawesome/free-regular-svg-icons';
 
 // Add icons to the library
 library.add(
@@ -24,5 +29,7 @@ library.add(
   faBriefcase,
   faTreeCity,
   faAngleLeft,
-  faAngleRight
+  faAngleRight,
+  fasComment,
+  farComment
 );
