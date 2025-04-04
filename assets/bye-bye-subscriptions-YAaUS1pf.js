@@ -1,0 +1,1 @@
+import"./index-C1z_UMjP.js";const e={title:"Bye bye subscriptions",description:"Bye bye subscriptions. Use Webflow as an example.",date:"2025-03-11",published:!1,image:null,tags:[],exceprt:null},{title:i,description:a,date:n,published:l,image:o,tags:p,exceprt:c}=e;function r(t){}export{r as default,e as metadata};
