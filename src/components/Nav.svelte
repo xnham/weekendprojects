@@ -75,6 +75,7 @@
       <li><a href="/next" class:active={currentPage === 'next'} on:click={closeMenu}>Next</a></li>
       <li><a href="/writing" class:active={currentPage === 'writing'} on:click={closeMenu}>Writing</a></li>
       <li><a href="/about" class:active={currentPage === 'about'} on:click={closeMenu}>About</a></li>
+      <li><a href="/contact" class:active={currentPage === 'contact'} on:click={closeMenu}>Contact</a></li>
     </ul>
   </div>
 </nav>
@@ -111,13 +112,14 @@
     list-style: none;
     display: flex;
     gap: 2.4rem;
-    padding: 5px 40px 5px 40px;
-    background-color: var(--dark-70);
+    padding: 6px 40px 6px 40px;
+    background-color: var(--dark-75);
+    transform: translateY(-10px);
   }
 
   .nav-links a {
     text-decoration: none;
-    font-weight: 400;
+    font-weight: 500;
     transition: opacity 0.2s ease;
     color: var(--pure-white-100);
     opacity: 0.8;
