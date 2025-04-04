@@ -28,7 +28,7 @@
   let error: string | null = null;
   
   // State for email modal
-  let showEmailModal = true;
+  let showEmailModal = false;
   let currentProjectId: string = '';
   let email = '';
   let isEmailValid = false;
