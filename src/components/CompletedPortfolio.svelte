@@ -548,7 +548,7 @@
     border: none;
     padding: 0;
     cursor: pointer;
-    color: var(--dark-60);
+    color: var(--dark-70);
     transition: color 0.2s ease, transform 0.2s ease;
     display: flex;
     align-items: center;
