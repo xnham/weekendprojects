@@ -86,9 +86,9 @@
         </span>
 
         <p>
-          Around 2015, I received my green card, allowing me to leave academia. After years of theoretical work, I was eager to
+          Around 2015, I received my green card, which allowed me to pursue projects outside academia. After years of theoretical work, I was eager to
           create something that delivered value directly to people.
-          Tennis happened to be my obsession at the time, and I noticed a need
+          Tennis happened to be my obsession at the time, and I observed a need
           in the tennis community that prompted me to start Ocams.
         </p>
       </div>
