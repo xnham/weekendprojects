@@ -1,3 +1,8 @@
+import emailjs from '@emailjs/browser';
+
+// Initialize EmailJS
+emailjs.init(import.meta.env.VITE_EMAILJS_PUBLIC_KEY);
+
 import { supabase } from '../lib/supabase';
 
 // Define interface for Project type
@@ -70,6 +75,39 @@ export const projectService = {
     return data as Project;
   },
 
+  async sendNotificationEmail(projectId: number, action: string): Promise<void> {
+    try {
+      // First get the current project details including counts
+      const { data: project, error } = await supabase
+        .from('projects')
+        .select('title, likes, follows')
+        .eq('id', projectId)
+        .single();
+      
+      if (error || !project) {
+        console.error('Failed to fetch project details:', error);
+        return;
+      }
+      
+      // Send email with project details
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        {
+          project_id: String(projectId),
+          project_title: project.title,
+          action: action,
+          likes_count: String(project.likes || 0),
+          follows_count: String(project.follows || 0),
+          email: "wendyham@gmail.com" // Your email address
+        }
+      );
+      console.log(`Notification email sent for ${action} on ${project.title}`);
+    } catch (error) {
+      console.error('Failed to send notification email:', error);
+    }
+  },
+
   async updateLikeCount(projectId: number, increment: boolean): Promise<void> {
     // Update the like count by incrementing or decrementing
     const { error } = await supabase.rpc('update_project_like_count', {
@@ -78,6 +116,11 @@ export const projectService = {
     });
     
     if (error) throw error;
+    
+    // Only send notification when someone likes (not unlikes)
+    if (increment) {
+      await this.sendNotificationEmail(projectId, "liked");
+    }
   },
 
   async updateFollowCount(projectId: number, increment: boolean): Promise<void> {
@@ -88,5 +131,10 @@ export const projectService = {
     });
     
     if (error) throw error;
+    
+    // Only send notification when someone follows (not unfollows)
+    if (increment) {
+      await this.sendNotificationEmail(projectId, "followed");
+    }
   }
 }; 
