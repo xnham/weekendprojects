@@ -525,7 +525,7 @@
   .completed-project-icon {
     position: absolute;
     top: 0;
-    right: 10px;
+    right: 14px;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
