@@ -451,7 +451,7 @@
 </div>
 
 <style>
-  /* ===== BASE LAYOUT STYLES ===== */
+  /* ===== LAYOUT & CONTAINER STYLES ===== */
   .completed-projects {
     display: flex;
     flex-direction: column;
@@ -480,7 +480,7 @@
     align-items: stretch; /* Make all children stretch to same height */
   }
 
-  /* ===== PROJECT HEADER STYLES ===== */
+  /* ===== HEADER STYLES ===== */
   .completed-project-header {
     display: flex;
     flex-direction: row;
@@ -516,34 +516,24 @@
     margin-bottom: 20px;
   }
 
+  /* ===== PROJECT ID & LIKE BUTTON STYLES ===== */
   .completed-project-icon {
-    font-size: 15px;
-    font-weight: 300;
-    letter-spacing: 2px;
     position: absolute;
     top: 0;
-    right: 0px;
+    right: 10px;
     display: flex;
-    justify-content: flex-end;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0;
     box-sizing: border-box;
-    gap: 8px;
-    flex-direction: column; /* Changed to column to stack like button and count */
-    align-items: flex-end; /* Right-align items */
+    font-size: 0; /* Hide the direct text node inside */
   }
   
-  /* Hide the project ID text but keep the container visible for the like button */
   .completed-project-icon::after {
     content: attr(data-project-id);
     display: none; /* Hide the ID */
   }
   
-  /* Hide direct text nodes within .completed-project-icon */
-  .completed-project-icon {
-    font-size: 0; /* Hide the direct text node inside */
-  }
-
-  /* Keep normal font size for any children (like the button) */
   .completed-project-icon * {
     font-size: 15px; /* Reset font size for children */
   }
@@ -557,9 +547,10 @@
     transition: color 0.2s ease, transform 0.2s ease;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     height: 30px;
     width: 30px;
+    margin-left: auto; /* This helps push it to the right */
   }
 
   .like-button:hover {
@@ -567,20 +558,25 @@
     transform: scale(1.1);
   }
 
-  /* Use more prominent color when active/liked */
   .like-button.liked :global(svg) {
     color: var(--dark-pink-100);
     animation: heartPulse 0.3s ease-in-out;
   }
   
-  /* Add the heart pulse animation */
+  .like-count {
+    font-size: 14px;
+    color: var(--dark-100);
+    text-align: right;
+    font-weight: 400;
+  }
+  
   @keyframes heartPulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.3); }
     100% { transform: scale(1); }
   }
 
-  /* ===== PROJECT LABEL STYLES ===== */
+  /* ===== LABEL STYLES ===== */
   .dual-pill-label {
     display: inline-flex;
     border-radius: 20px;
@@ -635,9 +631,9 @@
     color: var(--pure-white-100)
   }
 
-  /* ===== PROJECT CONTENT COLUMNS ===== */
+  /* ===== CONTENT COLUMNS STYLES ===== */
   .completed-project-left-column {
-    width: 75%; /* Take up 75% of the available space */
+    width: 75%;
     min-width: 0; /* Allow proper text wrapping */
     display: flex;
     flex-direction: column;
@@ -651,25 +647,25 @@
   }
 
   .completed-project-image-column {
-    width: 25%; /* Take up 25% of the available space */
+    width: 25%;
     max-width: 300px;
     overflow: hidden;
     align-self: flex-start;
     display: flex;
     align-items: flex-start;
     justify-content: left;
-    aspect-ratio: 1 / 1; /* Make container a perfect square */
+    aspect-ratio: 1 / 1;
   }
 
   .completed-project-image-column img {
     width: 100%;
-    height: 100%; /* Set height to 100% instead of auto */
+    height: 100%;
     display: block;
     border: 1px var(--dark-100) solid;
     object-fit: contain;
   }
 
-  /* ===== PROJECT TOOLS SECTION ===== */
+  /* ===== TOOLS SECTION STYLES ===== */
   .completed-project-tools {
     display: flex;
     flex-wrap: wrap;
@@ -688,7 +684,7 @@
     padding: 2px 16px;
   }
 
-  /* ===== SLIDER CONTAINER STRUCTURE ===== */
+  /* ===== SLIDER STRUCTURE STYLES ===== */
   .slider-outer-container {
     position: relative;
     width: 100%;
@@ -714,7 +710,6 @@
     width: 100%;
   }
 
-  /* ===== SLIDER TRACK AND SLIDES ===== */
   .slider-track {
     display: flex;
     transition: transform 0.5s ease;
@@ -731,7 +726,7 @@
     justify-content: flex-start;
   }
 
-  /* ===== SLIDER CONTROLS ===== */
+  /* ===== SLIDER CONTROLS & NAVIGATION STYLES ===== */
   .slider-controls {
     display: flex;
     flex-direction: column;
@@ -763,7 +758,6 @@
     justify-content: center;
   }
 
-  /* ===== SLIDER NAVIGATION DOTS ===== */
   .slider-dot {
     width: 8px;
     height: 8px;
@@ -779,7 +773,7 @@
     background-color: var(--dark-80);
   }
 
-  /* ===== SLIDER NAVIGATION ARROWS ===== */
+  /* ===== SLIDER ARROWS STYLES ===== */
   .slider-arrow-button {
     background-color: var(--light-100); 
     border: none;
@@ -850,7 +844,7 @@
     pointer-events: none; /* Make it completely undetectable to mouse events */
   }
 
-  /* ===== SLIDER LINKS STYLING ===== */
+  /* ===== SLIDER LINKS STYLES ===== */
   .slider-link, .slider-back-link {
     display: inline-block;
     margin-right: 15px;
@@ -870,25 +864,25 @@
     opacity: 0.8;
   }
 
-  .slider-link .link-text {
-    text-decoration: underline;
-  }
-  
-  .slider-link .link-arrow {
-    text-decoration: none;
-    margin-left: 3px; /* Add a small space between text and arrow */
-  }
-  
+  .slider-link .link-text,
   .slider-back-link .link-text {
     text-decoration: underline;
   }
   
+  .slider-link .link-arrow,
   .slider-back-link .link-arrow {
     text-decoration: none;
+  }
+  
+  .slider-link .link-arrow {
+    margin-left: 3px; /* Add a small space between text and arrow */
+  }
+  
+  .slider-back-link .link-arrow {
     margin-right: 3px; /* Add a small space between arrow and text */
   }
 
-  /* ===== IMPACT SECTION ===== */
+  /* ===== IMPACT SECTION STYLES ===== */
   .completed-project-impact {
     padding-top: 0;
     width: 100%;
@@ -911,8 +905,21 @@
     margin-bottom: 0;
   }
 
+  /* ===== STATUS INDICATOR STYLES ===== */
+  .loading-state,
+  .error-state {
+    padding: 2rem;
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--dark-60);
+  }
+  
+  .error-state {
+    color: var(--dark-pink-100);
+  }
+
   /* ===== RESPONSIVE DESIGN ===== */
-  /* ===== TABLET BREAKPOINT (max-width: 768px) ===== */
+  /* TABLET BREAKPOINT */
   @media (max-width: 768px) {
     .completed-project-card {
       margin-bottom: 80px;
@@ -942,13 +949,10 @@
     }
   }
 
-  /* ===== MOBILE BREAKPOINT (max-width: 576px) ===== */
+  /* MOBILE BREAKPOINT */
   @media (max-width: 576px) {
-
     .completed-project-card {
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 40px
+      margin-bottom: 40px;
     }
     
     .completed-project-header {
@@ -958,7 +962,6 @@
     
     .completed-project-header-left {
       width: 100%;
-      display: flex;
     }
     
     .completed-project-title {
@@ -966,29 +969,21 @@
       margin-bottom: 10px;
     }
     
-    /* Structure the content */
     .completed-project-content {
       order: 2;
-      display: flex;
       flex-direction: column;
       gap: 20px;
-      overflow: visible;
     }
     
-    /* Force the image above the content on mobile */
     .completed-project-image-column {
       width: 60%;
       order: 1;
       margin-bottom: 0;
-      align-self: flex-start; /* Left-align the image container instead of center */
+      align-self: flex-start;
     }
 
     .completed-project-image-column img {
-      width: 100%;
       min-width: unset; /* Remove the min-width that's causing the overflow */
-      height: 100%; 
-      margin: 0;
-      object-fit: contain;
     }
     
     .completed-project-left-column {
@@ -996,7 +991,6 @@
       order: 2;
     }
     
-    /* Tools come last */
     .completed-project-tools {
       padding-top: 10px;
       order: 3;
@@ -1010,7 +1004,6 @@
       margin-top: 6px;
     }
     
-    /* Slider arrow adjustments for mobile */
     .slider-arrow-button {
       width: 32px;
       height: 32px;
@@ -1025,33 +1018,11 @@
     }
     
     .slider-arrow-left.center-positioned {
-      left: -5px; /* Further reduced for mobile */
+      left: -5px;
     }
     
     .slider-arrow-right.center-positioned {
-      right: -5px; /* Keeping symmetry */
+      right: -5px;
     }
-  }
-
-  /* Add styles for loading and error states */
-  .loading-state,
-  .error-state {
-    padding: 2rem;
-    text-align: center;
-    font-size: 1.2rem;
-    color: var(--dark-60);
-  }
-  
-  .error-state {
-    color: var(--dark-pink-100);
-  }
-
-  /* Add style for the like counter */
-  .like-count {
-    font-size: 14px;
-    color: var(--dark-100);
-    text-align: right;
-    margin-top: -5px;
-    font-weight: 400;
   }
 </style>
