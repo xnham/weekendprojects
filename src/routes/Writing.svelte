@@ -59,7 +59,7 @@
     <h2 class="small-bottom-margin">Thoughts about <span class="purple">Software.</span></h2>
     
     <div class="future-project-intro">
-      <p>These essays are about how our natural behaviors, cognitive patterns, and lived experiences uncover opportunities to rethink software design to create tools that <span class="small-font">quietly</span> complement how we think and live.</p>
+      <p>How do our natural behaviors and cognitive patterns uncover opportunities to rethink software design and create tools that <span class="small-font">quietly</span> complement our lives?</p>
     </div>
     
     <Essays />

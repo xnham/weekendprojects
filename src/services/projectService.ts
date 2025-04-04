@@ -52,7 +52,8 @@ export const projectService = {
       .from('projects')
       .select('*')
       .eq('status', 'future')
-      .eq('show', true);
+      .eq('show', true)
+      .order('id', { ascending: true });
     
     if (error) throw error;
     return data as Project[];
