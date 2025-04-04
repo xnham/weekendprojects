@@ -315,6 +315,9 @@
                 <FontAwesomeIcon icon={['far', 'heart']} size="lg" />
               {/if}
             </button>
+            {#if project.likes && project.likes > 0}
+              <div class="like-count">{project.likes} {project.likes === 1 ? 'like' : 'likes'}</div>
+            {/if}
             {String(project.id).padStart(2, '0')}
           </div>
         </div>
@@ -525,6 +528,8 @@
     align-items: center;
     box-sizing: border-box;
     gap: 8px;
+    flex-direction: column; /* Changed to column to stack like button and count */
+    align-items: flex-end; /* Right-align items */
   }
   
   /* Hide the project ID text but keep the container visible for the like button */
@@ -1039,5 +1044,14 @@
   
   .error-state {
     color: var(--dark-pink-100);
+  }
+
+  /* Add style for the like counter */
+  .like-count {
+    font-size: 14px;
+    color: var(--dark-100);
+    text-align: right;
+    margin-top: -5px;
+    font-weight: 400;
   }
 </style>
