@@ -1,1 +1,0 @@
-import"./index-DX4WcTis.js";const i={title:"Vitamins vs. painkillers",description:"Vitamins vs. painkillers.",date:"2025-03-11",published:!1,image:null,tags:[],exceprt:null},{title:a,description:s,date:l,published:n,image:p,tags:r,exceprt:d}=i;function c(t){}export{c as default,i as metadata};
