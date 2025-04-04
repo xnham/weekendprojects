@@ -28,7 +28,7 @@
   let error: string | null = null;
   
   // State for email modal
-  let showEmailModal = false;
+  let showEmailModal = true;
   let currentProjectId: string = '';
   let email = '';
   let isEmailValid = false;
@@ -276,31 +276,33 @@
   <div class="future-project-modal">
     <div class="future-project-modal-content">
       <button class="future-project-close-modal" on:click={closeModal} aria-label="Close modal">&times;</button>
-      <h3 class="future-project-modal-title">Get early access to your favorite projects.</h3>
-      <div class="future-project-form-and-button">
-        <form on:submit|preventDefault={handleEmailSubmit}>
-          <div class="future-project-form-group">
-            <input 
-              type="email" 
-              bind:value={email} 
-              on:input={handleEmailInput} 
-              placeholder="Your email" 
-              required
-              aria-label="Email address"
+      <div class="future-project-modal-inner-content">
+        <h3 class="future-project-modal-title">Get early access to your favorite projects.</h3>
+        <div class="future-project-form-and-button">
+          <form on:submit|preventDefault={handleEmailSubmit}>
+            <div class="future-project-form-group">
+              <input 
+                type="email" 
+                bind:value={email} 
+                on:input={handleEmailInput} 
+                placeholder="Your email" 
+                required
+                aria-label="Email address"
+              >
+            </div>
+            <button 
+              type="submit" 
+              class="future-project-submit-button {!isEmailValid ? 'disabled' : ''}" 
+              disabled={!isEmailValid}
+              aria-label="Submit email"
             >
-          </div>
-          <button 
-            type="submit" 
-            class="future-project-submit-button {!isEmailValid ? 'disabled' : ''}" 
-            disabled={!isEmailValid}
-            aria-label="Submit email"
-          >
-            Submit
-          </button>
-        </form>
-      </div>
-      <div class="future-project-privacy-note">
-        <small>Low volume. Unsubscribe anytime.</small>
+              Submit
+            </button>
+          </form>
+        </div>
+        <div class="future-project-privacy-note">
+          <small>Low volume. Unsubscribe anytime.</small>
+        </div>
       </div>
     </div>
   </div>
@@ -318,6 +320,8 @@
     justify-content: center;
     gap: 50px;
     margin: 0;
+    width: 100%;
+    max-width: 700px;
   }
   
   /* --------------------
@@ -325,8 +329,6 @@
      -------------------- */
   .future-project-card {
     position: relative;
-    width: 100%;
-    max-width: 600px;
     height: auto;
     margin-top: 40px;
     border-left: 1px solid var(--dark-100);
@@ -350,8 +352,7 @@
   /* Card content and details */
   .future-project-card-details {
     flex-grow: 1;
-    padding-left: 20px;
-    margin-bottom: 30px;
+    padding: 0 0 30px 20px;
     color: var(--dark-85);
     white-space: pre-wrap;
     line-height: 1.6;
@@ -438,8 +439,7 @@
   }
   
   .future-project-like-button, 
-  .future-project-follow-button,
-  .future-project-comment-button {
+  .future-project-follow-button {
     display: flex;
     align-items: center;
     justify-content: left;
@@ -452,20 +452,8 @@
     padding-right: 24px;
   }
   
-  .future-project-like-button {
-    stroke: var(--dark-100);
-  }
-  
-  .future-project-follow-button {
-    color: var(--dark-100);
-  }
-  
   .future-project-comment-button {
-    color: var(--dark-100);
-  }
-  
-  .future-project-buttons button:last-child {
-    padding-right: 0;
+    display: none; /* Hide only the comment button */
   }
   
   .future-project-liked :global(svg) {
@@ -495,7 +483,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--dark-60);
+    background-color: var(--dark-70);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -504,12 +492,24 @@
   
   .future-project-modal-content {
     background-color: var(--light-100);
-    padding: 40px 80px;
+    padding: 0 80px;
     border-radius: 5px;
     max-width: 600px;
     width: 90%;
     position: relative;
     box-shadow: 0 5px 20px var(--dark-20);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 300px;
+  }
+  
+  .future-project-modal-inner-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 0 10px 0;
   }
   
   .future-project-modal-title {
@@ -517,15 +517,14 @@
     text-align: center;
     font-size: 24px;
     font-weight: 500;
-    line-height: 1.4;
-    padding: 60px 0 20px 0;
+    line-height: 1.3;
   }
   
   .future-project-close-modal {
     font-family: 'Roboto', sans-serif;
     position: absolute;
-    top: 24px;
-    right: 24px;
+    top: 16px;
+    right: 20px;
     font-size: 30px;
     font-weight: 200;
     line-height: 1;
@@ -569,7 +568,7 @@
     padding: 12px;
     border: 1px solid var(--dark-60);
     border-radius: 5px;
-    font-size: 16px;
+    font-size: 15px;
     transition: border-color 0.3s ease;
     box-sizing: border-box;
   }
@@ -608,7 +607,6 @@
     text-align: center;
     line-height: 1.4;
     color: var(--dark-80);
-    padding-bottom: 40px;
   }
   
   /* --------------------
@@ -627,22 +625,29 @@
     .future-project-card {
       max-width: 90%;
     }
+
+    .future-project-modal-content {
+      padding: 30px 70px 40px 70px;
+    }
   }
   
   /* Mobile styles */
   @media (max-width: 576px) {   
     .future-project-close-modal {
-      top: 16px;
+      top: 12px;
       right: 16px;
     }
 
     .future-project-modal-title {
-      padding: 40px 0 20px 0;
+      font-size: 22px;
     }
 
     .future-project-modal-content {
-      padding: 30px 20px;
       width: 95%;
+      padding-top: 30px;
+      padding-bottom: 50px;
+      padding-left: clamp(10px, 5vw, 40px);
+      padding-right: clamp(10px, 5vw, 40px);
     }
   }
   

@@ -9,12 +9,15 @@ import {
   faTreeCity,
   faAngleLeft,
   faAngleRight,
-  faComment as fasComment
+  faComment as fasComment,
+  faArrowUpRightFromSquare,
+  faShareFromSquare as fasShareFromSquare
 } from '@fortawesome/free-solid-svg-icons';
 import { 
   faHeart as farHeart, 
   faBell as farBell,
-  faComment as farComment 
+  faComment as farComment,
+  faShareFromSquare as farShareFromSquare
 } from '@fortawesome/free-regular-svg-icons';
 
 // Add icons to the library
@@ -31,5 +34,8 @@ library.add(
   faAngleLeft,
   faAngleRight,
   fasComment,
-  farComment
+  farComment,
+  faArrowUpRightFromSquare,
+  fasShareFromSquare,
+  farShareFromSquare
 );
