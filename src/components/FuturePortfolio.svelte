@@ -97,12 +97,8 @@
       // Toggle the local state
       if (wasLiked) {
         delete userData.likes[projectId.toString()];
-        // Update project likes count in UI
-        project.likes = Math.max(0, project.likes - 1);
       } else {
         userData.likes[projectId.toString()] = true;
-        // Update project likes count in UI
-        project.likes++;
       }
       userData = { ...userData };
       saveUserData();
@@ -110,10 +106,20 @@
       try {
         // Update the count in Supabase - increment if now liked, decrement if unliked
         await projectService.updateLikeCount(projectId, !wasLiked);
+        
+        // Create a new array to ensure reactivity
+        displayProjects = displayProjects.map(p => {
+          if (p.id === projectId) {
+            return {
+              ...p,
+              likes: Math.max(0, p.likes + (!wasLiked ? 1 : -1))
+            };
+          }
+          return p;
+        });
       } catch (err) {
         console.error('Error updating like count:', err);
         // Optionally revert the local state if the server update fails
-        // This would require more complex code to properly handle UI state reversion
       }
     }
   }
@@ -128,27 +134,45 @@
       
       if (isFollowing) {
         userData.follows = userData.follows.filter(id => id !== projectIdStr);
-        // Update project follows count in UI
-        project.follows = Math.max(0, project.follows - 1);
         userData = { ...userData };
         saveUserData();
         
         try {
           // Update the count in Supabase
           await projectService.updateFollowCount(projectId, false);
+          
+          // Create a new array to ensure reactivity
+          displayProjects = displayProjects.map(p => {
+            if (p.id === projectId) {
+              return {
+                ...p,
+                follows: Math.max(0, p.follows - 1)
+              };
+            }
+            return p;
+          });
         } catch (err) {
           console.error('Error updating follow count:', err);
         }
       } else {
         if (userData.email) {
           userData.follows = [...userData.follows, projectIdStr];
-          // Update project follows count in UI
-          project.follows++;
           saveUserData();
           
           try {
             // Update the count in Supabase
             await projectService.updateFollowCount(projectId, true);
+            
+            // Create a new array to ensure reactivity
+            displayProjects = displayProjects.map(p => {
+              if (p.id === projectId) {
+                return {
+                  ...p,
+                  follows: p.follows + 1
+                };
+              }
+              return p;
+            });
           } catch (err) {
             console.error('Error updating follow count:', err);
           }
@@ -170,11 +194,16 @@
       if (!userData.follows.includes(currentProjectId)) {
         userData.follows.push(currentProjectId);
         
-        // Update project follows count in UI
-        const project = displayProjects.find(p => p.id.toString() === currentProjectId);
-        if (project) {
-          project.follows++;
-        }
+        // Update project follows count in UI with proper reactivity
+        displayProjects = displayProjects.map(p => {
+          if (p.id.toString() === currentProjectId) {
+            return {
+              ...p,
+              follows: p.follows + 1
+            };
+          }
+          return p;
+        });
       }
       
       // Save user data
