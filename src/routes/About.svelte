@@ -63,7 +63,7 @@
       </div>
       <div class="about-content">
         <p>
-          Before Ocams, I spent many years in academia, which was largely a function of visa restrictions.
+          Before Ocams, I spent many years in academia due to visa restrictions.
         </p>
 
         <p>
