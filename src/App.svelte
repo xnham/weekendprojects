@@ -6,6 +6,7 @@
   import Next from './routes/Next.svelte';
   import Writing from './routes/Writing.svelte'
   import About from './routes/About.svelte';
+  import Contact from './routes/Contact.svelte';
   
   // State to track current page
   let currentPage = 'home';
@@ -20,6 +21,8 @@
       currentPage = 'next';
     } else if (path.startsWith('/writing')) {
       currentPage = 'writing';
+    } else if (path === '/contact') {
+      currentPage = 'contact';
     } else {
       currentPage = 'home';
     }
@@ -76,6 +79,8 @@
       <Next />
     {:else if currentPage === 'writing'}
       <Writing />
+    {:else if currentPage === 'contact'}
+      <Contact />
     {/if}
   </main>
   
