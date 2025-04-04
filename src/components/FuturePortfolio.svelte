@@ -493,7 +493,6 @@
   }
   
   .future-project-counters {
-    display: none; /* Hide the counters while keeping the element in the DOM */
     text-align: right;
     justify-content: flex-end;
     font-size: 14px;
