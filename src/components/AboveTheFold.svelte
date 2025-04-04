@@ -143,14 +143,18 @@
     }
     
     .title-part:nth-child(2) {
-      display: inline;
+      display: block;
+    }
+    
+    .rotating-text {
+      display: block;
     }
   }
   
   /* Mobile breakpoint */
   @media (max-width: 576px) {
     .title {
-      font-size: max(10vw, 26px);
+      font-size: max(12vw, 30px);
       margin-bottom: 30px;
     }
     
