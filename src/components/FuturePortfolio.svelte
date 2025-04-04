@@ -88,11 +88,14 @@
   }
   
   // Handle like button click
-  function handleLike(projectId: number): void {
+  async function handleLike(projectId: number): Promise<void> {
     const project = displayProjects.find(p => p.id === projectId);
     
     if (project) {
-      if (userData.likes[projectId.toString()]) {
+      const wasLiked = userData.likes[projectId.toString()];
+      
+      // Toggle the local state
+      if (wasLiked) {
         delete userData.likes[projectId.toString()];
         // Update project likes count in UI
         project.likes = Math.max(0, project.likes - 1);
@@ -103,11 +106,20 @@
       }
       userData = { ...userData };
       saveUserData();
+      
+      try {
+        // Update the count in Supabase - increment if now liked, decrement if unliked
+        await projectService.updateLikeCount(projectId, !wasLiked);
+      } catch (err) {
+        console.error('Error updating like count:', err);
+        // Optionally revert the local state if the server update fails
+        // This would require more complex code to properly handle UI state reversion
+      }
     }
   }
   
   // Handle follow button click
-  function handleFollow(projectId: number): void {
+  async function handleFollow(projectId: number): Promise<void> {
     const project = displayProjects.find(p => p.id === projectId);
     
     if (project) {
@@ -120,12 +132,26 @@
         project.follows = Math.max(0, project.follows - 1);
         userData = { ...userData };
         saveUserData();
+        
+        try {
+          // Update the count in Supabase
+          await projectService.updateFollowCount(projectId, false);
+        } catch (err) {
+          console.error('Error updating follow count:', err);
+        }
       } else {
         if (userData.email) {
           userData.follows = [...userData.follows, projectIdStr];
           // Update project follows count in UI
           project.follows++;
           saveUserData();
+          
+          try {
+            // Update the count in Supabase
+            await projectService.updateFollowCount(projectId, true);
+          } catch (err) {
+            console.error('Error updating follow count:', err);
+          }
         } else {
           currentProjectId = projectIdStr;
           showEmailModal = true;
