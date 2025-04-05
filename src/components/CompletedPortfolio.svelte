@@ -310,11 +310,11 @@
           </div>
           <div class="completed-project-icon">
             <button 
-              class="like-button {likedProjects[project.id.toString()] ? 'liked' : ''}"
+              class="interaction-btn like-button {isProjectLiked(project.id) ? 'btn-liked' : ''}"
               on:click={(e) => toggleLike(project.id, e)}
-              aria-label={likedProjects[project.id.toString()] ? "Unlike project" : "Like project"}
+              aria-label={isProjectLiked(project.id) ? "Unlike project" : "Like project"}
             >
-              {#if likedProjects[project.id.toString()]}
+              {#if isProjectLiked(project.id)}
                 <FontAwesomeIcon icon={['fas', 'heart']} size="lg" />
               {:else}
                 <FontAwesomeIcon icon={['far', 'heart']} size="lg" />
@@ -546,39 +546,16 @@
   .like-button {
     background: none;
     border: none;
-    padding: 0;
-    cursor: pointer;
-    color: var(--dark-70);
-    transition: color 0.2s ease, transform 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
     height: 30px;
     width: 30px;
-    margin-left: auto; /* This helps push it to the right */
+    margin-left: auto;
   }
 
-  .like-button:hover {
-    color: var(--dark-pink-100);
-    transform: scale(1.1);
-  }
-
-  .like-button.liked :global(svg) {
-    color: var(--dark-pink-100);
-    animation: heartPulse 0.3s ease-in-out;
-  }
-  
   .like-count {
-    font-size: 14px;
-    color: var(--dark-100);
+    font-size: 15px;
+    color: var(--dark-85);
     text-align: right;
     font-weight: 400;
-  }
-  
-  @keyframes heartPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.3); }
-    100% { transform: scale(1); }
   }
 
   /* ===== LABEL STYLES ===== */

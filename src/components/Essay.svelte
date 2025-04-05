@@ -197,7 +197,7 @@
           <time class="essay-date" datetime={metadata.date}>{formatDate(metadata.date)}</time>
           <div class="essay-buttons">
             <button 
-              class="essay-like-button {userData.likes && userData.likes[slug] ? 'essay-liked' : ''}" 
+              class="interaction-btn essay-like-button {userData.likes && userData.likes[slug] ? 'btn-liked' : ''}" 
               on:click={() => handleLike(slug)}
               aria-label={userData.likes && userData.likes[slug] ? 'Unlike this essay' : 'Like this essay'}
             >
@@ -210,7 +210,7 @@
               {/if}
             </button>
             <button 
-              class="essay-share-button" 
+              class="interaction-btn essay-share-button" 
               on:click={() => handleShare(slug, metadata.title)}
               aria-label="Share this essay"
             >
@@ -239,7 +239,7 @@
       <div class="essay-footer-row">
         <div class="essay-buttons">
           <button 
-            class="essay-like-button {userData.likes && userData.likes[slug] ? 'essay-liked' : ''}" 
+            class="interaction-btn essay-like-button {userData.likes && userData.likes[slug] ? 'btn-liked' : ''}" 
             on:click={() => handleLike(slug)}
             aria-label={userData.likes && userData.likes[slug] ? 'Unlike this essay' : 'Like this essay'}
           >
@@ -252,7 +252,7 @@
             {/if}
           </button>
           <button 
-            class="essay-share-button" 
+            class="interaction-btn essay-share-button" 
             on:click={() => handleShare(slug, metadata.title)}
             aria-label="Share this essay"
           >
@@ -477,34 +477,8 @@
     padding-right: 4px;
   }
   
-  .essay-like-button,
-  .essay-share-button {
-    color: var(--dark-80);
-    display: flex;
-    align-items: center;
-    justify-content: left;
-    gap: 6px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 15px;
-    background-color: transparent;
-    padding-right: 24px;
-  }
-  
-  .essay-buttons button:last-child {
-    padding-right: 0;
-  }
-  
-  .essay-liked :global(svg) {
+  .btn-liked :global(svg) {
     color: var(--dark-pink-100);
-    animation: heartPulse 0.3s ease-in-out;
-  }
-  
-  @keyframes heartPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.3); }
-    100% { transform: scale(1); }
   }
   
   /* Modal styles */

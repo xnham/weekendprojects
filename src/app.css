@@ -257,3 +257,30 @@ p a:hover {
         }
     }
 }
+
+/* ===== COMMON INTERACTION BUTTONS ===== */
+.interaction-btn {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  gap: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 15px;
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--light-100);
+  padding-right: 24px;
+  color: var(--dark-85);
+}
+
+/* Active states for interaction buttons */
+.btn-liked svg {
+  color: var(--dark-pink-100);
+  animation: heartPulse 0.3s ease-in-out;
+}
+
+.btn-following svg {
+  color: var(--dark-orange-100);
+  animation: heartPulse 0.3s ease-in-out;
+}
