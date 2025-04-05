@@ -283,7 +283,7 @@
         <div class="future-project-card-actions">
           <div class="future-project-buttons">
             <button 
-              class="future-project-like-button {userData.likes[project.id.toString()] ? 'future-project-liked' : ''}" 
+              class="interaction-btn future-project-like-button {userData.likes[project.id.toString()] ? 'btn-liked' : ''}" 
               on:click={() => handleLike(project.id)}
               aria-label={userData.likes[project.id.toString()] ? 'Unlike this project' : 'Like this project'}
             >
@@ -296,7 +296,7 @@
               {/if}
             </button>
             <button 
-              class="future-project-follow-button {userData.follows.includes(project.id.toString()) ? 'future-project-following' : ''}" 
+              class="interaction-btn future-project-follow-button {userData.follows.includes(project.id.toString()) ? 'btn-following' : ''}" 
               on:click={() => handleFollow(project.id)}
               aria-label={userData.follows.includes(project.id.toString()) ? 'Unfollow this project' : 'Follow this project'}
             >
@@ -493,32 +493,8 @@
     justify-content: column;
   }
   
-  .future-project-like-button, 
-  .future-project-follow-button {
-    display: flex;
-    align-items: center;
-    justify-content: left;
-    gap: 6px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 14px;
-    background-color: var(--light-100);
-    padding-right: 24px;
-  }
-  
   .future-project-comment-button {
     display: none; /* Hide only the comment button */
-  }
-  
-  .future-project-liked :global(svg) {
-    color: var(--dark-pink-100);
-    animation: heartPulse 0.3s ease-in-out;
-  }
-  
-  .future-project-following :global(svg) {
-    color: var(--dark-orange-100);
-    animation: heartPulse 0.3s ease-in-out;
   }
   
   .future-project-counters {

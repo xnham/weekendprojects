@@ -159,7 +159,7 @@
             <div class="essay-card-actions">
                 <div class="essay-buttons">
                     <button 
-                        class="essay-like-button {userData.likes[essay.slug] ? 'essay-liked' : ''}" 
+                        class="interaction-btn essay-like-button {userData.likes[essay.slug] ? 'btn-liked' : ''}" 
                         on:click={() => handleLike(essay.slug)}
                         aria-label={userData.likes[essay.slug] ? 'Unlike this essay' : 'Like this essay'}
                     >
@@ -172,7 +172,7 @@
                         {/if}
                     </button>
                     <button 
-                        class="essay-share-button" 
+                        class="interaction-btn essay-share-button" 
                         on:click={() => handleShare(essay.slug, essay.title)}
                         aria-label="Share this essay"
                     >
@@ -180,7 +180,7 @@
                         <span>Share</span>
                     </button>
                     <button 
-                        class="essay-follow-button {userData.follows.includes(essay.slug) ? 'essay-following' : ''}" 
+                        class="interaction-btn essay-follow-button {userData.follows.includes(essay.slug) ? 'btn-following' : ''}" 
                         on:click={() => handleFollow(essay.slug)}
                         aria-label={userData.follows.includes(essay.slug) ? 'Unfollow this essay' : 'Follow this essay'}
                     >
@@ -193,7 +193,7 @@
                         {/if}
                     </button>
                     <button 
-                        class="essay-comment-button" 
+                        class="interaction-btn essay-comment-button" 
                         on:click={() => handleComment(essay.slug)}
                         aria-label="Comment on this essay"
                     >
@@ -319,33 +319,8 @@
     
     .essay-buttons {
         display: flex;
-        justify-content: column;
-    }
-    
-    .essay-like-button,
-    .essay-share-button {
-        display: flex;
-        align-items: center;
-        justify-content: left;
-        gap: 6px;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-size: 14px;
-        background-color: var(--light-100);
-        padding-right: 24px;
-    }
-    
-    .essay-follow-button {
-        display: none; /* Hide the follow button */
-    }
-    
-    .essay-comment-button {
-        display: none; /* Hide the comment button */
-    }
-    
-    .essay-buttons button:last-child {
-        padding-right: 0;
+        gap: 16px;
+        padding-top: 8px;
     }
     
     .essay-liked :global(svg) {
