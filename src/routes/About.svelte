@@ -15,7 +15,7 @@
       <div class="about-content">
         <p>
           Having accumulated a long list of business and personal
-          micro-problems, I started using AI tools to build various pieces of '<a
+          problems, I started using AI tools to build various pieces of '<a
             href="/writing/software-for-one"
             class="essay-card-link">software for one</a
           >' to solve them.

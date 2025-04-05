@@ -179,27 +179,6 @@
                         <FontAwesomeIcon icon={['far', 'share-from-square']} />
                         <span>Share</span>
                     </button>
-                    <button 
-                        class="interaction-btn essay-follow-button {userData.follows.includes(essay.slug) ? 'btn-following' : ''}" 
-                        on:click={() => handleFollow(essay.slug)}
-                        aria-label={userData.follows.includes(essay.slug) ? 'Unfollow this essay' : 'Follow this essay'}
-                    >
-                        {#if userData.follows.includes(essay.slug)}
-                            <FontAwesomeIcon icon={['fas', 'bell']} />
-                            <span>Following</span>
-                        {:else}
-                            <FontAwesomeIcon icon={['far', 'bell']} />
-                            <span>Follow</span>
-                        {/if}
-                    </button>
-                    <button 
-                        class="interaction-btn essay-comment-button" 
-                        on:click={() => handleComment(essay.slug)}
-                        aria-label="Comment on this essay"
-                    >
-                        <FontAwesomeIcon icon={['far', 'comment']} />
-                        <span>Comment</span>
-                    </button>
                 </div>
             </div>
         </div>

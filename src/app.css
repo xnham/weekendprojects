@@ -274,6 +274,11 @@ p a:hover {
   color: var(--dark-85);
 }
 
+/* Remove padding-right from the last button in a container */
+.interaction-btn:last-child {
+  padding-right: 0;
+}
+
 /* Active states for interaction buttons */
 .btn-liked svg {
   color: var(--dark-pink-100);
