@@ -970,6 +970,7 @@
     }
     
     .completed-project-title {
+      width: 75%;
       font-size: 24px;
       margin-bottom: 10px;
     }
