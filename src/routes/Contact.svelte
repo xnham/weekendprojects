@@ -147,7 +147,7 @@
 
     .submit-button {
         width: 100%;
-        padding: 12px;
+        padding: 14px;
         background-color: var(--purple-100);
         color: white;
         border: none;
