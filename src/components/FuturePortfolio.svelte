@@ -501,7 +501,7 @@
     text-align: right;
     justify-content: flex-end;
     font-size: 14px;
-    color: var(--dark-100);
+    color: var(--dark-85);
   }
   
   /* --------------------

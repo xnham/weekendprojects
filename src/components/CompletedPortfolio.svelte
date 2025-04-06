@@ -18,6 +18,7 @@
     beneficiary: string;
     extraContent?: string | null;
     extraContentLinkText?: string | null;
+    extraContentTitle?: string | null;
     linkText?: string | null;
     beforeImpact?: string | null;
     afterImpact?: string | null;
@@ -376,6 +377,9 @@
                       {#if project.extraContent}
                         <div class="slider-slide" style="min-width: {100 / getTotalSlides(project)}%">
                           <div class="completed-project-extra">
+                            {#if project.extraContentTitle}
+                              <p class="extra-content-title">{project.extraContentTitle}</p>
+                            {/if}
                             {@html formatDescription(project.extraContent)}
                           </div>
                         </div>
@@ -879,6 +883,19 @@
     align-items: flex-start;
     justify-content: flex-start;
   }
+
+  /* ===== EXTRA SECTION STYLES ===== */
+  .extra-content-title {
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .completed-project-extra {
+    padding: 30px 40px;
+    background-color: var(--dark-2);
+    width: 100%;
+    height: 100%;
+  }
   
   /* ===== CONTENT FORMATTING ===== */
   :global(.completed-project-description p:last-child),
@@ -1006,6 +1023,13 @@
     
     .slider-arrow-right.center-positioned {
       right: -5px;
+    }
+  }
+
+  /* MOBILE BREAKPOINT */
+  @media (max-width: 576px) {
+    .extra-content-title {
+      margin-bottom: 12px;
     }
   }
 </style>

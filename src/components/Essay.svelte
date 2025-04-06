@@ -350,7 +350,7 @@
   .essay-date {
     text-transform: uppercase;
     letter-spacing: 0.08rem;
-    color: var(--dark-80);
+    color: var(--dark-85);
     font-size: 13px;
     font-weight: 400;
   }
