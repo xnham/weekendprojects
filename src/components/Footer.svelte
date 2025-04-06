@@ -4,7 +4,7 @@
 </script>
 
 <footer>
-  <p>© xnham {currentYear} | New York, NY</p>
+  <p>© Wendy Ham {currentYear}</p>
 </footer>
 
 <style>
