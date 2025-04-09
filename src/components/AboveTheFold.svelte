@@ -24,7 +24,9 @@
       setTimeout(() => {
         currentIndex = getRandomIndex(currentIndex, rotatingTexts.length);
         rotatingText = rotatingTexts[currentIndex];
-        rotatingTextElement!.style.opacity = '1';
+        if (rotatingTextElement) {
+          rotatingTextElement.style.opacity = '1';
+        }
       }, 500);
     }
   }
@@ -51,20 +53,19 @@
       <div class="column">
         <p>Building and maintaining software used to be expensive, which meant custom solutions were mainly accessible to large enterprises.</p>
         
-        <p>That has changed. Now, pretty much anyone can create production-grade software using everyday language.* It's becoming completely normal for small businesses, families, and individuals to deploy bespoke software that's precisely tailored—even adaptive—to their needs.
+        <p>That has changed. Now, pretty much anyone can create production-grade software using everyday language (a.k.a. by vibe coding). It's becoming completely normal for small businesses, families, and individuals to deploy bespoke software that's precisely tailored—even adaptive—to their needs.
         </p>
 
-        <p>Weekend Projects is my exploration of this exciting era of software long tail. In 2024, empowered by Claude, Cursor, and other AI tools, I started building various pieces of 'software for one' to squash small yet pesky problems that were bugging me and my family.</p>
+        <p>Weekend Projects is my exploration of this exciting era of software long tail. Empowered by Claude, Cursor, and other AI tools, I started building various pieces of 'software for one' to squash small yet pesky problems that were bugging me and my family.</p>
       </div>
 
       <div class="column">
-        <p>Before the advent of these powerful AI assistants, owing to my disjointed coding skills, I would've had to hire a developer or toil for months to build each piece of software, which would have been a silly use of resources.</p>
+        <p>Before these powerful AI assistants came along, owing to my disjointed coding skills, I would've had to hire a developer or toil for months to build each piece of software, which would have been a silly use of resources.</p>
 
-        <p>It's really fun to see the economic forces now enabling, maybe even favoring, hyperpersonal software creation. I'm excited to share my take on it here.</p>
+        <p>I'm curious: Have the economic forces now enabled, maybe even favored, hyperpersonal software creation? Can someone with my patchy technical background build software that's actually worth using?</p>
 
         <p>Btw, one of the things I built was a friendly voice robot called Mr. Benedict. If you have your own project in mind, how about <a href="/mr-benedict">giving it a call</a> to get some feedback?</p>
 
-        <p class="asterisk-explanation">*Known as '<a href="https://en.wikipedia.org/wiki/Vibe_coding" target=_blank>vibe coding</a>,' a term Andrej Karpathy coined in February 2025.</p>
       </div>
     </div>
   </div>
@@ -104,6 +105,7 @@
     flex: 1;
   }
   
+  /*
   .asterisk-explanation {
     border-top: 1px solid var(--dark-100);
     margin-top: 20px;
@@ -112,6 +114,7 @@
     text-align: right;
     line-height: 1.6;
   }
+  */
   
   /* Small desktop breakpoint */
   @media (max-width: 1200px) {    

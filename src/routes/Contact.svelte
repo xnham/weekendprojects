@@ -1,9 +1,12 @@
 <script lang="ts">
+    import { submitContactForm } from '../services/contactService';
+    
     // Form data
     let name = '';
     let email = '';
     let message = '';
     let submitted = false;
+    let submitting = false;
     
     // Email validation function
     function validateEmail(email: string): boolean {
@@ -17,22 +20,37 @@
     // Check if form is valid
     $: isFormValid = name.trim() !== '' && email.trim() !== '' && message.trim() !== '' && validateEmail(email);
 
-    // Form submission handler
-    function handleSubmit() {
+    // Handle both Supabase submission and email notification
+    async function handleSubmit() {
         if (!isFormValid) return;
         
-        // Here you would typically handle the form submission
-        // e.g., send data to a server
-        console.log({ name, email, message });
-        submitted = true;
+        submitting = true;
         
-        // Reset form after submission
-        setTimeout(() => {
-            name = '';
-            email = '';
-            message = '';
-            submitted = false;
-        }, 3000);
+        try {
+            // Handle both Supabase and FormSubmit in one service call
+            const result = await submitContactForm({
+                name,
+                email,
+                message
+            });
+            
+            if (result.success) {
+                submitted = true;
+                
+                // Reset form after submission
+                setTimeout(() => {
+                    name = '';
+                    email = '';
+                    message = '';
+                    submitted = false;
+                }, 3000);
+            }
+        } catch (err) {
+            console.error('Form submission error:', err);
+            // Optional: Add user-visible error message here
+        } finally {
+            submitting = false;
+        }
     }
 </script>
 
@@ -52,7 +70,7 @@
     <form class="contact-form" on:submit|preventDefault={handleSubmit}>
         {#if submitted}
             <div class="success-message">
-                <p>Thank you for your message! I'll get back to you soon.</p>
+                <p>Thank you for your getting in touch. Talk to you soon!</p>
             </div>
         {:else}
             <div class="form-group">
@@ -79,6 +97,8 @@
                 <textarea id="message" bind:value={message} rows="5" required></textarea>
             </div>
             
+            <input type="hidden" name="_subject" value="New Contact Form Submission">
+            
             <button 
                 type="submit" 
                 class="submit-button {!isFormValid ? 'disabled' : ''}" 
@@ -92,7 +112,7 @@
 
 <style>
     .contact-intro {
-        margin-bottom: 40px;
+        margin-bottom: 20px;
         width: 75%;
     }
 
@@ -114,7 +134,7 @@
 
     input, textarea {
         width: 100%;
-        background-color: var(--light-100);
+        background-color: var(--pure-white-100);
         padding: 12px;
         border: 1px solid var(--dark-60);
         border-radius: 5px;
@@ -169,10 +189,8 @@
     }
 
     .success-message {
-        background-color: #d4edda;
-        color: #155724;
+        background-color: var(--dark-5);
         padding: 15px;
-        border-radius: 4px;
         margin-bottom: 20px;
     }
 

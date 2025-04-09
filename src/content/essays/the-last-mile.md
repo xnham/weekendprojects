@@ -3,8 +3,6 @@ title: "The Last Mile"
 description: "How AI is like DoorDash."
 date: "2025-03-31"
 published: true
-image: 
-tags: []
 excerpt: "Plenty of problems are technically solved yet practically stuck, not because the machinery falters, but because no single interface can carry it across the messy terrain of human behavior."
 ---
 In logistics, the ‘last mile’ is the final leg of a delivery, the short stretch between a distribution hub and your doorstep. It’s often the most expensive and frustrating part of the journey because it’s messy. It involves traffic, unclear addresses, bad weather, the quirks of human schedules, and sometimes, scary dogs.

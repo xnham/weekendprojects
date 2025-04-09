@@ -1,8 +1,15 @@
 <script lang="ts">
   import { onMount, afterUpdate } from 'svelte';
-  import { projectService } from '../services/projectService';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import ImpactShowcase from './ImpactShowcase.svelte';
+  import { supabase } from '../lib/supabase';
+  import { 
+    toggleLike, 
+    isLiked,
+    ContentType,
+    subscribeToInteractions
+  } from '../services/interactionService';
+  import InteractionButton from './shared/InteractionButton.svelte';
   
   // Define a type for the project structure
   interface Project {
@@ -47,80 +54,42 @@
   let loading = true;
   let error: string | null = null;
   
-  // Replace Set with object to match FuturePortfolio approach
-  let likedProjects: { [key: string]: boolean } = {};
+  // Replace likedProjects with subscription
+  let projectInteractionState = { likes: {} };
   
-  // Function to load liked projects from localStorage
-  function loadLikedProjects() {
-    const stored = localStorage.getItem('completedLikedProjects');
-    if (stored) {
-      likedProjects = JSON.parse(stored);
-    }
-  }
-  
-  // Function to save liked projects to localStorage
-  function saveLikedProjects() {
-    localStorage.setItem('completedLikedProjects', JSON.stringify(likedProjects));
-  }
-  
-  // Function to toggle like status (match FuturePortfolio approach)
-  async function toggleLike(projectId: number, event: MouseEvent) {
-    event.stopPropagation(); // Prevent event bubbling
-    
-    const projectIdStr = projectId.toString();
-    const wasLiked = likedProjects[projectIdStr];
-    
-    // Toggle the local state
-    if (wasLiked) {
-      delete likedProjects[projectIdStr];
-    } else {
-      likedProjects[projectIdStr] = true;
-    }
-    
-    // Create a new object to ensure reactivity
-    likedProjects = { ...likedProjects };
-    saveLikedProjects();
-    
-    try {
-      // Update the count in Supabase - increment if now liked, decrement if unliked
-      await projectService.updateLikeCount(projectId, !wasLiked);
-      
-      // Update the local count display and create a new array for reactivity
-      completedProjects = completedProjects.map(p => {
-        if (p.id === projectId) {
-          return {
-            ...p,
-            likes: Math.max(0, (p.likes || 0) + (!wasLiked ? 1 : -1))
-          };
-        }
-        return p;
-      });
-    } catch (err) {
-      console.error('Error updating like count:', err);
-      // Optionally revert the local state if the server update fails
-    }
-  }
-  
-  // Function to check if a project is liked (helps with reactivity)
-  function isProjectLiked(projectId: number): boolean {
-    return likedProjects[projectId.toString()] === true;
-  }
+  // Add reactive derived values
+  $: projectLikedStatus = completedProjects.reduce((acc, project) => {
+    acc[project.id] = projectInteractionState?.likes[`${ContentType.PROJECT}:${project.id}`] || false;
+    return acc;
+  }, {});
   
   // Fetch projects from Supabase
   onMount(() => {
-    // Load liked projects from localStorage
-    loadLikedProjects();
+    // Subscribe to interaction changes
+    const unsubscribe = subscribeToInteractions(state => {
+      projectInteractionState = state;
+    });
     
     // Move the async part into a separate function
     async function loadProjects() {
       try {
-        const data = await projectService.getCompletedProjects();
+        // Fetch completed projects from Supabase
+        const { data, error: fetchError } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('status', 'completed')
+          .eq('show', true)
+          .order('id', { ascending: false });
+        
+        if (fetchError) throw fetchError;
+        
         // Ensure launchDate is properly converted to Date objects and impact is boolean
         completedProjects = data.map(project => ({
           ...project,
           launchDate: project.launchDate ? new Date(project.launchDate) : null,
           impact: typeof project.impact === 'string' ? project.impact === 'true' : Boolean(project.impact)
         }));
+        
         // Initialize current slides
         completedProjects.forEach(project => {
           currentSlides[project.id] = 0;
@@ -154,6 +123,7 @@
     // Return the cleanup function directly
     return () => {
       window.removeEventListener('resize', handleResize);
+      unsubscribe();
     };
   });
   
@@ -279,6 +249,35 @@
       return { main: text.replace(/\s+>$/, ''), arrow: '>' };
     }
   }
+
+  // Replace handleLikeClick with service call
+  function handleLikeClick(projectId: number) {
+    // Find the current project
+    const project = completedProjects.find(p => p.id === projectId);
+    if (!project) return;
+    
+    // Check if currently liked
+    const isCurrentlyLiked = projectInteractionState?.likes[`${ContentType.PROJECT}:${projectId}`] || false;
+    
+    // Update the local count immediately for responsive UI
+    if (project.likes !== undefined) {
+      project.likes = isCurrentlyLiked ? Math.max(0, project.likes - 1) : project.likes + 1;
+    } else if (!isCurrentlyLiked) {
+      // If likes is undefined but user is liking, start at 1
+      project.likes = 1;
+    }
+    
+    // Force Svelte to update by creating a new array reference
+    completedProjects = [...completedProjects];
+    
+    // Call the service
+    toggleLike(ContentType.PROJECT, projectId.toString());
+  }
+
+  // Replace isProjectLiked with lookup from reactive state
+  function isProjectLiked(projectId: number): boolean {
+    return projectLikedStatus[projectId] || false;
+  }
 </script>
 
 <div id="completed-projects" class="completed-projects">
@@ -310,17 +309,14 @@
             <div class="completed-project-title">{project.title}</div>
           </div>
           <div class="completed-project-icon">
-            <button 
-              class="interaction-btn like-button {isProjectLiked(project.id) ? 'btn-liked' : ''}"
-              on:click={(e) => toggleLike(project.id, e)}
-              aria-label={isProjectLiked(project.id) ? "Unlike project" : "Like project"}
-            >
-              {#if isProjectLiked(project.id)}
-                <FontAwesomeIcon icon={['fas', 'heart']} size="lg" />
-              {:else}
-                <FontAwesomeIcon icon={['far', 'heart']} size="lg" />
-              {/if}
-            </button>
+            <InteractionButton 
+              type="like"
+              active={projectLikedStatus[project.id]}
+              count={undefined}
+              showText={false}
+              iconSize="lg"
+              on:click={() => handleLikeClick(project.id)}
+            />
             {#if project.likes && project.likes > 0}
               <div class="like-count">{project.likes} {project.likes === 1 ? 'like' : 'likes'}</div>
             {/if}
@@ -532,12 +528,22 @@
     right: 14px;
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
+    align-items: flex-end;  /* This aligns children to the right */
     gap: 0;
     box-sizing: border-box;
     font-size: 0; /* Hide the direct text node inside */
   }
   
+  /* Add these styles to ensure the button is properly aligned */
+  :global(.completed-project-icon .interaction-btn) {
+    padding: 0;
+    background: transparent;
+    margin-left: auto; /* This pushes the button to the right */
+    width: fit-content;
+    display: flex;
+    justify-content: flex-end;
+  }
+
   .completed-project-icon::after {
     content: attr(data-project-id);
     display: none; /* Hide the ID */

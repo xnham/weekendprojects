@@ -11,7 +11,8 @@ import {
   faAngleRight,
   faComment as fasComment,
   faArrowUpRightFromSquare,
-  faShareFromSquare as fasShareFromSquare
+  faShareFromSquare as fasShareFromSquare,
+  faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
 import { 
   faHeart as farHeart, 
@@ -37,5 +38,6 @@ library.add(
   farComment,
   faArrowUpRightFromSquare,
   fasShareFromSquare,
-  farShareFromSquare
+  farShareFromSquare,
+  faInfoCircle
 );

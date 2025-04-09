@@ -1,138 +1,151 @@
 <script lang="ts">
-    import { getAllEssays } from '../utils/essays';
-    import { onMount } from 'svelte';
-    import type { EssayMetadata } from '../utils/essays';
-    import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-    import { fade } from 'svelte/transition';
-    
+    import { getAllEssays } from "../utils/essays";
+    import { onMount } from "svelte";
+    import type { EssayMetadata } from "../utils/essays";
+    import { FontAwesomeIcon } from "@fortawesome/svelte-fontawesome";
+    import { fade } from "svelte/transition";
+    import {
+        toggleLike,
+        recordShare,
+        recordView,
+        isLiked as checkIfLiked,
+        subscribeToInteractions,
+        getInteractionState,
+        ContentType,
+    } from "../services/interactionService";
+    import InteractionButton from "../components/shared/InteractionButton.svelte";
+
     let essays: EssayMetadata[] = [];
-    let userData = {
-        email: '',
-        follows: [] as string[],
-        likes: {} as {[key: string]: boolean}
-    };
-    
-    // Modal state
-    let showShareModal = false;
-    let copySuccess = false;
-    let currentShareUrl = '';
-    let modalTimeout: ReturnType<typeof setTimeout>;
-    
+    let essayInteractionState = getInteractionState();
+
+    // Replace modal state with copy feedback state
+    let copyFeedback = "";
+    let copyFeedbackEssayId = "";
+    let feedbackTimeout: ReturnType<typeof setTimeout>;
+
+    // Replace essayLikes with reactive derived values
+    $: essayLikedStatus = essays.reduce((acc, essay) => {
+        acc[essay.id] = essayInteractionState?.likes[`${ContentType.ESSAY}:${essay.id}`] || false;
+        return acc;
+    }, {});
+
     onMount(() => {
-        loadUserData();
-        
         // Load essays
-        getAllEssays().then(result => {
+        getAllEssays().then((result) => {
             essays = result;
         });
-        
+
+        // Subscribe to interaction state changes
+        const unsubscribe = subscribeToInteractions((state) => {
+            essayInteractionState = state;
+        });
+
         // Add global ESC key handler for modal
         const handleKeydown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && showShareModal) {
-                closeModal();
+            if (e.key === "Escape") {
+                copyFeedback = "";
+                copyFeedbackEssayId = "";
             }
         };
-        
-        window.addEventListener('keydown', handleKeydown);
-        
+
+        window.addEventListener("keydown", handleKeydown);
+
         return () => {
-            window.removeEventListener('keydown', handleKeydown);
-            if (modalTimeout) clearTimeout(modalTimeout);
+            unsubscribe();
+            window.removeEventListener("keydown", handleKeydown);
+            if (feedbackTimeout) clearTimeout(feedbackTimeout);
         };
     });
-    
-    function loadUserData() {
-        const data = localStorage.getItem('essayUserData');
-        if (data) {
-            userData = JSON.parse(data);
-        }
+
+    function handleLikeToggle(essayId: string) {
+        toggleLike(ContentType.ESSAY, essayId);
     }
-    
-    function saveUserData() {
-        localStorage.setItem('essayUserData', JSON.stringify(userData));
+
+    function checkEssayLiked(slug: string): boolean {
+        return !!essayLikedStatus[slug];
     }
-    
-    function handleLike(slug: string): void {
-        if (userData.likes[slug]) {
-            delete userData.likes[slug];
-        } else {
-            userData.likes[slug] = true;
-        }
-        userData = { ...userData };
-        saveUserData();
-    }
-    
-    function handleFollow(slug: string): void {
-        const isFollowing = userData.follows.includes(slug);
-        
-        if (isFollowing) {
-            userData.follows = userData.follows.filter(id => id !== slug);
-        } else {
-            userData.follows = [...userData.follows, slug];
-        }
-        
-        userData = { ...userData };
-        saveUserData();
-    }
-    
-    function handleComment(slug: string): void {
-        console.log('Comment clicked for essay:', slug);
-        // TODO: Implement comment functionality
-    }
-    
-    function handleShare(slug: string, title: string): void {
-        const url = window.location.origin + '/writing/' + slug;
-        currentShareUrl = url;
-        showShareModal = true;
-        
-        // Auto-hide modal after 3 seconds if copy was successful
-        if (modalTimeout) {
-            clearTimeout(modalTimeout);
-        }
-    }
-    
-    function copyLink() {
-        navigator.clipboard.writeText(currentShareUrl)
-            .then(() => {
-                copySuccess = true;
-                modalTimeout = setTimeout(() => {
-                    showShareModal = false;
-                    copySuccess = false;
-                }, 3000);
-            })
-            .catch(() => {
-                copySuccess = false;
-            });
-    }
-    
-    function closeModal() {
-        showShareModal = false;
-        copySuccess = false;
-        if (modalTimeout) {
-            clearTimeout(modalTimeout);
-        }
-    }
-    
+
     function formatDate(dateString: string) {
         // Simple date formatter that doesn't use the Date object at all
         // This prevents any timezone conversions
-        const [year, month, day] = dateString.split('-');
-        
+        const [year, month, day] = dateString.split("-");
+
         // Convert month number to name
         const monthNames = [
-          'January', 'February', 'March', 'April', 'May', 'June', 
-          'July', 'August', 'September', 'October', 'November', 'December'
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
         ];
-        
+
         // Parse month as integer and subtract 1 to get the correct index (months are 1-based in the string)
         const monthIndex = parseInt(month, 10) - 1;
         const monthName = monthNames[monthIndex];
-        
+
         // Remove leading zero from day if present
-        const dayFormatted = day.startsWith('0') ? day.substring(1) : day;
-        
+        const dayFormatted = day.startsWith("0") ? day.substring(1) : day;
+
         // Return formatted date string
         return `${monthName} ${dayFormatted}, ${year}`;
+    }
+
+    function getEssayUrl(slug: string): string {
+        return `${window.location.origin}/writing/${slug}`;
+    }
+
+    function handleShare(event: MouseEvent, essay: EssayMetadata): void {
+        // Prevent the click from bubbling up to the card and navigating
+        event.preventDefault();
+        event.stopPropagation();
+        
+        const url = `${window.location.origin}/writing/${essay.slug}`;
+        
+        // Add console logs for debugging
+        console.log("Sharing essay:", essay.id);
+        
+        // Copy to clipboard directly
+        navigator.clipboard.writeText(url)
+            .then(() => {
+                console.log("Copy successful, setting feedback");
+                
+                // Clear any existing timeout first
+                if (feedbackTimeout) clearTimeout(feedbackTimeout);
+                
+                // Update state variables - make sure to use Svelte's reactive assignments
+                copyFeedbackEssayId = essay.id;
+                copyFeedback = "Link copied!";
+                
+                // Record the share in Supabase
+                recordShare(ContentType.ESSAY, essay.id);
+                
+                // Clear feedback after delay
+                feedbackTimeout = setTimeout(() => {
+                    console.log("Clearing feedback");
+                    copyFeedback = "";
+                    copyFeedbackEssayId = "";
+                }, 3000); // Extended to 3 seconds for testing
+            })
+            .catch(err => {
+                console.error("Failed to copy: ", err);
+                // Clear any existing timeout first
+                if (feedbackTimeout) clearTimeout(feedbackTimeout);
+                
+                copyFeedbackEssayId = essay.id;
+                copyFeedback = "Copy failed";
+                
+                feedbackTimeout = setTimeout(() => {
+                    copyFeedback = "";
+                    copyFeedbackEssayId = "";
+                }, 3000);
+            });
     }
 </script>
 
@@ -140,9 +153,6 @@
     {#each essays as essay}
         <div class="essay-card">
             <a href="/writing/{essay.slug}" class="essay-card-link">
-                {#if essay.image}
-                    <img src={essay.image} alt={essay.title} class="essay-image" />
-                {/if}
                 <div class="essay-content">
                     <p class="essay-date">{formatDate(essay.date)}</p>
                     <h3 class="essay-title">{essay.title}</h3>
@@ -153,91 +163,71 @@
                             {essay.description}
                         {/if}
                     </p>
-                    <span class="read-more"><span class="read-more-text">Read more</span> &gt</span>
+                    <span class="read-more"
+                        ><span class="read-more-text">Read more</span> &gt</span
+                    >
                 </div>
             </a>
-            <div class="essay-card-actions">
-                <div class="essay-buttons">
-                    <button 
-                        class="interaction-btn essay-like-button {userData.likes[essay.slug] ? 'btn-liked' : ''}" 
-                        on:click={() => handleLike(essay.slug)}
-                        aria-label={userData.likes[essay.slug] ? 'Unlike this essay' : 'Like this essay'}
-                    >
-                        {#if userData.likes[essay.slug]}
-                            <FontAwesomeIcon icon={['fas', 'heart']} />
-                            <span>Liked</span>
-                        {:else}
-                            <FontAwesomeIcon icon={['far', 'heart']} />
-                            <span>Like</span>
-                        {/if}
-                    </button>
-                    <button 
-                        class="interaction-btn essay-share-button" 
-                        on:click={() => handleShare(essay.slug, essay.title)}
-                        aria-label="Share this essay"
-                    >
-                        <FontAwesomeIcon icon={['far', 'share-from-square']} />
-                        <span>Share</span>
-                    </button>
+            <div class="essay-interaction-container">
+                <InteractionButton 
+                    type="like"
+                    active={essayLikedStatus[essay.id]}
+                    count={undefined}
+                    on:click={() => handleLikeToggle(essay.id)}
+                />
+
+                <div class="share-button-container">
+                    <InteractionButton 
+                        type="share"
+                        active={false}
+                        count={undefined}
+                        on:click={(event) => handleShare(event, essay)}
+                    />
+                    
+                    {#if copyFeedback && copyFeedbackEssayId === essay.id}
+                        <div class="copy-feedback" transition:fade={{ duration: 150 }}>
+                            {copyFeedback}
+                        </div>
+                    {/if}
                 </div>
             </div>
         </div>
     {/each}
 </div>
 
-<!-- Share Link Modal -->
-{#if showShareModal}
-<div 
-    class="modal-overlay" 
-    role="presentation"
-    transition:fade={{ duration: 200 }}
->
-    <!-- Use a semantic dialog element for the modal -->
-    <div 
-        class="modal-content" 
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="share-modal-title"
-        tabindex="-1"
-        transition:fade={{ duration: 300, delay: 100 }}
-    >
-        <button class="modal-close" on:click={closeModal} aria-label="Close modal">×</button>
-        <div class="modal-header">
-            <h3 class="share-modal-title">Share this essay</h3>
-        </div>
-        <div class="modal-body">
-            <div class="share-link-container">
-                <input type="text" readonly value={currentShareUrl} class="share-link-input" />
-                <button class="copy-button" on:click={copyLink} disabled={copySuccess}>
-                    {copySuccess ? 'Copied!' : 'Copy'}
-                </button>
-            </div>
-            {#if copySuccess}
-            <div class="copy-success">Link copied to clipboard!</div>
-            {/if}
-        </div>
-    </div>
-    <!-- Invisible close button that covers the overlay for click-to-close functionality -->
-    <button 
-        class="overlay-close-button" 
-        on:click={closeModal} 
-        aria-label="Close modal"
-    ></button>
-</div>
-{/if}
-
 <style>
+    /* Main layout */
     .essays {
-        display: flex;   
+        display: flex;
         flex-direction: column;
         gap: 60px;
-        width: 100%;
-        max-width: 700px;
+        width: 75%;
     }
-    
+
+    /* Essay card styles */
     .essay-card {
-        overflow: hidden;
+        overflow: visible;
         border-left: 1px solid var(--dark-100);
+    }
+
+    .essay-card-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+    }
+
+    .essay-content {
+        padding: 0 0 20px 20px;
+        border-bottom: 1px solid var(--dark-100);
+    }
+
+    .essay-interaction-container {
+        display: flex;
+        flex-direction: row;
+        padding: 10px 0 10px 20px;
+        align-items: flex-start;
+        position: relative;
     }
 
     .essay-date {
@@ -245,32 +235,15 @@
         letter-spacing: 0.1rem;
         color: var(--dark-70);
         font-size: 12px;
-        font-weight: 500;
+        font-weight: 400;
     }
 
     .essay-title {
-        font-family: 'DM Serif Text', serif;
+        font-family: "DM Serif Text", serif;
         font-size: 24px;
         color: var(--dark-100);
     }
-    
-    .essay-image {
-        width: 100%;
-        height: 180px;
-        object-fit: cover;
-    }
-    
-    .essay-content {
-        padding: 0 0 30px 20px;
-    }
-    
-    .essay-card-link {
-        display: block;
-        text-decoration: none;
-        color: inherit;
-        cursor: pointer;
-    }
-    
+
     .read-more {
         display: inline-block;
         margin-top: 10px;
@@ -287,192 +260,60 @@
         opacity: 0.8;
     }
 
-    .essay-card-actions {
-        display: flex;
-        justify-content: space-between;
-        gap: 0px;
-        padding: 14px 0 14px 20px;
-        margin-top: auto;
-        border-top: 1px var(--dark-100) solid;
-    }
-    
-    .essay-buttons {
-        display: flex;
-        gap: 16px;
-        padding-top: 8px;
-    }
-    
-    .essay-liked :global(svg) {
-        color: var(--dark-pink-100);
-        animation: heartPulse 0.3s ease-in-out;
-    }
-    
-    .essay-following :global(svg) {
-        color: var(--dark-orange-100);
-        animation: heartPulse 0.3s ease-in-out;
-    }
-    
+    /* Animations */
     @keyframes heartPulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.3); }
-        100% { transform: scale(1); }
-    }
-
-    /* Modal styles */
-    .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: var(--dark-70);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.3);
+        }
+        100% {
+            transform: scale(1);
+        }
     }
     
-    /* Invisible button that covers the entire overlay for accessibility */
-    .overlay-close-button {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        z-index: 1001;
-    }
-    
-    .modal-content {
-        background-color: var(--light-100);
-        padding: 40px 80px 30px 80px;
-        border-radius: 5px;
-        max-width: 600px;
-        width: 90%;
+    .share-button-container {
         position: relative;
-        box-shadow: 0 5px 20px var(--dark-20);
-        z-index: 1002; /* Higher than the overlay close button */
+        display: inline-block;
     }
-    
-    .modal-header {
-        display: flex;
-        justify-content: center;
-        padding: 0;
-        border-bottom: none;
-    }
-    
-    .share-modal-title {
-        font-family: 'DM Serif Text', serif;
-        text-align: center;
-        font-size: 24px;
-        font-weight: 500;
-        line-height: 1.3;
-    }
-    
-    .modal-close {
-        font-family: 'Roboto', sans-serif;
+
+    /* Copy feedback styling */
+    .copy-feedback {
         position: absolute;
-        top: 16px;
-        right: 20px;
-        font-size: 30px;
-        font-weight: 200;
-        line-height: 1;
-        color: var(--dark-60);
-        cursor: pointer;
-        background: none;
-        border: none;
-        padding: 0;
-        width: 30px;
-        height: 30px;
-    }
-    
-    .modal-close:hover {
-        color: var(--dark-90);
-        transform: scale(1.2);
-        transition: transform 0.3s ease;
-    }
-    
-    .modal-body {
-        padding: 10px 0 20px 0;
-    }
-    
-    .share-link-container {
-        display: flex;
-        width: 100%;
-    }
-    
-    .share-link-input {
-        flex: 1;
-        background-color: var(--light-100);
-        color: var(--dark-75);
-        padding: 12px;
-        border: 1px solid var(--dark-60);
-        border-radius: 5px 0 0 5px;
-        font-size: 15px;
-        transition: border-color 0.3s ease;
-        box-sizing: border-box;
-        min-width: 0;
-    }
-    
-    .share-link-input:focus {
-        outline: none;
-        border-color: var(--dark-80);
-        box-shadow: 0 0 0 1px var(--purple-30);
-    }
-    
-    .copy-button {
-        background-color: var(--purple-100);
-        color: white;
-        border: none;
-        padding: 12px 15px;
-        border-radius: 0 5px 5px 0;
-        cursor: pointer;
-        font-weight: 500;
-        font-size: 16px;
-        transition: background-color 0.3s;
+        bottom: -35px;
+        left: 0;
         white-space: nowrap;
-        flex-shrink: 0;
-    }
-    
-    .copy-button:hover {
-        background-color: var(--dark-purple-100);
-    }
-    
-    .copy-button:disabled {
-        background-color: var(--purple-100);
-        opacity: 0.7;
-        cursor: not-allowed;
-    }
-    
-    .copy-success {
-        color: var(--dark-green-100);
         font-size: 14px;
-        margin-top: 15px;
-        text-align: center;
-    }
-    
-    /* Media queries */
-    @media (max-width: 576px) {   
-        .modal-close {
-            top: 12px;
-            right: 16px;
-        }
-
-        .share-modal-title {
-            padding-top: 20px;
-            font-size: 22px;
-        }
-
-        .modal-content {
-            padding: 50px clamp(10px, 5vw, 40px);
-            width: 95%;
-        }
-
-        .share-link-input {
-            font-size: 14px;
-        }
+        color: var(--dark-80);
+        background-color: #F5F6F6;
+        padding: 8px 12px;
+        border-radius: 4px;
+        z-index: 1000;
+        box-shadow:
+            inset 0 1px 1px rgba(0, 0, 0, 0.05),
+            0 1px 2px rgba(0, 0, 0, 0.08),
+            0 2px 4px rgba(0, 0, 0, 0.08),
+            0 4px 6px rgba(0, 0, 0, 0.08),
+            0 6px 8px rgba(0, 0, 0, 0.08);
+        pointer-events: none;
     }
 
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+        .essays {
+            width: 100%;
+        }
+    }
 </style>
