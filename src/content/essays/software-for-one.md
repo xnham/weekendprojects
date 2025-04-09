@@ -3,8 +3,6 @@ title: "Software for One"
 description: "Why settle for software built for an Ideal Customer Profile?"
 date: "2025-03-08"
 published: true
-image:
-tags: []
 excerpt: "For decades, startups obsessed over product-market fit. But what happens when “market” no longer matters, when software built for one is not only possible, but preferable?"
 ---
 For decades, software followed a predictable pattern. First, identify a large market with a common problem. Next, build a solution that works well enough for most people in that market. Finally, scale it to as many users as possible to justify the enormous investment required to build it in the first place. This approach made perfect sense in a world where software development was prohibitively expensive, requiring teams of skilled programmers, project managers, designers, and testers.

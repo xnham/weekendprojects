@@ -1,7 +1,16 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { projectService } from '../services/projectService';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
+  import { supabase } from '../lib/supabase';
+  import { 
+    toggleLike, 
+    recordFollow, 
+    isLiked, 
+    isFollowing,
+    ContentType,
+    subscribeToInteractions,
+  } from '../services/interactionService';
+  import InteractionButton from '../components/shared/InteractionButton.svelte';
   
   // Define interfaces for our data structures
   interface Project {
@@ -22,6 +31,13 @@
     likes: { [key: string]: boolean };
   }
   
+  // Add new interface for notifications
+  interface Notification {
+    projectId: number;
+    message: string;
+    timer: ReturnType<typeof setTimeout> | null;
+  }
+  
   // Projects state
   let displayProjects: Project[] = [];
   let loading = true;
@@ -33,12 +49,29 @@
   let email = '';
   let isEmailValid = false;
   
+  // Add notification state
+  let activeNotifications: Record<number, Notification> = {};
+  
   // User data state
   let userData: UserData = { 
     email: '', 
     follows: [], 
     likes: {} 
   };
+  
+  // Replace userData and local state management
+  let projectInteractionState = { likes: {}, follows: {} };
+  
+  // Add reactive derived values
+  $: projectLikedStatus = displayProjects.reduce((acc, project) => {
+    acc[project.id] = projectInteractionState?.likes[`${ContentType.PROJECT}:${project.id}`] || false;
+    return acc;
+  }, {});
+  
+  $: projectFollowStatus = displayProjects.reduce((acc, project) => {
+    acc[project.id] = projectInteractionState?.follows[`${ContentType.PROJECT}:${project.id}`] || false;
+    return acc;
+  }, {});
   
   // Initialize component
   onMount(() => {
@@ -48,8 +81,23 @@
     // Move async part to a separate function
     async function loadProjects() {
       try {
-        // Fetch projects from Supabase
-        displayProjects = await projectService.getFutureProjects();
+        console.log("Starting to fetch projects from Supabase...");
+        // Fetch future projects from Supabase with corrected query parameters
+        const { data, error: fetchError } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('status', 'future') // Changed: use 'future' status instead of array
+          .eq('show', true)
+          .order('id', { ascending: true }); // Changed: ascending order
+        
+        console.log("Supabase query result:", { data, fetchError });
+        
+        if (fetchError) throw fetchError;
+        
+        // Transform the data as needed
+        displayProjects = data || [];
+        console.log("Projects loaded:", displayProjects.length);
+        
         loading = false;
       } catch (err) {
         console.error('Error loading projects:', err);
@@ -61,8 +109,15 @@
     // Call the async function
     loadProjects();
     
-    // Return empty cleanup function if needed
-    return () => {};
+    // Subscribe to interaction changes
+    const unsubscribe = subscribeToInteractions(state => {
+      projectInteractionState = state;
+    });
+    
+    // Return cleanup function
+    return () => {
+      unsubscribe();
+    };
   });
   // User data management functions
   function loadUserData() {
@@ -88,125 +143,95 @@
   }
   
   // Handle like button click
-  async function handleLike(projectId: number): Promise<void> {
-    const project = displayProjects.find(p => p.id === projectId);
+  function handleLike(projectId: number) {
+    // Get the current status before toggling
+    const currentlyLiked = projectLikedStatus[projectId];
     
-    if (project) {
-      const wasLiked = userData.likes[projectId.toString()];
-      
-      // Toggle the local state
-      if (wasLiked) {
-        delete userData.likes[projectId.toString()];
-      } else {
-        userData.likes[projectId.toString()] = true;
+    // Toggle the like status
+    toggleLike(ContentType.PROJECT, projectId.toString());
+    
+    // Update project likes count in UI with proper reactivity
+    displayProjects = displayProjects.map(p => {
+      if (p.id === projectId) {
+        return {
+          ...p,
+          likes: p.likes + (currentlyLiked ? -1 : 1) // Decrement if unliking, increment if liking
+        };
       }
-      userData = { ...userData };
-      saveUserData();
-      
-      try {
-        // Update the count in Supabase - increment if now liked, decrement if unliked
-        await projectService.updateLikeCount(projectId, !wasLiked);
-        
-        // Create a new array to ensure reactivity
-        displayProjects = displayProjects.map(p => {
-          if (p.id === projectId) {
-            return {
-              ...p,
-              likes: Math.max(0, p.likes + (!wasLiked ? 1 : -1))
-            };
-          }
-          return p;
-        });
-      } catch (err) {
-        console.error('Error updating like count:', err);
-        // Optionally revert the local state if the server update fails
-      }
-    }
+      return p;
+    });
+  }
+  
+  // Add missing getProjectTitle function
+  function getProjectTitle(projectId: number): string {
+    const project = displayProjects.find(p => p.id === projectId);
+    return project ? project.title : 'this project';
   }
   
   // Handle follow button click
-  async function handleFollow(projectId: number): Promise<void> {
-    const project = displayProjects.find(p => p.id === projectId);
+  function handleFollow(projectId: number) {
+    // Get the current status before toggling
+    const currentlyFollowing = projectFollowStatus[projectId];
     
-    if (project) {
-      const projectIdStr = projectId.toString();
-      const isFollowing = userData.follows.includes(projectIdStr);
+    // Toggle the follow status
+    recordFollow(ContentType.PROJECT, projectId.toString());
+    
+    // Update project follows count in UI with proper reactivity
+    displayProjects = displayProjects.map(p => {
+      if (p.id === projectId) {
+        return {
+          ...p,
+          follows: p.follows + (currentlyFollowing ? -1 : 1) // Decrement if unfollowing, increment if following
+        };
+      }
+      return p;
+    });
+    
+    // Show notification with the OPPOSITE of current state (since we're toggling)
+    const message = !currentlyFollowing 
+      ? `You'll be notified when ${getProjectTitle(projectId)} is updated.` 
+      : `You won't be notified about ${getProjectTitle(projectId)}.`;
+    
+    showNotification(projectId, message);
+  }
+  
+  // Handle email form submission
+  async function handleEmailSubmit() {
+    if (validateEmail(email)) {
+      const projectId = parseInt(currentProjectId);
       
-      if (isFollowing) {
-        userData.follows = userData.follows.filter(id => id !== projectIdStr);
-        userData = { ...userData };
-        saveUserData();
+      // Show notification about following BEFORE database operations
+      showNotification(projectId, "You are now following this project. You will receive an email when there's an update.");
+      
+      // Update user data
+      userData.email = email;
+      
+      // Add project to follows in local storage
+      if (!userData.follows.includes(currentProjectId)) {
+        userData.follows.push(currentProjectId);
         
         try {
-          // Update the count in Supabase
-          await projectService.updateFollowCount(projectId, false);
+          // TODO: Replace projectService with appropriate API call
+          // Previously: 
+          // await projectService.addProjectFollower(projectId, email);
+          // await projectService.updateFollowCount(projectId, true);
           
-          // Create a new array to ensure reactivity
+          // Update project follows count in UI with proper reactivity
           displayProjects = displayProjects.map(p => {
             if (p.id === projectId) {
               return {
                 ...p,
-                follows: Math.max(0, p.follows - 1)
+                follows: p.follows + 1
               };
             }
             return p;
           });
         } catch (err) {
-          console.error('Error updating follow count:', err);
-        }
-      } else {
-        if (userData.email) {
-          userData.follows = [...userData.follows, projectIdStr];
-          saveUserData();
-          
-          try {
-            // Update the count in Supabase
-            await projectService.updateFollowCount(projectId, true);
-            
-            // Create a new array to ensure reactivity
-            displayProjects = displayProjects.map(p => {
-              if (p.id === projectId) {
-                return {
-                  ...p,
-                  follows: p.follows + 1
-                };
-              }
-              return p;
-            });
-          } catch (err) {
-            console.error('Error updating follow count:', err);
-          }
-        } else {
-          currentProjectId = projectIdStr;
-          showEmailModal = true;
+          console.error('Error recording follower in database:', err);
         }
       }
-    }
-  }
-  
-  // Handle email form submission
-  function handleEmailSubmit() {
-    if (validateEmail(email)) {
-      // Update user data
-      userData.email = email;
       
-      // Add project to follows
-      if (!userData.follows.includes(currentProjectId)) {
-        userData.follows.push(currentProjectId);
-        
-        // Update project follows count in UI with proper reactivity
-        displayProjects = displayProjects.map(p => {
-          if (p.id.toString() === currentProjectId) {
-            return {
-              ...p,
-              follows: p.follows + 1
-            };
-          }
-          return p;
-        });
-      }
-      
-      // Save user data
+      // Save user data to localStorage
       saveUserData();
       
       // Close modal
@@ -214,6 +239,36 @@
       
       // Reset email
       email = '';
+    }
+  }
+  
+  // Add notification functions
+  function showNotification(projectId: number, message: string) {
+    // Clear existing notification timer if it exists
+    if (activeNotifications[projectId]?.timer) {
+      clearTimeout(activeNotifications[projectId].timer);
+    }
+    
+    // Create new notification
+    activeNotifications[projectId] = {
+      projectId,
+      message,
+      timer: setTimeout(() => {
+        dismissNotification(projectId);
+      }, 2500) // Auto-dismiss after 2.5 seconds
+    };
+    
+    // Trigger reactivity
+    activeNotifications = {...activeNotifications};
+  }
+
+  function dismissNotification(projectId: number) {
+    if (activeNotifications[projectId]) {
+      if (activeNotifications[projectId].timer) {
+        clearTimeout(activeNotifications[projectId].timer);
+      }
+      delete activeNotifications[projectId];
+      activeNotifications = {...activeNotifications};
     }
   }
   
@@ -282,32 +337,20 @@
         </div>
         <div class="future-project-card-actions">
           <div class="future-project-buttons">
-            <button 
-              class="interaction-btn future-project-like-button {userData.likes[project.id.toString()] ? 'btn-liked' : ''}" 
+            <InteractionButton 
+              type="like"
+              active={projectLikedStatus[project.id]}
+              count={undefined}
+              iconSize="sm"
               on:click={() => handleLike(project.id)}
-              aria-label={userData.likes[project.id.toString()] ? 'Unlike this project' : 'Like this project'}
-            >
-              {#if userData.likes[project.id.toString()]}
-                <FontAwesomeIcon icon={['fas', 'heart']} />
-                <span>Liked</span>
-              {:else}
-                <FontAwesomeIcon icon={['far', 'heart']} />
-                <span>Like</span>
-              {/if}
-            </button>
-            <button 
-              class="interaction-btn future-project-follow-button {userData.follows.includes(project.id.toString()) ? 'btn-following' : ''}" 
+            />
+            <InteractionButton 
+              type="follow"
+              active={projectFollowStatus[project.id]}
+              count={undefined}
+              iconSize="sm"
               on:click={() => handleFollow(project.id)}
-              aria-label={userData.follows.includes(project.id.toString()) ? 'Unfollow this project' : 'Follow this project'}
-            >
-              {#if userData.follows.includes(project.id.toString())}
-                <FontAwesomeIcon icon={['fas', 'bell']} />
-                <span>Following</span>
-              {:else}
-                <FontAwesomeIcon icon={['far', 'bell']} />
-                <span>Follow</span>
-              {/if}
-            </button>
+            />
             <button 
               class="future-project-comment-button" 
               on:click={() => handleComment(project.id)}
@@ -321,18 +364,41 @@
             {formatCounters(project.likes, project.follows)}
           </div>
         </div>
+
+        <!-- Add notification element -->
+        {#if activeNotifications[project.id]}
+          <div class="inline-notification" role="status">
+            <div class="notification-content">
+              <FontAwesomeIcon icon={['fas', 'info-circle']} />
+              <span>{activeNotifications[project.id].message}</span>
+            </div>
+            <button 
+              class="dismiss-notification" 
+              on:click={() => dismissNotification(project.id)}
+              aria-label="Dismiss notification"
+            >
+              &times;
+            </button>
+          </div>
+        {/if}
       </div>
     {/each}
   {/if}
 </div>
 
-<!-- Email Collection Modal -->
+<!-- Replace the Modal component with direct implementation -->
 {#if showEmailModal}
   <div class="future-project-modal">
     <div class="future-project-modal-content">
-      <button class="future-project-close-modal" on:click={closeModal} aria-label="Close modal">&times;</button>
+      <button 
+        class="future-project-close-modal" 
+        on:click={closeModal}
+        aria-label="Close modal"
+      >
+        &times;
+      </button>
       <div class="future-project-modal-inner-content">
-        <h3 class="future-project-modal-title">Get early access to your favorite projects.</h3>
+        <h2 class="future-project-modal-title">Get early access to your favorite projects.</h2>
         <div class="future-project-form-and-button">
           <form on:submit|preventDefault={handleEmailSubmit}>
             <div class="future-project-form-group">
@@ -347,7 +413,7 @@
             </div>
             <button 
               type="submit" 
-              class="future-project-submit-button {!isEmailValid ? 'disabled' : ''}" 
+              class="modal-action-btn" 
               disabled={!isEmailValid}
               aria-label="Submit email"
             >
@@ -364,9 +430,9 @@
 {/if}
 
 <style>
-  /* --------------------
-     Layout and containers
-     -------------------- */
+  /* ======================
+     BASE & LAYOUT
+     ====================== */
   .future-projects {
     display: flex;
     flex-direction: column;
@@ -375,17 +441,33 @@
     justify-content: center;
     gap: 50px;
     margin: 0;
-    width: 100%;
-    max-width: 700px;
+    width: 65%;
   }
   
-  /* --------------------
-     Card styling
-     -------------------- */
+  /* Loading and error states */
+  .loading-state,
+  .error-state {
+    padding: 2rem;
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--dark-60);
+    width: 100%;
+    max-width: 600px;
+    margin: 40px 0;
+  }
+  
+  .error-state {
+    color: var(--dark-pink-100);
+  }
+  
+  /* ======================
+     PROJECT CARDS
+     ====================== */
   .future-project-card {
     position: relative;
     height: auto;
     margin-top: 40px;
+    margin-bottom: 35px;
     border-left: 1px solid var(--dark-100);
     display: flex;
     flex-direction: column;
@@ -404,7 +486,7 @@
     word-wrap: break-word;
   }
   
-  /* Card content and details */
+  /* Card content */
   .future-project-card-details {
     flex-grow: 1;
     padding: 0 0 30px 20px;
@@ -424,7 +506,36 @@
     opacity: 0.7;
   }
   
-  /* Pill labels */
+  /* Card actions */
+  .future-project-card-actions {
+    display: flex;
+    justify-content: space-between; 
+    gap: 0px;
+    padding: 14px 0 14px 20px;
+    margin-top: auto;
+    border-top: 1px var(--dark-100) solid;
+  }
+  
+  .future-project-buttons {
+    display: flex;
+    justify-content: column;
+  }
+  
+  .future-project-counters {
+    text-align: right;
+    justify-content: flex-end;
+    font-size: 14px;
+    color: var(--dark-80);
+  }
+  
+  /* Interactive elements */
+  .future-project-comment-button {
+    display: none; /* Hide only the comment button */
+  }
+  
+  /* ======================
+     PILL LABELS
+     ====================== */
   .dual-pill-label {
     display: inline-flex;
     border-radius: 20px;
@@ -453,6 +564,7 @@
     border-left: none;
   }
   
+  /* Value variations */
   .value-side.fun {
     background-color: var(--dark-orange-100);
     color: var(--pure-white-100);
@@ -478,42 +590,70 @@
     color: var(--pure-white-100);
   }
   
-  /* Card actions area */
-  .future-project-card-actions {
+  /* ======================
+     NOTIFICATIONS
+     ====================== */
+  .inline-notification {
+    position: absolute;
+    top: 100%;
+    margin-top: 0;
+    left: 20px;
+    right: 20px;
     display: flex;
-    justify-content: space-between; 
-    gap: 0px;
-    padding: 14px 0 14px 20px;
-    margin-top: auto;
-    border-top: 1px var(--dark-100) solid;
-  }
-  
-  .future-project-buttons {
-    display: flex;
-    justify-content: column;
-  }
-  
-  .future-project-comment-button {
-    display: none; /* Hide only the comment button */
-  }
-  
-  .future-project-counters {
-    text-align: right;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 8px 12px;
+    background-color: #F5F6F6;
+    border-radius: 4px;
     font-size: 14px;
-    color: var(--dark-85);
+    animation: slideUp 0.15s ease-out;
+    overflow: hidden;
+    will-change: opacity, transform;
+    box-shadow:
+      inset 0 1px 1px rgba(0, 0, 0, 0.05),
+      0 1px 2px rgba(0, 0, 0, 0.08),
+      0 2px 4px rgba(0, 0, 0, 0.08),
+      0 4px 6px rgba(0, 0, 0, 0.08),
+      0 6px 8px rgba(0, 0, 0, 0.08);
+    z-index: 100;
+    width: auto;
   }
   
-  /* --------------------
-     Modal styling
-     -------------------- */
+  .notification-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--dark-80);
+  }
+  
+  .notification-content :global(svg) {
+    color: var(--dark-80);
+  }
+  
+  .dismiss-notification {
+    background: none;
+    border: none;
+    color: var(--dark-60);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 0 0 8px;
+    line-height: 1;
+  }
+  
+  .dismiss-notification:hover {
+    color: var(--dark-90);
+  }
+  
+  /* ======================
+     MODAL DIALOG
+     ====================== */
   .future-project-modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--dark-70);
+    background-color: var(--dark-80);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -539,7 +679,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 40px 0 10px 0;
+    padding: 60px 0 50px 0;
   }
   
   .future-project-modal-title {
@@ -548,15 +688,15 @@
     font-size: 24px;
     font-weight: 500;
     line-height: 1.3;
+    margin-bottom: 40px;
   }
   
   .future-project-close-modal {
-    font-family: 'Roboto', sans-serif;
     position: absolute;
-    top: 16px;
+    top: 20px;
     right: 20px;
     font-size: 30px;
-    font-weight: 200;
+    font-weight: 300;
     line-height: 1;
     color: var(--dark-60);
     cursor: pointer;
@@ -565,6 +705,7 @@
     padding: 0;
     width: 30px;
     height: 30px;
+    font-family: 'Roboto', sans-serif;
   }
   
   .future-project-close-modal:hover {
@@ -573,7 +714,7 @@
     transition: transform 0.3s ease;
   }
   
-  /* Modal form elements */
+  /* Modal form */
   .future-project-form-and-button {
     display: flex;
     flex-direction: column;
@@ -589,47 +730,42 @@
   
   .future-project-form-group {
     width: 100%;
-    margin: 20px 0;
+    margin: 0;
   }
   
   .future-project-form-group input {
     width: 100%;
-    background-color: var(--light-100);
-    padding: 12px;
+    padding: 10px;
     border: 1px solid var(--dark-60);
-    border-radius: 5px;
-    font-size: 15px;
-    transition: border-color 0.3s ease;
-    box-sizing: border-box;
+    border-radius: 4px;
+    font-size: 16px;
   }
   
   .future-project-form-group input:focus {
     outline: none;
     border-color: var(--dark-80);
-    box-shadow: 0 0 0 1px var(--purple-30);
   }
   
-  .future-project-submit-button {
+  .modal-action-btn {
+    display: block;
     width: 100%;
-    padding: 12px;
+    height: 40px;
     background-color: var(--purple-100);
-    color: white;
+    color: var(--light-100);
     border: none;
-    border-radius: 6px;
+    border-radius: 4px;
     font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.3s;
-    box-sizing: border-box;
+    transition: background-color 0.2s ease;
   }
   
-  .future-project-submit-button:hover {
+  .modal-action-btn:hover:not(:disabled) {
     background-color: var(--dark-purple-100);
   }
   
-  .future-project-submit-button.disabled {
-    background-color: var(--purple-100);
+  .modal-action-btn:disabled {
+    background-color: var(--purple-30);
     cursor: not-allowed;
-    opacity: 0.7;
   }
   
   .future-project-privacy-note {
@@ -639,61 +775,75 @@
     color: var(--dark-80);
   }
   
-  /* --------------------
-     Animations 
-     -------------------- */
+  /* ======================
+     ANIMATIONS
+     ====================== */
   @keyframes heartPulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.3); }
     100% { transform: scale(1); }
   }
   
-  /* --------------------
-     Responsive styles
-     -------------------- */
-  @media (max-width: 768px) {
-    .future-project-card {
-      max-width: 90%;
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
     }
-
-    .future-project-modal-content {
-      padding: 30px 70px 40px 70px;
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
   
-  /* Mobile styles */
-  @media (max-width: 576px) {   
-    .future-project-close-modal {
-      top: 12px;
-      right: 16px;
+  /* ======================
+     RESPONSIVE STYLES
+     ====================== */
+  /* Small Desktop */
+  @media (max-width: 900px) {
+    .future-projects {
+      width: 75%;
     }
-
-    .future-project-modal-title {
-      font-size: 22px;
+  }
+  
+  /* Tablet */
+  @media (max-width: 768px) {
+    .future-projects {
+      width: 85%;
     }
-
+    
+    .future-project-modal-content {
+      padding: 0 70px 0 70px;
+    }
+  }
+  
+  /* Mobile */
+  @media (max-width: 576px) {
     .future-project-modal-content {
       width: 95%;
-      padding-top: 30px;
-      padding-bottom: 50px;
+      padding-top: 10px;
       padding-left: clamp(10px, 5vw, 40px);
       padding-right: clamp(10px, 5vw, 40px);
     }
-  }
-  
-  /* Add styles for loading and error states */
-  .loading-state,
-  .error-state {
-    padding: 2rem;
-    text-align: center;
-    font-size: 1.2rem;
-    color: var(--dark-60);
-    width: 100%;
-    max-width: 600px;
-    margin: 40px 0;
-  }
-  
-  .error-state {
-    color: var(--dark-pink-100);
+    
+    .future-project-modal-title {
+      font-size: 22px;
+    }
+    
+    .future-project-close-modal {
+      top: 16px;
+      right: 16px;
+    }
+    
+    .inline-notification {
+      width: 90%;
+      font-size: 13px;
+      padding: 6px 10px;
+    }
+    
+    /* Make sure the notification message doesn't overflow */
+    .notification-content span {
+      white-space: normal;
+      word-break: break-word;
+    }
   }
 </style>

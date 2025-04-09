@@ -1,12 +1,13 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import Nav from './components/Nav.svelte';
-  import Footer from './components/Footer.svelte';
+  import Nav from './components/shared/Nav.svelte';
+  import Footer from './components/shared/Footer.svelte';
   import Home from './routes/Home.svelte';
   import Next from './routes/Next.svelte';
   import Writing from './routes/Writing.svelte'
   import About from './routes/About.svelte';
   import Contact from './routes/Contact.svelte';
+  import { initializeInteractions } from './services/interactionService';
   
   // State to track current page
   let currentPage = 'home';
@@ -44,6 +45,9 @@
     // Add click event listener to document for capturing link clicks
     document.addEventListener('click', handleLinkClick);
     
+    // Initialize both interaction systems
+    initializeInteractions();
+    
     return () => {
       window.removeEventListener('popstate', handleNavigation);
       document.removeEventListener('click', handleLinkClick);
@@ -54,7 +58,7 @@
   function handleLinkClick(event: MouseEvent) {
     // Only handle links within our app
     const target = (event.target as Element).closest('a');
-    if (target && target.origin === window.location.origin) {
+    if (target && target.href && new URL(target.href).origin === window.location.origin) {
       event.preventDefault();
       const href = target.getAttribute('href');
       
