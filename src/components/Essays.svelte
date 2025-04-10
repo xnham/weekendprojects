@@ -126,6 +126,15 @@
                 // Record the share in Supabase
                 recordShare(ContentType.ESSAY, essay.id);
                 
+                // Force an update to the interaction state to ensure UI refreshes
+                essayInteractionState = { 
+                    ...essayInteractionState,
+                    shares: { 
+                        ...essayInteractionState.shares, 
+                        [`${ContentType.ESSAY}:${essay.id}`]: true 
+                    }
+                };
+                
                 // Clear feedback after delay
                 feedbackTimeout = setTimeout(() => {
                     console.log("Clearing feedback");
@@ -146,6 +155,27 @@
                     copyFeedbackEssayId = "";
                 }, 3000);
             });
+    }
+
+    // Add this function to format likes and shares counts
+    function formatCounters(likes: number, shares: number): string {
+        // No likes or shares
+        if (likes === 0 && shares === 0) {
+            return "";
+        }
+        
+        // Only likes
+        if (likes > 0 && shares === 0) {
+            return `${likes} ${likes === 1 ? 'like' : 'likes'}`;
+        }
+        
+        // Only shares
+        if (likes === 0 && shares > 0) {
+            return `${shares} ${shares === 1 ? 'share' : 'shares'}`;
+        }
+        
+        // Both likes and shares
+        return `${likes} ${likes === 1 ? 'like' : 'likes'} & ${shares} ${shares === 1 ? 'share' : 'shares'}`;
     }
 </script>
 
@@ -169,25 +199,42 @@
                 </div>
             </a>
             <div class="essay-interaction-container">
-                <InteractionButton 
-                    type="like"
-                    active={essayLikedStatus[essay.id]}
-                    count={undefined}
-                    on:click={() => handleLikeToggle(essay.id)}
-                />
-
-                <div class="share-button-container">
+                <div class="essay-buttons">
                     <InteractionButton 
-                        type="share"
-                        active={false}
+                        type="like"
+                        active={essayLikedStatus[essay.id]}
                         count={undefined}
-                        on:click={(event) => handleShare(event, essay)}
+                        on:click={() => handleLikeToggle(essay.id)}
                     />
-                    
-                    {#if copyFeedback && copyFeedbackEssayId === essay.id}
-                        <div class="copy-feedback" transition:fade={{ duration: 150 }}>
-                            {copyFeedback}
-                        </div>
+
+                    <div class="share-button-container">
+                        <InteractionButton 
+                            type="share"
+                            active={false}
+                            count={undefined}
+                            on:click={(event) => handleShare(event, essay)}
+                        />
+                        
+                        {#if copyFeedback && copyFeedbackEssayId === essay.id}
+                            <div class="copy-feedback" transition:fade={{ duration: 150 }}>
+                                {copyFeedback}
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+                
+                <div class="essay-counters">
+                    {#if essay.id}
+                        {formatCounters(
+                            // Count likes for this essay by checking interaction state
+                            Object.keys(essayInteractionState?.likes || {})
+                                .filter(key => key === `${ContentType.ESSAY}:${essay.id}` && essayInteractionState.likes[key])
+                                .length,
+                            // Count shares for this essay by checking interaction state
+                            Object.keys(essayInteractionState?.shares || {})
+                                .filter(key => key === `${ContentType.ESSAY}:${essay.id}` && essayInteractionState.shares[key])
+                                .length
+                        )}
                     {/if}
                 </div>
             </div>
@@ -315,5 +362,18 @@
         .essays {
             width: 100%;
         }
+    }
+
+    .essay-buttons {
+        display: flex;
+        flex-direction: row;
+    }
+    
+    .essay-counters {
+        text-align: right;
+        justify-content: flex-end;
+        font-size: 14px;
+        color: var(--dark-80);
+        margin-left: auto;
     }
 </style>
