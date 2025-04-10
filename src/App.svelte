@@ -59,12 +59,16 @@
     // Add event listener for navigation
     window.addEventListener('popstate', handleNavigation);
     
+    // Add listener for custom navigation event
+    window.addEventListener('spanavigate', handleNavigation);
+    
     // Add click event listener to document for capturing link clicks
     document.addEventListener('click', handleLinkClick);
     
     // Return cleanup function
     return () => {
       window.removeEventListener('popstate', handleNavigation);
+      window.removeEventListener('spanavigate', handleNavigation);
       document.removeEventListener('click', handleLinkClick);
       
       // No need to restore original fetch since we're not modifying it anymore

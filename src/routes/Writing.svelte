@@ -25,10 +25,14 @@
     // Listen for our custom event
     window.addEventListener('urlchange', updateCurrentEssay);
     
+    // Listen for spanavigate event from App.svelte
+    window.addEventListener('spanavigate', updateCurrentEssay);
+    
     // Clean up listener when component is destroyed
     return () => {
       window.removeEventListener('popstate', updateCurrentEssay);
       window.removeEventListener('urlchange', updateCurrentEssay);
+      window.removeEventListener('spanavigate', updateCurrentEssay);
     };
   });
   
