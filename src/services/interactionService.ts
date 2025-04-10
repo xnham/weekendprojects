@@ -91,6 +91,10 @@ interface InteractionState {
   shares: { [key: string]: boolean };  // Format: "contentType:contentId" -> boolean
   follows: { [key: string]: boolean }; // Format: "contentType:contentId" -> boolean
   views: { [key: string]: boolean };   // Format: "contentType:contentId" -> boolean
+  userEmail?: string; // Store user email globally
+  initialized: boolean;
+  loading: boolean;
+  error?: string;
 }
 
 // Create a writable store to manage interaction state
@@ -99,139 +103,120 @@ const interactionStore = writable<InteractionState>({
   likes: {},
   shares: {},
   follows: {},
-  views: {}
+  views: {},
+  initialized: false,
+  loading: true
 });
+
+/**
+ * Gets or creates a device ID for the current user
+ */
+export async function getOrCreateDeviceId(): Promise<string> {
+  // Check localStorage first
+  let deviceId = localStorage.getItem('deviceId');
+  
+  if (deviceId) {
+    // Remove any quotes that might be wrapping the UUID
+    deviceId = deviceId.replace(/^"(.*)"$/, '$1');
+  } else {
+    // Create a new UUID if none exists
+    deviceId = crypto.randomUUID ? crypto.randomUUID() : 
+      Math.random().toString(36).substring(2, 15) + 
+      Math.random().toString(36).substring(2, 15);
+    
+    // Store in localStorage without quotes
+    localStorage.setItem('deviceId', deviceId);
+  }
+  
+  return deviceId;
+}
 
 /**
  * Initialize the interaction system
  */
-export async function initializeInteractions(): Promise<void> {
+async function initializeInteractions(): Promise<void> {
   try {
-    // Load data from localStorage
-    const storedData = storage.get('interactions');
-    if (storedData) {
-      interactionStore.set(storedData);
-    }
+    // Get or create device ID
+    const deviceId = await getOrCreateDeviceId();
     
-    // Sync with Supabase
-    await syncWithSupabase();
+    // Initialize store with device ID
+    interactionStore.update(state => ({
+      ...state,
+      deviceId,
+      initialized: false,
+      loading: true
+    }));
+    
+    // Load follows from project_followers table
+    const { data: projectFollows, error: followsError } = await supabase
+      .from('project_followers')
+      .select('project_id, email')
+      .eq('device_id', deviceId);
+    
+    if (followsError && followsError.code !== 'PGRST116') throw followsError;
+    
+    // Load essay likes from essay_interactions
+    const { data: essayInteractions, error: essayError } = await supabase
+      .from('essay_interactions')
+      .select('essay_id, has_liked, has_viewed')
+      .eq('device_id', deviceId);
+      
+    if (essayError && essayError.code !== 'PGRST116') throw essayError;
+    
+    // Convert to state object format
+    const likesMap = {};
+    const followsMap = {};
+    const viewsMap = {};
+    let userEmail: string | undefined;
+    
+    // Process project follows
+    projectFollows?.forEach(follow => {
+      followsMap[`${ContentType.PROJECT}:${follow.project_id}`] = true;
+      
+      // Get the first email we find (assuming same email for all follows)
+      if (!userEmail && follow.email) {
+        userEmail = follow.email;
+      }
+    });
+    
+    // Process essay interactions
+    essayInteractions?.forEach(interaction => {
+      if (interaction.has_liked) {
+        likesMap[`${ContentType.ESSAY}:${interaction.essay_id}`] = true;
+      }
+      
+      if (interaction.has_viewed) {
+        viewsMap[`${ContentType.ESSAY}:${interaction.essay_id}`] = true;
+      }
+    });
+    
+    // Update store with loaded data
+    interactionStore.update(state => ({
+      ...state,
+      likes: likesMap,
+      follows: followsMap,
+      views: viewsMap,
+      userEmail,
+      initialized: true,
+      loading: false
+    }));
+    
   } catch (error) {
-    handleError(
-      'Failed to initialize interaction system',
-      error,
-      ErrorSeverity.ERROR,
-      'interactionService'
-    );
-    
-    // Fallback - still try to use localStorage data
-    const storedData = storage.get('interactions');
-    if (storedData) {
-      interactionStore.set(storedData);
-    }
+    console.error('Error initializing interactions:', error);
+    interactionStore.update(state => ({
+      ...state,
+      error: 'Failed to load interaction data',
+      initialized: false,
+      loading: false
+    }));
   }
 }
 
-/**
- * Loads all interaction data from Supabase for the given device ID.
- * This consolidates data from multiple tables into a unified state object.
- * 
- * @param deviceId - The unique identifier for the current device
- */
-async function loadInteractionsFromSupabase(deviceId: string) {
-  try {
-    // Fetch all essay interactions
-    const { data: essayData, error: essayError } = await supabase
-      .from('essay_interactions')
-      .select('essay_id, has_liked, has_shared, has_viewed')
-      .eq('device_id', deviceId);
-      
-    if (essayError) {
-      handleError('Error loading essay interactions', essayError);
-    }
-    
-    // Fetch all project interactions
-    const { data: projectData, error: projectError } = await supabase
-      .from('project_followers')
-      .select('project_id')
-      .eq('device_id', deviceId);
-      
-    if (projectError) {
-      handleError('Error loading project follows', projectError);
-    }
-    
-    // Get liked projects from localStorage for backward compatibility
-    const storedCompletedLikes = storage.getItem('completedLikedProjects');
-    const storedFutureLikes = storage.getItem('nextUserData');
-    
-    // Initialize interaction objects
-    const likes: { [key: string]: boolean } = {};
-    const follows: { [key: string]: boolean } = {};
-    const shares: { [key: string]: boolean } = {};
-    const views: { [key: string]: boolean } = {};
-    
-    // Process essay interactions
-    if (essayData) {
-      essayData.forEach(interaction => {
-        if (interaction.has_liked) {
-          likes[`${ContentType.ESSAY}:${interaction.essay_id}`] = true;
-        }
-        if (interaction.has_shared) {
-          shares[`${ContentType.ESSAY}:${interaction.essay_id}`] = true;
-        }
-        if (interaction.has_viewed) {
-          views[`${ContentType.ESSAY}:${interaction.essay_id}`] = true;
-        }
-      });
-    }
-    
-    // Process project follows
-    if (projectData) {
-      projectData.forEach(follow => {
-        follows[`${ContentType.PROJECT}:${follow.project_id}`] = true;
-      });
-    }
-    
-    // Process legacy project likes from localStorage
-    if (storedCompletedLikes) {
-      try {
-        const completedLikes = JSON.parse(storedCompletedLikes);
-        Object.keys(completedLikes).forEach(projectId => {
-          if (completedLikes[projectId]) {
-            likes[`${ContentType.PROJECT}:${projectId}`] = true;
-          }
-        });
-      } catch (error) {
-        handleError('Error parsing stored completed likes', error);
-      }
-    }
-    
-    if (storedFutureLikes) {
-      try {
-        const userData = JSON.parse(storedFutureLikes);
-        if (userData.likes) {
-          Object.keys(userData.likes).forEach(projectId => {
-            if (userData.likes[projectId]) {
-              likes[`${ContentType.PROJECT}:${projectId}`] = true;
-            }
-          });
-        }
-      } catch (error) {
-        handleError('Error parsing stored future likes', error);
-      }
-    }
-    
-    // Update the store with loaded data
-    interactionStore.update(state => ({
-      ...state,
-      likes,
-      follows,
-      shares,
-      views
-    }));
-  } catch (error) {
-    handleError('Error loading interactions from Supabase', error);
-  }
-}
+// Call initialize on module load
+initializeInteractions();
+
+// Export functions
+export { initializeInteractions };
 
 /**
  * Toggle like status for content
@@ -256,31 +241,40 @@ export async function toggleLike(contentType: ContentType, contentId: string): P
     // Persist to localStorage
     storage.set('interactions', get(interactionStore));
     
-    // Update Supabase (async)
-    await updateSupabaseLike(contentType, contentId, newLikeState);
+    // Update Supabase
+    if (contentType === ContentType.ESSAY) {
+      await updateEssayLike(contentId, newLikeState);
+    } else if (contentType === ContentType.PROJECT) {
+      await updateProjectLike(contentId, newLikeState);
+    }
     
     return newLikeState;
   } catch (error) {
+    // Get the previous state before we attempted to toggle
     const state = get(interactionStore);
     const key = `${contentType}:${contentId}`;
+    const previousLikeState = state.likes[key] || false;
     
     handleError(
-      `Failed to ${state.likes[key] ? 'unlike' : 'like'} ${contentType}`,
+      `Failed to ${previousLikeState ? 'unlike' : 'like'} ${contentType}`,
       error,
       ErrorSeverity.WARNING,
       'interactionService'
     );
     
-    // Rollback local state on failure
+    // Revert local state on failure
     interactionStore.update(currentState => ({
       ...currentState,
       likes: {
         ...currentState.likes,
-        [key]: state.likes[key] || false
+        [key]: previousLikeState
       }
     }));
     
-    return state.likes[key] || false;
+    // Persist the reverted state
+    storage.set('interactions', get(interactionStore));
+    
+    return previousLikeState;
   }
 }
 
@@ -289,9 +283,10 @@ export async function toggleLike(contentType: ContentType, contentId: string): P
  */
 export async function recordShare(contentType: ContentType, contentId: string): Promise<void> {
   try {
+    const state = get(interactionStore);
     const key = `${contentType}:${contentId}`;
     
-    // Update local state
+    // Update local state 
     interactionStore.update(state => ({
       ...state,
       shares: {
@@ -303,8 +298,12 @@ export async function recordShare(contentType: ContentType, contentId: string): 
     // Persist to localStorage
     storage.set('interactions', get(interactionStore));
     
-    // Update Supabase (async)
-    await updateSupabaseShare(contentType, contentId);
+    // Update Supabase
+    if (contentType === ContentType.ESSAY) {
+      await updateEssayShare(contentId);
+    } else if (contentType === ContentType.PROJECT) {
+      await updateSupabaseShare(contentType, contentId);
+    }
   } catch (error) {
     handleError(
       `Failed to record share for ${contentType}`,
@@ -316,16 +315,21 @@ export async function recordShare(contentType: ContentType, contentId: string): 
 }
 
 /**
- * Record a view for content
+ * Record a view for an essay
  */
 export async function recordView(contentType: ContentType, contentId: string): Promise<void> {
+  if (contentType !== ContentType.ESSAY) {
+    return; // Only track views for essays
+  }
+  
   try {
-    const key = `${contentType}:${contentId}`;
     const state = get(interactionStore);
+    const deviceId = state.deviceId;
+    const key = `${contentType}:${contentId}`;
     
-    // Only record view once per session
-    if (state.views[key]) {
-      return;
+    // Skip if we've already recorded this view
+    if (state.views && state.views[key]) {
+      return; 
     }
     
     // Update local state
@@ -340,172 +344,187 @@ export async function recordView(contentType: ContentType, contentId: string): P
     // Persist to localStorage
     storage.set('interactions', get(interactionStore));
     
-    // Update Supabase (async)
-    await updateSupabaseView(contentType, contentId);
+    // Check if interaction record exists - use .match() instead of .eq() for device_id
+    // This avoids issues with UUID formatting in the URL
+    const { data, error } = await supabase
+      .from('essay_interactions')
+      .select('id, has_viewed')
+      .eq('device_id', deviceId) // Supabase client will format this correctly
+      .eq('essay_id', contentId)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') { // Not found
+      console.error('Error checking interaction:', error);
+      throw error;
+    }
+    
+    if (data) {
+      // Only update if not already viewed
+      if (!data.has_viewed) {
+        const { error: updateError } = await supabase
+          .from('essay_interactions')
+          .update({ 
+            has_viewed: true,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', data.id);
+          
+        if (updateError) {
+          console.error('Error updating interaction:', updateError);
+        }
+      }
+    } else {
+      // Create new record
+      const { error: insertError } = await supabase
+        .from('essay_interactions')
+        .insert({
+          device_id: deviceId,
+          essay_id: contentId,
+          has_liked: false,
+          share_count: 0,
+          has_viewed: true
+        });
+        
+      if (insertError) {
+        console.error('Error inserting interaction:', insertError);
+      }
+    }
+    
   } catch (error) {
-    handleError(
-      `Failed to record view for ${contentType}`,
-      error,
-      ErrorSeverity.WARNING,
-      'interactionService'
-    );
+    console.error(`Failed to record view for essay ${contentId}:`, error);
   }
 }
 
 /**
- * Record a follow for a project
+ * Update the user's follow status for a project.
+ * This handles both the follow action and collecting email if needed.
+ * 
+ * @param contentType - Type of content (PROJECT)
+ * @param contentId - ID of the project
+ * @param email - Optional email for notifications (required for first follow if no email stored)
+ * @returns Promise resolving to the new follow state
  */
-export async function recordFollow(contentType: ContentType, contentId: string): Promise<boolean> {
+export async function toggleFollow(contentType: ContentType, contentId: string, email?: string): Promise<boolean> {
   try {
-    // Only allow follows for projects
-    if (contentType !== ContentType.PROJECT) {
-      throw new Error('Only projects can be followed');
-    }
-    
     const key = `${contentType}:${contentId}`;
     const state = get(interactionStore);
     
     // Toggle the follow status
     const newFollowState = !state.follows[key];
     
-    // Update local state
+    // Use stored email if available and no new email provided
+    const emailToUse = email || state.userEmail;
+    
+    // If user is following and we don't have an email, throw error
+    if (newFollowState && !emailToUse && contentType === ContentType.PROJECT) {
+      throw new Error('Email is required to follow a project');
+    }
+    
+    // Update local state immediately for responsive UI
     interactionStore.update(state => ({
       ...state,
       follows: {
         ...state.follows,
         [key]: newFollowState
-      }
+      },
+      // Update user email if one was provided
+      ...(email ? { userEmail: email } : {})
     }));
     
-    // Persist to localStorage
-    storage.set('interactions', get(interactionStore));
-    
-    // Update Supabase (async)
-    await updateSupabaseFollow(contentType, contentId, newFollowState);
+    // Update Supabase
+    if (contentType === ContentType.PROJECT) {
+      await updateProjectFollow(contentId, newFollowState, emailToUse);
+    }
     
     return newFollowState;
   } catch (error) {
+    // Get the previous state before we attempted to toggle
     const state = get(interactionStore);
     const key = `${contentType}:${contentId}`;
+    const previousFollowState = state.follows[key] || false;
     
-    handleError(
-      `Failed to ${state.follows[key] ? 'unfollow' : 'follow'} project`,
-      error,
-      ErrorSeverity.WARNING,
-      'interactionService'
-    );
+    console.error(`Failed to ${previousFollowState ? 'unfollow' : 'follow'} ${contentType}:`, error);
     
-    // Return previous state on failure
-    return state.follows[key] || false;
+    // Revert local state on failure
+    interactionStore.update(currentState => ({
+      ...currentState,
+      follows: {
+        ...currentState.follows,
+        [key]: previousFollowState
+      }
+    }));
+    
+    return previousFollowState;
   }
 }
 
 /**
- * Updates an essay interaction in Supabase.
- * 
- * @param essayId - The essay ID
- * @param field - The interaction field to update (has_liked, has_shared, has_viewed)
- * @param value - The new value for the field
+ * Updates project follow status in Supabase.
+ * This handles both follow/unfollow actions and count updates.
  */
-async function updateEssayInteraction(essayId: string, field: string, value: boolean): Promise<void> {
-  const state = get(interactionStore);
-  const deviceId = state.deviceId;
-  
-  // Check if interaction exists
-  const { data, error } = await supabase
-    .from('essay_interactions')
-    .select('id')
-    .eq('device_id', deviceId)
-    .eq('essay_id', essayId)
-    .single();
+async function updateProjectFollow(projectId: string, followed: boolean, email?: string): Promise<void> {
+  try {
+    const state = get(interactionStore);
+    const deviceId = state.deviceId;
     
-  if (error && error.code !== 'PGRST116') { // PGRST116 = not found, which is expected
-    throw error;
-  }
-  
-  if (data) {
-    // Update existing interaction
-    const { error: updateError } = await supabase
-      .from('essay_interactions')
-      .update({ [field]: value })
-      .eq('id', data.id);
+    if (followed) {
+      if (!email) {
+        throw new Error('Email is required for new follows');
+      }
       
-    if (updateError) throw updateError;
-  } else {
-    // Create new interaction
-    const { error: insertError } = await supabase
-      .from('essay_interactions')
-      .insert({
-        device_id: deviceId,
-        essay_id: essayId,
-        [field]: value
+      // Insert new follow record
+      const { error: insertError } = await supabase
+        .from('project_followers')
+        .insert({
+          device_id: deviceId,
+          project_id: projectId,
+          email,
+          created_at: new Date().toISOString()
+        });
+        
+      if (insertError) throw insertError;
+      
+      // Update follows count using RPC
+      const { error: updateError } = await supabase.rpc('update_project_follows', {
+        project_id: projectId,
+        increment: 1
       });
       
-    if (insertError) throw insertError;
+      if (updateError) throw updateError;
+      
+      // Store email in state
+      interactionStore.update(currentState => ({
+        ...currentState,
+        userEmail: email
+      }));
+      
+    } else {
+      // Delete follow record
+      const { error: deleteError } = await supabase
+        .from('project_followers')
+        .delete()
+        .eq('device_id', deviceId)
+        .eq('project_id', projectId);
+        
+      if (deleteError) throw deleteError;
+      
+      // Update follows count using RPC
+      const { error: updateError } = await supabase.rpc('update_project_follows', {
+        project_id: projectId,
+        increment: -1
+      });
+      
+      if (updateError) throw updateError;
+    }
+    
+  } catch (error) {
+    console.error('Error updating project follow:', error);
+    throw error;
   }
 }
 
-/**
- * Updates local storage for project likes to maintain backward compatibility.
- * 
- * @param projectId - The project ID
- * @param liked - Whether the project is liked or not
- */
-function updateLocalProjectLikes(projectId: string, liked: boolean): void {
-  // Handle completed projects
-  const completedLikes = storage.getItem('completedLikedProjects', {});
-  completedLikes[projectId] = liked;
-  storage.setItem('completedLikedProjects', completedLikes);
-  
-  // Handle future projects
-  const userData = storage.getItem('nextUserData', {
-    email: '',
-    follows: [],
-    likes: {}
-  });
-  
-  userData.likes[projectId] = liked;
-  storage.setItem('nextUserData', userData);
-}
-
-/**
- * Reverts an optimistic like update in case of backend failure.
- * 
- * @param contentType - The content type
- * @param contentId - The content ID
- */
-function revertOptimisticLikeUpdate(contentType: ContentType, contentId: string): void {
-  const state = get(interactionStore);
-  const key = `${contentType}:${contentId}`;
-  const currentValue = state.likes[key] || false;
-  
-  interactionStore.update(state => ({
-    ...state,
-    likes: {
-      ...state.likes,
-      [key]: !currentValue // Revert to opposite of current state
-    }
-  }));
-}
-
-/**
- * Reverts an optimistic follow update in case of backend failure.
- * 
- * @param contentId - The content ID
- */
-function revertOptimisticFollowUpdate(contentId: string): void {
-  const state = get(interactionStore);
-  const key = `${ContentType.PROJECT}:${contentId}`;
-  const currentValue = state.follows[key] || false;
-  
-  interactionStore.update(state => ({
-    ...state,
-    follows: {
-      ...state.follows,
-      [key]: !currentValue // Revert to opposite of current state
-    }
-  }));
-}
+// Replace recordFollow with toggleFollow for consistency
+export { toggleFollow as recordFollow };
 
 /**
  * Checks if a content item is liked by the current user.
@@ -543,112 +562,188 @@ export function getInteractionState(): Omit<InteractionState, 'deviceId'> {
 }
 
 /**
- * Subscribes to interaction state changes.
- * Components should subscribe to receive updates when interactions change.
- * 
- * @param callback - Function to call when state changes
- * @returns Unsubscribe function
+ * Subscribe to interaction state changes
  */
-export function subscribeToInteractions(
-  callback: (state: Omit<InteractionState, 'deviceId'>) => void
-) {
-  return interactionStore.subscribe(state => {
-    // Omit deviceId from callback for privacy
-    const { deviceId, ...rest } = state;
-    callback(rest);
-  });
+export function subscribeToInteractions(callback: (state: any) => void): () => void {
+  // Initialize if not already done
+  if (!get(interactionStore).initialized && !get(interactionStore).loading) {
+    initializeInteractions();
+  }
+  
+  return interactionStore.subscribe(callback);
 }
 
 /**
- * Sync with Supabase database
+ * Updates like status for an essay in Supabase
  */
-async function syncWithSupabase(): Promise<void> {
-  try {
-    // Generate a device ID if not already set
-    let state = get(interactionStore);
-    
-    if (!state.deviceId) {
-      const deviceId = uuidv4();
-      interactionStore.update(state => ({
-        ...state,
-        deviceId
-      }));
-      state = get(interactionStore);
+async function updateEssayLike(essayId: string, liked: boolean): Promise<void> {
+  const state = get(interactionStore);
+  const deviceId = state.deviceId;
+  
+  // Check if interaction record exists
+  const { data, error } = await supabase
+    .from('essay_interactions')
+    .select('id, has_liked')
+    .eq('device_id', deviceId)
+    .eq('essay_id', essayId)
+    .single();
+  
+  if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+    throw error;
+  }
+  
+  if (data) {
+    // Only update if the state has changed
+    if (data.has_liked !== liked) {
+      // Update existing record
+      const { error: updateError } = await supabase
+        .from('essay_interactions')
+        .update({ 
+          has_liked: liked,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', data.id);
+        
+      if (updateError) throw updateError;
     }
-    
-    // Load interactions from Supabase
-    await loadInteractionsFromSupabase(state.deviceId);
-    
-  } catch (error) {
-    handleError(
-      'Failed to sync interaction data with server',
-      error,
-      ErrorSeverity.ERROR,
-      'interactionService'
-    );
-    
-    // This is a sync error, so we'll rely on local data
-    // and try again next time
+  } else {
+    // Create new record
+    const { error: insertError } = await supabase
+      .from('essay_interactions')
+      .insert({
+        device_id: deviceId,
+        essay_id: essayId,
+        has_liked: liked,
+        share_count: 0,
+        has_viewed: true // Assume they've viewed it if they're liking it
+      });
+      
+    if (insertError) throw insertError;
+  }
+}
+
+/**
+ * Updates share count for an essay in Supabase
+ */
+async function updateEssayShare(essayId: string): Promise<void> {
+  const state = get(interactionStore);
+  const deviceId = state.deviceId;
+  
+  // Check if interaction record exists
+  const { data, error } = await supabase
+    .from('essay_interactions')
+    .select('id, share_count')
+    .eq('device_id', deviceId)
+    .eq('essay_id', essayId)
+    .single();
+  
+  if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+    throw error;
+  }
+  
+  if (data) {
+    // Update existing record - increment share count
+    const { error: updateError } = await supabase
+      .from('essay_interactions')
+      .update({ 
+        share_count: (data.share_count || 0) + 1,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', data.id);
+      
+    if (updateError) throw updateError;
+  } else {
+    // Create new record
+    const { error: insertError } = await supabase
+      .from('essay_interactions')
+      .insert({
+        device_id: deviceId,
+        essay_id: essayId,
+        has_liked: false,
+        share_count: 1,
+        has_viewed: true // Assume viewed if sharing
+      });
+      
+    if (insertError) throw insertError;
+  }
+}
+
+/**
+ * Updates view status for an essay in Supabase
+ */
+async function updateEssayView(essayId: string): Promise<void> {
+  const state = get(interactionStore);
+  const deviceId = state.deviceId;
+  
+  // Check if interaction record exists
+  const { data, error } = await supabase
+    .from('essay_interactions')
+    .select('id, has_viewed')
+    .eq('device_id', deviceId)
+    .eq('essay_id', essayId)
+    .single();
+  
+  if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+    throw error;
+  }
+  
+  if (data) {
+    // Only update if not already viewed
+    if (!data.has_viewed) {
+      const { error: updateError } = await supabase
+        .from('essay_interactions')
+        .update({ 
+          has_viewed: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', data.id);
+        
+      if (updateError) throw updateError;
+    }
+  } else {
+    // Create new record
+    const { error: insertError } = await supabase
+      .from('essay_interactions')
+      .insert({
+        device_id: deviceId,
+        essay_id: essayId,
+        has_liked: false,
+        share_count: 0,
+        has_viewed: true
+      });
+      
+    if (insertError) throw insertError;
   }
 }
 
 /**
  * Updates like status in Supabase.
+ * This uses the existing implementation for now.
  */
-async function updateSupabaseLike(contentType: ContentType, contentId: string, liked: boolean): Promise<void> {
+async function updateProjectLike(contentId: string, liked: boolean): Promise<void> {
   try {
     const state = get(interactionStore);
     
-    if (contentType === ContentType.ESSAY) {
-      // Update essay like in Supabase
-      await updateEssayInteraction(contentId, 'has_liked', liked);
-      
-      // Update essay likes count in essays table
-      const { error } = await supabase.rpc('update_essay_likes', { 
-        essay_id: contentId, 
-        increment: liked ? 1 : -1 
-      });
-      
-      if (error) throw error;
-    } 
-    else if (contentType === ContentType.PROJECT) {
-      // Update project like in legacy local storage for backward compatibility
-      updateLocalProjectLikes(contentId, liked);
-      
-      // Update project likes count in projects table
-      const { error } = await supabase.rpc('update_project_likes', {
-        project_id: contentId,
-        increment: liked ? 1 : -1
-      });
-      
-      if (error) throw error;
-    }
+    // Update project like in legacy local storage for backward compatibility
+    updateLocalProjectLikes(contentId, liked);
+    
+    // Update project likes count in projects table
+    const { error } = await supabase.rpc('update_project_likes', {
+      project_id: contentId,
+      increment: liked ? 1 : -1
+    });
+    
+    if (error) throw error;
   } catch (error) {
     // Re-throw to let the calling function handle error
     throw error;
   }
 }
 
-/**
- * Updates share status in Supabase.
- */
+// These functions are kept for backward compatibility until we update the project tables
 async function updateSupabaseShare(contentType: ContentType, contentId: string): Promise<void> {
   try {
-    const state = get(interactionStore);
-    
-    if (contentType === ContentType.ESSAY) {
-      // Update essay share in Supabase
-      await updateEssayInteraction(contentId, 'has_shared', true);
-      
-      // Increment essay shares count
-      const { error } = await supabase.rpc('update_essay_shares', { 
-        essay_id: contentId, 
-        increment: 1 
-      });
-      
-      if (error) throw error;
-    } 
-    else if (contentType === ContentType.PROJECT) {
+    if (contentType === ContentType.PROJECT) {
       // Update project shares count
       const { error } = await supabase.rpc('update_project_shares', {
         project_id: contentId,
@@ -663,26 +758,9 @@ async function updateSupabaseShare(contentType: ContentType, contentId: string):
   }
 }
 
-/**
- * Updates view status in Supabase.
- */
 async function updateSupabaseView(contentType: ContentType, contentId: string): Promise<void> {
   try {
-    const state = get(interactionStore);
-    
-    if (contentType === ContentType.ESSAY) {
-      // Update essay view in Supabase
-      await updateEssayInteraction(contentId, 'has_viewed', true);
-      
-      // Increment essay views count
-      const { error } = await supabase.rpc('update_essay_views', { 
-        essay_id: contentId, 
-        increment: 1 
-      });
-      
-      if (error) throw error;
-    } 
-    else if (contentType === ContentType.PROJECT) {
+    if (contentType === ContentType.PROJECT) {
       // Update project views count
       const { error } = await supabase.rpc('update_project_views', {
         project_id: contentId,
@@ -697,69 +775,38 @@ async function updateSupabaseView(contentType: ContentType, contentId: string): 
   }
 }
 
-/**
- * Updates follow status in Supabase.
- */
-async function updateSupabaseFollow(contentType: ContentType, contentId: string, followed: boolean): Promise<void> {
+// For backward compatibility
+function updateLocalProjectLikes(projectId: string, liked: boolean) {
   try {
-    const state = get(interactionStore);
-    
-    if (contentType !== ContentType.PROJECT) {
-      throw new Error('Only projects can be followed');
-    }
-    
-    // Check if follow entry exists
-    const { data, error } = await supabase
-      .from('project_followers')
-      .select('id')
-      .eq('device_id', state.deviceId)
-      .eq('project_id', contentId)
-      .single();
-      
-    if (error && error.code !== 'PGRST116') throw error;
-    
-    if (followed) {
-      // Create follow if it doesn't exist
-      if (!data) {
-        const { error: insertError } = await supabase
-          .from('project_followers')
-          .insert({
-            device_id: state.deviceId,
-            project_id: contentId,
-            created_at: new Date().toISOString()
-          });
-          
-        if (insertError) throw insertError;
+    // Get existing liked projects
+    const likedProjectsJSON = localStorage.getItem('likedProjects');
+    let likedProjects = likedProjectsJSON ? JSON.parse(likedProjectsJSON) : [];
+
+    if (liked) {
+      // Add project to liked list if not already there
+      if (!likedProjects.includes(projectId)) {
+        likedProjects.push(projectId);
       }
-      
-      // Update follows count
-      const { error: updateError } = await supabase.rpc('update_project_follows', {
-        project_id: contentId,
-        increment: 1
-      });
-      
-      if (updateError) throw updateError;
     } else {
-      // Remove follow if it exists
-      if (data) {
-        const { error: deleteError } = await supabase
-          .from('project_followers')
-          .delete()
-          .eq('id', data.id);
-          
-        if (deleteError) throw deleteError;
-        
-        // Update follows count
-        const { error: updateError } = await supabase.rpc('update_project_follows', {
-          project_id: contentId,
-          increment: -1
-        });
-        
-        if (updateError) throw updateError;
-      }
+      // Remove project from liked list
+      likedProjects = likedProjects.filter(id => id !== projectId);
     }
-  } catch (error) {
-    // Re-throw to let the calling function handle error
-    throw error;
+
+    // Save updated list
+    localStorage.setItem('likedProjects', JSON.stringify(likedProjects));
+  } catch (e) {
+    console.error('Error updating local project likes:', e);
+  }
+}
+
+// If loaded from a non-app page or as a module
+if (typeof window !== 'undefined') {
+  // Try to load from localStorage on initialization
+  const storedInteractions = storage.get('interactions');
+  if (storedInteractions) {
+    interactionStore.set({
+      ...storedInteractions,
+      initialized: false // Still need server data
+    });
   }
 }

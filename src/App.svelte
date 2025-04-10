@@ -7,7 +7,8 @@
   import Writing from './routes/Writing.svelte'
   import About from './routes/About.svelte';
   import Contact from './routes/Contact.svelte';
-  import { initializeInteractions } from './services/interactionService';
+  import { initializeInteractions, getOrCreateDeviceId } from './services/interactionService';
+  import { supabase } from './lib/supabase';
   
   // State to track current page
   let currentPage = 'home';
@@ -36,8 +37,24 @@
   
   // Initialize and set up listeners
   onMount(() => {
-    // Set initial page based on URL
-    updateCurrentPage();
+    // Define original fetch before we potentially modify it
+    const originalFetch = window.fetch;
+    
+    // Get device ID for Supabase headers
+    const setupApp = async () => {
+      const deviceId = await getOrCreateDeviceId();
+      
+      // No longer modifying fetch to add device-id header
+      // Just use the original fetch function
+      
+      // Set initial page based on URL
+      updateCurrentPage();
+      
+      // Initialize interaction systems
+      initializeInteractions();
+    };
+    
+    setupApp();
     
     // Add event listener for navigation
     window.addEventListener('popstate', handleNavigation);
@@ -45,12 +62,12 @@
     // Add click event listener to document for capturing link clicks
     document.addEventListener('click', handleLinkClick);
     
-    // Initialize both interaction systems
-    initializeInteractions();
-    
+    // Return cleanup function
     return () => {
       window.removeEventListener('popstate', handleNavigation);
       document.removeEventListener('click', handleLinkClick);
+      
+      // No need to restore original fetch since we're not modifying it anymore
     };
   });
   

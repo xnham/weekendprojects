@@ -10,7 +10,8 @@
     recordShare,
     recordView,
     ContentType,
-    subscribeToInteractions
+    subscribeToInteractions,
+    isLiked
   } from '../services/interactionService';
   import InteractionButton from './shared/InteractionButton.svelte';
   
@@ -26,11 +27,11 @@
   let isScrolling = false;
   
   // Unified interaction state
-  let essayInteractionState = { likes: {}, shares: {}, views: {} };
+  let interactionState = { likes: {}, shares: {}, views: {} };
   
-  // Add reactive derived values - use string key matching the ContentType.ESSAY format
+  // Add reactive derived values
   $: essayKey = metadata?.id ? `${ContentType.ESSAY}:${metadata.id}` : '';
-  $: isEssayLiked = essayKey ? !!essayInteractionState.likes[essayKey] : false;
+  $: isEssayLiked = essayKey ? !!interactionState.likes[essayKey] : false;
   
   // Replace modal state with simple feedback state
   let copyFeedback = "";
@@ -40,12 +41,15 @@
     // Load the essay
     loadEssayContent();
     
+    // Record view when the essay loads
+    // This should happen after we have the metadata
+    
     // Listen for scroll events
     window.addEventListener('scroll', handleScroll);
     
-    // Subscribe to interaction changes (once)
+    // Subscribe to interaction changes
     const unsubscribeFromInteractions = subscribeToInteractions(state => {
-      essayInteractionState = state;
+      interactionState = state;
     });
     
     // Return cleanup function
@@ -64,122 +68,149 @@
   
   async function loadEssayContent() {
     try {
+      loading = true;
       const result = await loadEssay(slug);
       
       if (result.error) {
         error = result.error;
       } else {
-        content = result.content;
         metadata = result.metadata;
+        content = result.content;
         
-        // Record view when essay is loaded if we have a valid ID
+        // Record view once we have the essay ID
         if (metadata?.id) {
           recordView(ContentType.ESSAY, metadata.id);
         }
       }
-    } catch (err) {
-      console.error('Error loading essay:', err);
-      error = 'An unexpected error occurred loading the essay.';
+    } catch (e) {
+      error = 'Failed to load essay';
+      console.error('Error loading essay:', e);
     } finally {
       loading = false;
     }
   }
   
-  function handleLikeToggle() {
-    if (!metadata?.id) return;
-    toggleLike(ContentType.ESSAY, metadata.id);
-  }
-  
-  function handleShare() {
+  // Handle like button click
+  async function handleLike() {
     if (!metadata?.id) return;
     
-    // Get the share URL
-    const shareUrl = `${window.location.origin}/writing/${slug}`;
-    
-    // Copy to clipboard directly 
-    navigator.clipboard.writeText(shareUrl)
-      .then(() => {
-        copyFeedback = "Link copied!";
-        
-        // Record the share interaction
-        recordShare(ContentType.ESSAY, metadata.id);
-        
-        // Clear feedback after delay
-        if (feedbackTimeout) clearTimeout(feedbackTimeout);
-        feedbackTimeout = setTimeout(() => {
-          copyFeedback = "";
-        }, 2000);
-      })
-      .catch(err => {
-        console.error('Failed to copy URL:', err);
-        copyFeedback = "Copy failed";
-        
-        if (feedbackTimeout) clearTimeout(feedbackTimeout);
-        feedbackTimeout = setTimeout(() => {
-          copyFeedback = "";
-        }, 2000);
-      });
-  }
-  
-  function handleScroll() {
-    // Reset the hide timeout whenever scrolling occurs
-    if (hideTimeout) clearTimeout(hideTimeout);
-    
-    // Control whether the back button should appear at all based on scroll position
-    const scrollPosition = window.scrollY;
-    const showThreshold = 300;
-    showFloatingButton = scrollPosition > showThreshold;
-    
-    // Set button visibility based on scroll position, not just scroll start
-    if (showFloatingButton) {
-      isScrolling = true;
-      buttonVisible = true;
-    } else {
-      // If we're below the threshold, ensure button is hidden
-      buttonVisible = false;
+    try {
+      const newLikeState = await toggleLike(ContentType.ESSAY, metadata.id);
+      // No need to manually update UI state - it will be updated via subscription
+    } catch (e) {
+      console.error('Failed to toggle like:', e);
     }
-    
-    // Set a new timeout to hide the button after 2 seconds of no scrolling
-    hideTimeout = setTimeout(() => {
-      isScrolling = false;
-      buttonVisible = false;
-    }, 2000);
   }
   
+  // Handle share button click
+  async function handleShare() {
+    if (!metadata?.id) return;
+    
+    try {
+      // Copy URL to clipboard
+      await navigator.clipboard.writeText(window.location.href);
+      
+      // Show feedback
+      copyFeedback = "URL copied to clipboard!";
+      if (feedbackTimeout) clearTimeout(feedbackTimeout);
+      feedbackTimeout = setTimeout(() => {
+        copyFeedback = "";
+      }, 3000);
+      
+      // Record share
+      await recordShare(ContentType.ESSAY, metadata.id);
+    } catch (e) {
+      console.error('Failed to share essay:', e);
+      copyFeedback = "Failed to copy URL";
+      feedbackTimeout = setTimeout(() => {
+        copyFeedback = "";
+      }, 3000);
+    }
+  }
+  
+  // Scroll handling logic
+  function handleScroll() {
+    if (!isScrolling) {
+      isScrolling = true;
+      requestAnimationFrame(() => {
+        const scrollPosition = window.scrollY;
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        
+        // Show floating back button when scrolled down a bit
+        showFloatingButton = scrollPosition > 300;
+        
+        // Make button visible when we need it
+        if (showFloatingButton && !buttonVisible) {
+          buttonVisible = true;
+        } else if (!showFloatingButton && buttonVisible) {
+          // Add hide delay to avoid flickering
+          if (hideTimeout) clearTimeout(hideTimeout);
+          hideTimeout = setTimeout(() => {
+            buttonVisible = false;
+          }, 200);
+        }
+        
+        isScrolling = false;
+      });
+    }
+  }
+  
+  // Go back function for the back button
+  function goBack() {
+    window.history.back();
+  }
+
+  // Add this formatDate function inside the <script> section
   function formatDate(dateString: string) {
     // Simple date formatter that doesn't use the Date object at all
-    const [year, month, day] = dateString.split('-');
-    
+    // This prevents any timezone conversions
+    const [year, month, day] = dateString.split("-");
+
     // Convert month number to name
     const monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
     ];
-    
-    // Parse month as integer and subtract 1 to get correct index (months are 1-based in the string)
+
+    // Parse month as integer and subtract 1 to get the correct index (months are 1-based in the string)
     const monthIndex = parseInt(month, 10) - 1;
     const monthName = monthNames[monthIndex];
-    
+
     // Remove leading zero from day if present
-    const dayFormatted = day.startsWith('0') ? day.substring(1) : day;
-    
+    const dayFormatted = day.startsWith("0") ? day.substring(1) : day;
+
     // Return formatted date string
     return `${monthName} ${dayFormatted}, ${year}`;
   }
+
+  // Add these helpers to access counts
+  function getEssayLikes(): number {
+    return metadata?.like_count || 0;
+  }
   
-  // Add this function to manually handle navigation
-  function handleBackClick(event) {
-    event.preventDefault();
-    window.history.pushState({}, '', '/writing');
-    
-    // Dispatch a custom event to notify App.svelte that navigation occurred
-    window.dispatchEvent(new Event('popstate'));
+  function getEssayShares(): number {
+    return metadata?.share_count || 0;
+  }
+  
+  function getEssayViews(): number {
+    return metadata?.view_count || 0;
   }
 </script>
 
 <!-- Back link -->
 <div class="back-button">&lt; 
-<a href="/writing" on:click={handleBackClick}>
+<a href="/writing" on:click={goBack}>
   <span class="link-text">Back</span>
 </a>
 </div>
@@ -187,7 +218,7 @@
 <!-- Floating back button when scrolled -->
 <a 
   href="/writing"
-  on:click={handleBackClick}
+  on:click={goBack}
   class="floating-back-button {buttonVisible ? 'visible' : 'hidden'} {!showFloatingButton ? 'instant-hide' : ''}"
   aria-hidden={!buttonVisible}
 >
@@ -209,7 +240,7 @@
             type="like"
             active={isEssayLiked}
             count={undefined}
-            on:click={handleLikeToggle}
+            on:click={handleLike}
           />
           <InteractionButton 
             type="share"
@@ -234,6 +265,13 @@
     </div>
   {/if}
 </article>
+
+<!-- Update your counters in the UI to use these functions -->
+<div class="essay-stats">
+    <span class="essay-stat">{getEssayLikes()} {getEssayLikes() === 1 ? 'like' : 'likes'}</span>
+    <span class="essay-stat">{getEssayShares()} {getEssayShares() === 1 ? 'share' : 'shares'}</span>
+    <span class="essay-stat">{getEssayViews()} {getEssayViews() === 1 ? 'view' : 'views'}</span>
+</div>
 
 <style>
   /* Layout & Container Elements */
@@ -278,6 +316,10 @@
     font-size: 17px;
     margin-top: 0;
     margin-bottom: 3rem;
+  }
+
+  .essay-stats {
+    display: none;
   }
 
   /* Navigation Elements */

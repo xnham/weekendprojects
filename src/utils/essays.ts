@@ -66,9 +66,6 @@ export async function loadEssay(slug: string): Promise<EssayLoadResult> {
       view_count: essay.view_count
     };
     
-    // Increment view count
-    incrementViewCount(essay.id);
-    
     return {
       content: post.default,
       metadata: essayMetadata,
@@ -119,15 +116,6 @@ export async function getAllEssays(): Promise<EssayMetadata[]> {
   } catch (error) {
     console.error("Error loading essays:", error);
     return [];
-  }
-}
-
-// Increment view count for an essay
-async function incrementViewCount(essayId: string) {
-  try {
-    await supabase.rpc('increment_view_count', { essay_id: essayId });
-  } catch (error) {
-    console.error("Error incrementing view count:", error);
   }
 }
 

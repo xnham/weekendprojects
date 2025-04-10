@@ -24,14 +24,8 @@
     follows: number;
     beneficiary: string;
   }
-
-  interface UserData {
-    email: string;
-    follows: string[];
-    likes: { [key: string]: boolean };
-  }
   
-  // Add new interface for notifications
+  // Add interface for notifications
   interface Notification {
     projectId: number;
     message: string;
@@ -43,24 +37,17 @@
   let loading = true;
   let error: string | null = null;
   
-  // State for email modal
-  let showEmailModal = false;
-  let currentProjectId: string = '';
-  let email = '';
-  let isEmailValid = false;
-  
   // Add notification state
   let activeNotifications: Record<number, Notification> = {};
   
-  // User data state
-  let userData: UserData = { 
-    email: '', 
-    follows: [], 
-    likes: {} 
-  };
+  // Email modal state
+  let showEmailModal = false;
+  let currentProjectId: number | null = null;
+  let email: string = '';
+  let submitting = false;
   
-  // Replace userData and local state management
-  let projectInteractionState = { likes: {}, follows: {} };
+  // Replace legacy userData with interaction state
+  let projectInteractionState = { likes: {}, follows: {}, userEmail: undefined };
   
   // Add reactive derived values
   $: projectLikedStatus = displayProjects.reduce((acc, project) => {
@@ -75,9 +62,6 @@
   
   // Initialize component
   onMount(() => {
-    // Load user data from localStorage
-    loadUserData();
-    
     // Move async part to a separate function
     async function loadProjects() {
       try {
@@ -86,9 +70,9 @@
         const { data, error: fetchError } = await supabase
           .from('projects')
           .select('*')
-          .eq('status', 'future') // Changed: use 'future' status instead of array
+          .eq('status', 'future')
           .eq('show', true)
-          .order('id', { ascending: true }); // Changed: ascending order
+          .order('id', { ascending: true });
         
         console.log("Supabase query result:", { data, fetchError });
         
@@ -119,28 +103,6 @@
       unsubscribe();
     };
   });
-  // User data management functions
-  function loadUserData() {
-    const data = localStorage.getItem('nextUserData');
-    if (data) {
-      userData = JSON.parse(data);
-    }
-  }
-  
-  function saveUserData() {
-    localStorage.setItem('nextUserData', JSON.stringify(userData));
-  }
-  
-  // Email validation
-  function validateEmail(email: string): boolean {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(String(email).toLowerCase());
-  }
-  
-  // Check if email is valid when input changes
-  function handleEmailInput() {
-    isEmailValid = validateEmail(email);
-  }
   
   // Handle like button click
   function handleLike(projectId: number) {
@@ -173,72 +135,71 @@
     // Get the current status before toggling
     const currentlyFollowing = projectFollowStatus[projectId];
     
-    // Toggle the follow status
-    recordFollow(ContentType.PROJECT, projectId.toString());
-    
-    // Update project follows count in UI with proper reactivity
-    displayProjects = displayProjects.map(p => {
-      if (p.id === projectId) {
-        return {
-          ...p,
-          follows: p.follows + (currentlyFollowing ? -1 : 1) // Decrement if unfollowing, increment if following
-        };
+    if (!currentlyFollowing) {
+      // Check if we already have the user's email in the interaction state
+      if (projectInteractionState.userEmail) {
+        // If we have email, use it without showing modal
+        completeFollowToggle(projectId, projectInteractionState.userEmail);
+      } else {
+        // If no email yet, show modal to get email
+        currentProjectId = projectId;
+        showEmailModal = true;
       }
-      return p;
-    });
+    } else {
+      // If already following, just unfollow (no email needed)
+      completeFollowToggle(projectId, null);
+    }
+  }
+  
+  // Complete the follow toggle process (after email collection if needed)
+  async function completeFollowToggle(projectId: number, userEmail: string | null) {
+    const currentlyFollowing = projectFollowStatus[projectId];
     
-    // Show notification with the OPPOSITE of current state (since we're toggling)
-    const message = !currentlyFollowing 
-      ? `You'll be notified when ${getProjectTitle(projectId)} is updated.` 
-      : `You won't be notified about ${getProjectTitle(projectId)}.`;
-    
-    showNotification(projectId, message);
+    try {
+      // Toggle the follow status with the service
+      await recordFollow(ContentType.PROJECT, projectId.toString(), userEmail);
+      
+      // Update project follows count in UI with proper reactivity
+      displayProjects = displayProjects.map(p => {
+        if (p.id === projectId) {
+          return {
+            ...p,
+            follows: p.follows + (currentlyFollowing ? -1 : 1) // Decrement if unfollowing, increment if following
+          };
+        }
+        return p;
+      });
+      
+      // Show notification with the OPPOSITE of current state (since we're toggling)
+      const message = !currentlyFollowing 
+        ? `You'll be notified when ${getProjectTitle(projectId)} is updated.` 
+        : `You won't be notified about ${getProjectTitle(projectId)}.`;
+      
+      showNotification(projectId, message);
+    } catch (error) {
+      console.error("Error toggling follow:", error);
+      // Optionally show an error notification here
+    }
   }
   
   // Handle email form submission
-  async function handleEmailSubmit() {
-    if (validateEmail(email)) {
-      const projectId = parseInt(currentProjectId);
+  async function handleSubmitEmail() {
+    if (!email || !currentProjectId) return;
+    
+    submitting = true;
+    
+    try {
+      await completeFollowToggle(currentProjectId, email);
       
-      // Show notification about following BEFORE database operations
-      showNotification(projectId, "You are now following this project. You will receive an email when there's an update.");
-      
-      // Update user data
-      userData.email = email;
-      
-      // Add project to follows in local storage
-      if (!userData.follows.includes(currentProjectId)) {
-        userData.follows.push(currentProjectId);
-        
-        try {
-          // TODO: Replace projectService with appropriate API call
-          // Previously: 
-          // await projectService.addProjectFollower(projectId, email);
-          // await projectService.updateFollowCount(projectId, true);
-          
-          // Update project follows count in UI with proper reactivity
-          displayProjects = displayProjects.map(p => {
-            if (p.id === projectId) {
-              return {
-                ...p,
-                follows: p.follows + 1
-              };
-            }
-            return p;
-          });
-        } catch (err) {
-          console.error('Error recording follower in database:', err);
-        }
-      }
-      
-      // Save user data to localStorage
-      saveUserData();
-      
-      // Close modal
+      // Close modal and reset form
       showEmailModal = false;
-      
-      // Reset email
       email = '';
+      currentProjectId = null;
+    } catch (error) {
+      console.error("Error following project with email:", error);
+      // Optionally show an error message in the modal
+    } finally {
+      submitting = false;
     }
   }
   
@@ -291,11 +252,6 @@
     
     // Both likes and followers
     return `${likes} ${likes === 1 ? 'like' : 'likes'} & ${followers} ${followers === 1 ? 'follower' : 'followers'}`;
-  }
-  
-  // Close modal function
-  function closeModal() {
-    showEmailModal = false;
   }
   
   // Handle comment button click
@@ -391,44 +347,44 @@
   {/if}
 </div>
 
-<!-- Replace the Modal component with direct implementation -->
+<!-- Email collection modal -->
 {#if showEmailModal}
   <div class="future-project-modal">
     <div class="future-project-modal-content">
       <button 
         class="future-project-close-modal" 
-        on:click={closeModal}
+        on:click={() => showEmailModal = false} 
         aria-label="Close modal"
       >
         &times;
       </button>
       <div class="future-project-modal-inner-content">
-        <h2 class="future-project-modal-title">Get early access to your favorite projects.</h2>
+        <h3 class="future-project-modal-title">
+          Get updates about your favorite projects
+        </h3>
         <div class="future-project-form-and-button">
-          <form on:submit|preventDefault={handleEmailSubmit}>
-            <div class="future-project-form-group">
+          <div class="future-project-form-group">
+            <form on:submit|preventDefault={handleSubmitEmail}>
               <input 
                 type="email" 
                 bind:value={email} 
-                on:input={handleEmailInput} 
-                placeholder="Your email" 
-                required
-                aria-label="Email address"
+                placeholder="Your email address" 
+                required 
                 use:focusOnMount
+                class="follow-email-input"
+              />
+              <button 
+                type="submit" 
+                class="modal-action-btn" 
+                disabled={submitting || !email}
               >
-            </div>
-            <button 
-              type="submit" 
-              class="modal-action-btn" 
-              disabled={!isEmailValid}
-              aria-label="Submit email"
-            >
-              Submit
-            </button>
-          </form>
-        </div>
-        <div class="future-project-privacy-note">
-          <small>Low volume. Unsubscribe anytime.</small>
+                {submitting ? 'Subscribing...' : 'Subscribe to updates'}
+              </button>
+            </form>
+          </div>
+          <p class="future-project-privacy-note">
+            Low volume. Unsubscribe anytime.
+          </p>
         </div>
       </div>
     </div>
@@ -730,27 +686,9 @@
     margin: 0 auto;
   }
   
-  .future-project-form-and-button form {
-    width: 100%;
-  }
-  
   .future-project-form-group {
     width: 100%;
     margin: 0;
-  }
-  
-  .future-project-form-group input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid var(--dark-60);
-    border-radius: 4px;
-    font-size: 16px;
-    background-color: var(--light-100);
-  }
-  
-  .future-project-form-group input:focus {
-    outline: none;
-    border-color: var(--dark-80);
   }
   
   .modal-action-btn {
@@ -776,10 +714,11 @@
   }
   
   .future-project-privacy-note {
-    margin-top: 15px;
+    margin-top: 14px;
     text-align: center;
     line-height: 1.4;
-    color: var(--dark-80);
+    font-size: 13px;
+    color: var(--dark-70);
   }
   
   /* ======================
@@ -852,5 +791,25 @@
       white-space: normal;
       word-break: break-word;
     }
+  }
+  
+  .follow-email-input {
+    width: 100%;
+    height: 40px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid var(--dark-60);
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: var(--light-100);
+  }
+
+  .follow-email-input::placeholder {
+    color: var(--dark-40);
+  }
+  
+  .follow-email-input:focus {
+    border-color: var(--dark-80);
+    outline: none;
   }
 </style>
