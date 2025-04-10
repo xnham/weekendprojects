@@ -14,6 +14,7 @@
     isLiked
   } from '../services/interactionService';
   import InteractionButton from './shared/InteractionButton.svelte';
+  import { supabase } from '../lib/supabase';
   
   export let slug: string;
   
@@ -95,8 +96,24 @@
     if (!metadata?.id) return;
     
     try {
-      const newLikeState = await toggleLike(ContentType.ESSAY, metadata.id);
-      // No need to manually update UI state - it will be updated via subscription
+      await toggleLike(ContentType.ESSAY, metadata.id);
+      
+      // Refresh the metadata to get updated counts
+      const { data: updatedEssay } = await supabase
+        .from('essays')
+        .select('like_count, share_count, view_count')
+        .eq('id', metadata.id)
+        .single();
+        
+      if (updatedEssay) {
+        // Update only the count fields
+        metadata = { 
+          ...metadata, 
+          like_count: updatedEssay.like_count,
+          share_count: updatedEssay.share_count,
+          view_count: updatedEssay.view_count
+        };
+      }
     } catch (e) {
       console.error('Failed to toggle like:', e);
     }
@@ -119,6 +136,23 @@
       
       // Record share
       await recordShare(ContentType.ESSAY, metadata.id);
+      
+      // Refresh the metadata to get updated counts
+      const { data: updatedEssay } = await supabase
+        .from('essays')
+        .select('like_count, share_count, view_count')
+        .eq('id', metadata.id)
+        .single();
+        
+      if (updatedEssay) {
+        // Update only the count fields
+        metadata = { 
+          ...metadata, 
+          like_count: updatedEssay.like_count,
+          share_count: updatedEssay.share_count,
+          view_count: updatedEssay.view_count
+        };
+      }
     } catch (e) {
       console.error('Failed to share essay:', e);
       copyFeedback = "Failed to copy URL";
@@ -144,11 +178,12 @@
         if (showFloatingButton && !buttonVisible) {
           buttonVisible = true;
         } else if (!showFloatingButton && buttonVisible) {
-          // Add hide delay to avoid flickering
-          if (hideTimeout) clearTimeout(hideTimeout);
-          hideTimeout = setTimeout(() => {
-            buttonVisible = false;
-          }, 200);
+          // Remove the timeout delay and update immediately when scrolling up
+          buttonVisible = false;
+          if (hideTimeout) {
+            clearTimeout(hideTimeout);
+            hideTimeout = null;
+          }
         }
         
         isScrolling = false;
@@ -157,8 +192,11 @@
   }
   
   // Go back function for the back button
-  function goBack() {
-    window.history.back();
+  function goBack(e: MouseEvent) {
+    e.preventDefault();
+    window.history.pushState({}, '', '/writing');
+    // Dispatch a custom event that App.svelte can listen for
+    window.dispatchEvent(new CustomEvent('spanavigate'));
   }
 
   // Add this formatDate function inside the <script> section
@@ -210,9 +248,9 @@
 
 <!-- Back link -->
 <div class="back-button">&lt; 
-<a href="/writing" on:click={goBack}>
-  <span class="link-text">Back</span>
-</a>
+  <a href="/writing" on:click={goBack}>
+    <span class="link-text">Back</span>
+  </a>
 </div>
 
 <!-- Floating back button when scrolled -->
@@ -350,12 +388,12 @@
     position: fixed;
     top: 10px;
     left: 10px;
-    background-color: var(--light-100);
+    background-color: transparent;
     color: var(--dark-70);
-    padding: 8px 12px;
+    padding: 8px 0 8px 20px;
     font-size: 14px;
     text-decoration: none;
-    z-index: 100;
+    z-index: 50;
     opacity: 0;
     transition: opacity 1.5s ease, transform 0.3s ease, color 0.3s ease;
     pointer-events: none;
