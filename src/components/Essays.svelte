@@ -7,16 +7,14 @@
     import {
         toggleLike,
         recordShare,
-        recordView,
-        isLiked as checkIfLiked,
+        isLiked,
         subscribeToInteractions,
-        getInteractionState,
         ContentType,
     } from "../services/interactionService";
     import InteractionButton from "../components/shared/InteractionButton.svelte";
 
     let essays: EssayMetadata[] = [];
-    let essayInteractionState = getInteractionState();
+    let interactionState = { likes: {}, shares: {}, views: {} };
 
     // Replace modal state with copy feedback state
     let copyFeedback = "";
@@ -25,19 +23,20 @@
 
     // Replace essayLikes with reactive derived values
     $: essayLikedStatus = essays.reduce((acc, essay) => {
-        acc[essay.id] = essayInteractionState?.likes[`${ContentType.ESSAY}:${essay.id}`] || false;
+        const key = `${ContentType.ESSAY}:${essay.id}`;
+        acc[essay.id] = interactionState?.likes[key] || false;
         return acc;
     }, {});
 
     onMount(() => {
         // Load essays
-        getAllEssays().then((result) => {
+        getAllEssays().then(result => {
             essays = result;
         });
 
         // Subscribe to interaction state changes
         const unsubscribe = subscribeToInteractions((state) => {
-            essayInteractionState = state;
+            interactionState = state;
         });
 
         // Add global ESC key handler for modal
@@ -57,12 +56,46 @@
         };
     });
 
-    function handleLikeToggle(essayId: string) {
-        toggleLike(ContentType.ESSAY, essayId);
+    async function handleLike(essayId: string) {
+        try {
+            await toggleLike(ContentType.ESSAY, essayId);
+            // State will be updated via subscription
+        } catch (error) {
+            console.error("Error toggling like:", error);
+        }
     }
 
-    function checkEssayLiked(slug: string): boolean {
-        return !!essayLikedStatus[slug];
+    async function handleShare(essay: EssayMetadata) {
+        try {
+            if (!essay.id) return;
+            
+            // Create the share URL
+            const shareUrl = `${window.location.origin}/writing/${essay.slug}`;
+            
+            // Copy to clipboard
+            await navigator.clipboard.writeText(shareUrl);
+            
+            // Show feedback
+            copyFeedback = "URL copied to clipboard!";
+            copyFeedbackEssayId = essay.id;
+            
+            if (feedbackTimeout) clearTimeout(feedbackTimeout);
+            feedbackTimeout = setTimeout(() => {
+                copyFeedback = "";
+                copyFeedbackEssayId = "";
+            }, 3000);
+            
+            // Record the share in the database
+            await recordShare(ContentType.ESSAY, essay.id);
+        } catch (error) {
+            console.error("Error sharing essay:", error);
+            copyFeedback = "Failed to copy URL";
+            copyFeedbackEssayId = essay.id;
+            feedbackTimeout = setTimeout(() => {
+                copyFeedback = "";
+                copyFeedbackEssayId = "";
+            }, 3000);
+        }
     }
 
     function formatDate(dateString: string) {
@@ -101,64 +134,20 @@
         return `${window.location.origin}/writing/${slug}`;
     }
 
-    function handleShare(event: MouseEvent, essay: EssayMetadata): void {
-        // Prevent the click from bubbling up to the card and navigating
-        event.preventDefault();
-        event.stopPropagation();
-        
-        const url = `${window.location.origin}/writing/${essay.slug}`;
-        
-        // Add console logs for debugging
-        console.log("Sharing essay:", essay.id);
-        
-        // Copy to clipboard directly
-        navigator.clipboard.writeText(url)
-            .then(() => {
-                console.log("Copy successful, setting feedback");
-                
-                // Clear any existing timeout first
-                if (feedbackTimeout) clearTimeout(feedbackTimeout);
-                
-                // Update state variables - make sure to use Svelte's reactive assignments
-                copyFeedbackEssayId = essay.id;
-                copyFeedback = "Link copied!";
-                
-                // Record the share in Supabase
-                recordShare(ContentType.ESSAY, essay.id);
-                
-                // Force an update to the interaction state to ensure UI refreshes
-                essayInteractionState = { 
-                    ...essayInteractionState,
-                    shares: { 
-                        ...essayInteractionState.shares, 
-                        [`${ContentType.ESSAY}:${essay.id}`]: true 
-                    }
-                };
-                
-                // Clear feedback after delay
-                feedbackTimeout = setTimeout(() => {
-                    console.log("Clearing feedback");
-                    copyFeedback = "";
-                    copyFeedbackEssayId = "";
-                }, 3000); // Extended to 3 seconds for testing
-            })
-            .catch(err => {
-                console.error("Failed to copy: ", err);
-                // Clear any existing timeout first
-                if (feedbackTimeout) clearTimeout(feedbackTimeout);
-                
-                copyFeedbackEssayId = essay.id;
-                copyFeedback = "Copy failed";
-                
-                feedbackTimeout = setTimeout(() => {
-                    copyFeedback = "";
-                    copyFeedbackEssayId = "";
-                }, 3000);
-            });
+    // Add this function to get counts directly from database fields
+    function getEssayLikes(essay: EssayMetadata): number {
+        return essay.like_count || 0;
     }
-
-    // Add this function to format likes and shares counts
-    function formatCounters(likes: number, shares: number): string {
+    
+    function getEssayShares(essay: EssayMetadata): number {
+        return essay.share_count || 0;
+    }
+    
+    // Update the formatCounters to use these functions
+    function formatCounters(essay: EssayMetadata): string {
+        const likes = getEssayLikes(essay);
+        const shares = getEssayShares(essay);
+        
         // No likes or shares
         if (likes === 0 && shares === 0) {
             return "";
@@ -204,7 +193,7 @@
                         type="like"
                         active={essayLikedStatus[essay.id]}
                         count={undefined}
-                        on:click={() => handleLikeToggle(essay.id)}
+                        on:click={() => handleLike(essay.id)}
                     />
 
                     <div class="share-button-container">
@@ -212,7 +201,7 @@
                             type="share"
                             active={false}
                             count={undefined}
-                            on:click={(event) => handleShare(event, essay)}
+                            on:click={(event) => handleShare(essay)}
                         />
                         
                         {#if copyFeedback && copyFeedbackEssayId === essay.id}
@@ -225,16 +214,7 @@
                 
                 <div class="essay-counters">
                     {#if essay.id}
-                        {formatCounters(
-                            // Count likes for this essay by checking interaction state
-                            Object.keys(essayInteractionState?.likes || {})
-                                .filter(key => key === `${ContentType.ESSAY}:${essay.id}` && essayInteractionState.likes[key])
-                                .length,
-                            // Count shares for this essay by checking interaction state
-                            Object.keys(essayInteractionState?.shares || {})
-                                .filter(key => key === `${ContentType.ESSAY}:${essay.id}` && essayInteractionState.shares[key])
-                                .length
-                        )}
+                        {formatCounters(essay)}
                     {/if}
                 </div>
             </div>

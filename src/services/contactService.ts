@@ -41,6 +41,7 @@ export async function submitContactForm(formData: ContactFormData): Promise<Subm
         // FormSubmit customization options
         formSubmitData.append('_subject', 'New Contact Form Submission');
         formSubmitData.append('_replyto', formData.email);
+        formSubmitData.append('_captcha', 'false');
         
         // Send to FormSubmit using obfuscated email
         const emailResponse = await fetch('https://formsubmit.co/296313ad9901bdf7df20d9e5275fdf95', {
