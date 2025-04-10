@@ -304,6 +304,11 @@
     console.log('Comment clicked for project:', projectId);
     // TODO: Implement comment functionality
   }
+  
+  // Add a custom focus action
+  function focusOnMount(node: HTMLElement) {
+    node.focus();
+  }
 </script>
 
 <div class="future-projects" id="projectList">
@@ -409,6 +414,7 @@
                 placeholder="Your email" 
                 required
                 aria-label="Email address"
+                use:focusOnMount
               >
             </div>
             <button 
@@ -739,6 +745,7 @@
     border: 1px solid var(--dark-60);
     border-radius: 4px;
     font-size: 16px;
+    background-color: var(--light-100);
   }
   
   .future-project-form-group input:focus {

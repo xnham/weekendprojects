@@ -134,7 +134,7 @@
 
     input, textarea {
         width: 100%;
-        background-color: var(--pure-white-100);
+        background-color: var(--light-100);
         padding: 12px;
         border: 1px solid var(--dark-60);
         border-radius: 5px;
