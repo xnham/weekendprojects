@@ -6,14 +6,15 @@
   import { 
     toggleLike, 
     isLiked,
-    ContentType,
-    subscribeToInteractions
-  } from '../services/interactionService';
+    subscribeToInteractions,
+    ContentType
+  } from '../services/projectInteractionService';
   import InteractionButton from './shared/InteractionButton.svelte';
   
   // Define a type for the project structure
   interface Project {
-    id: number;
+    id: string;
+    order: number;
     title: string;
     status: string;
     show: boolean;
@@ -49,19 +50,32 @@
     likes?: number;
   }
   
+  // Interface to match projectInteractionService
+  interface InteractionState {
+    likes: Record<string, boolean>;
+    follows: Record<string, boolean>;
+    userEmail?: string;
+    initialized: boolean;
+  }
+  
   // State for projects
   let completedProjects: Project[] = [];
   let loading = true;
   let error: string | null = null;
   
-  // Replace likedProjects with subscription
-  let projectInteractionState = { likes: {} };
+  // Replace likedProjects with subscription, using the proper interface
+  let projectInteractionState: InteractionState = { 
+    likes: {}, 
+    follows: {}, 
+    userEmail: undefined, 
+    initialized: false 
+  };
   
   // Add reactive derived values
   $: projectLikedStatus = completedProjects.reduce((acc, project) => {
     acc[project.id] = projectInteractionState?.likes[`${ContentType.PROJECT}:${project.id}`] || false;
     return acc;
-  }, {});
+  }, {} as Record<string, boolean>);
   
   // Fetch projects from Supabase
   onMount(() => {
@@ -79,7 +93,7 @@
           .select('*')
           .eq('status', 'completed')
           .eq('show', true)
-          .order('id', { ascending: false });
+          .order('order', { ascending: false });
         
         if (fetchError) throw fetchError;
         
@@ -128,16 +142,16 @@
   });
   
   // Track current slide for each project
-  let currentSlides: Record<number, number> = {};
+  let currentSlides: Record<string, number> = {};
   
   // Touch handling for swipe gestures
   let touchStartX = 0;
   let touchEndX = 0;
   
   // References for description elements and arrow buttons
-  let descriptionElements: Record<number, HTMLElement> = {};
-  let leftArrows: Record<number, HTMLElement> = {};
-  let rightArrows: Record<number, HTMLElement> = {};
+  let descriptionElements: Record<string, HTMLElement> = {};
+  let leftArrows: Record<string, HTMLElement> = {};
+  let rightArrows: Record<string, HTMLElement> = {};
   
   function handleTouchStart(e: TouchEvent): void {
     touchStartX = e.touches[0].clientX;
@@ -147,7 +161,7 @@
     touchEndX = e.touches[0].clientX;
   }
   
-  function handleTouchEnd(projectId: number, project: Project): void {
+  function handleTouchEnd(projectId: string, project: Project): void {
     const swipeThreshold = 50; // Minimum distance required for a swipe
     const swipeDistance = touchEndX - touchStartX;
     
@@ -219,12 +233,12 @@
   }
   
   // Function to navigate to a specific slide
-  function goToSlide(projectId: number, slideIndex: number): void {
+  function goToSlide(projectId: string, slideIndex: number): void {
     currentSlides[projectId] = slideIndex;
   }
   
   // Function to go forward one slide
-  function goForward(projectId: number, project: Project): void {
+  function goForward(projectId: string, project: Project): void {
     const numSlides = getTotalSlides(project);
     if (currentSlides[projectId] < numSlides - 1) {
       currentSlides[projectId]++;
@@ -232,7 +246,7 @@
   }
   
   // Function to go back one slide
-  function goBack(projectId: number): void {
+  function goBack(projectId: string): void {
     if (currentSlides[projectId] > 0) {
       currentSlides[projectId]--;
     }
@@ -251,7 +265,7 @@
   }
 
   // Replace handleLikeClick with service call
-  function handleLikeClick(projectId: number) {
+  function handleLikeClick(projectId: string) {
     // Find the current project
     const project = completedProjects.find(p => p.id === projectId);
     if (!project) return;
@@ -270,12 +284,12 @@
     // Force Svelte to update by creating a new array reference
     completedProjects = [...completedProjects];
     
-    // Call the service
-    toggleLike(ContentType.PROJECT, projectId.toString());
+    // Call the service with both required arguments
+    toggleLike(ContentType.PROJECT, projectId);
   }
 
   // Replace isProjectLiked with lookup from reactive state
-  function isProjectLiked(projectId: number): boolean {
+  function isProjectLiked(projectId: string): boolean {
     return projectLikedStatus[projectId] || false;
   }
 </script>

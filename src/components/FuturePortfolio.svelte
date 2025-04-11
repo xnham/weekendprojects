@@ -4,17 +4,18 @@
   import { supabase } from '../lib/supabase';
   import { 
     toggleLike, 
-    recordFollow, 
-    isLiked, 
+    toggleFollow,
+    isLiked,
     isFollowing,
-    ContentType,
     subscribeToInteractions,
-  } from '../services/interactionService';
-  import InteractionButton from '../components/shared/InteractionButton.svelte';
+    ContentType
+  } from '../services/projectInteractionService';
+  import InteractionButton from './shared/InteractionButton.svelte';
   
   // Define interfaces for our data structures
   interface Project {
-    id: number;
+    id: string;
+    order: number;
     title: string;
     status: string;
     show: boolean;
@@ -27,7 +28,7 @@
   
   // Add interface for notifications
   interface Notification {
-    projectId: number;
+    projectId: string;
     message: string;
     timer: ReturnType<typeof setTimeout> | null;
   }
@@ -38,27 +39,40 @@
   let error: string | null = null;
   
   // Add notification state
-  let activeNotifications: Record<number, Notification> = {};
+  let activeNotifications: Record<string, Notification> = {};
   
   // Email modal state
   let showEmailModal = false;
-  let currentProjectId: number | null = null;
+  let currentProjectId: string | null = null;
   let email: string = '';
   let submitting = false;
   
-  // Replace legacy userData with interaction state
-  let projectInteractionState = { likes: {}, follows: {}, userEmail: undefined, initialized: false };
+  // Define the interface to match the one from projectInteractionService
+  interface InteractionState {
+    likes: Record<string, boolean>;
+    follows: Record<string, boolean>;
+    userEmail?: string;
+    initialized: boolean;
+  }
+  
+  // Replace legacy userData with interaction state and use the proper interface
+  let projectInteractionState: InteractionState = { 
+    likes: {}, 
+    follows: {}, 
+    userEmail: undefined, 
+    initialized: false 
+  };
   
   // Add reactive derived values
   $: projectLikedStatus = displayProjects.reduce((acc, project) => {
-    acc[project.id] = projectInteractionState?.likes[`${ContentType.PROJECT}:${project.id.toString()}`] || false;
+    acc[project.id] = projectInteractionState?.likes[`${ContentType.PROJECT}:${project.id}`] || false;
     return acc;
-  }, {});
+  }, {} as Record<string, boolean>);
   
   $: projectFollowStatus = displayProjects.reduce((acc, project) => {
-    acc[project.id] = projectInteractionState?.follows[`${ContentType.PROJECT}:${project.id.toString()}`] || false;
+    acc[project.id] = projectInteractionState?.follows[`${ContentType.PROJECT}:${project.id}`] || false;
     return acc;
-  }, {});
+  }, {} as Record<string, boolean>);
   
   // Add debug logging for interaction state
   afterUpdate(() => {
@@ -84,7 +98,7 @@
           .select('*')
           .eq('status', 'future')
           .eq('show', true)
-          .order('id', { ascending: true });
+          .order('order', { ascending: true });
         
         console.log("Supabase query result:", { data, fetchError });
         
@@ -134,12 +148,12 @@
   });
   
   // Handle like button click
-  function handleLike(projectId: number) {
+  function handleLike(projectId: string) {
     // Get the current status before toggling
     const currentlyLiked = projectLikedStatus[projectId];
     
     // Toggle the like status
-    toggleLike(ContentType.PROJECT, projectId.toString());
+    toggleLike(ContentType.PROJECT, projectId);
     
     // Update project likes count in UI with proper reactivity
     displayProjects = displayProjects.map(p => {
@@ -154,41 +168,19 @@
   }
   
   // Add missing getProjectTitle function
-  function getProjectTitle(projectId: number): string {
+  function getProjectTitle(projectId: string): string {
     const project = displayProjects.find(p => p.id === projectId);
     return project ? project.title : 'this project';
   }
   
   // Handle follow button click
-  function handleFollow(projectId: number) {
-    // Get the current status before toggling
-    const currentlyFollowing = projectFollowStatus[projectId];
-    
-    if (!currentlyFollowing) {
-      // Check if we already have the user's email in the interaction state
-      if (projectInteractionState.userEmail) {
-        // If we have email, use it without showing modal
-        completeFollowToggle(projectId, projectInteractionState.userEmail);
-      } else {
-        // If no email yet, show modal to get email
-        currentProjectId = projectId;
-        showEmailModal = true;
-      }
-    } else {
-      // If already following, just unfollow (no email needed)
-      completeFollowToggle(projectId, null);
-    }
-  }
-  
-  // Complete the follow toggle process (after email collection if needed)
-  async function completeFollowToggle(projectId: number, userEmail: string | null) {
-    const currentlyFollowing = projectFollowStatus[projectId];
-    
+  async function handleFollow(projectId: string) {
     try {
-      // Toggle the follow status with the service
-      await recordFollow(ContentType.PROJECT, projectId.toString(), userEmail);
+      // Get current state before toggle
+      const currentlyFollowing = projectFollowStatus[projectId];
+      const newFollowState = !currentlyFollowing;
       
-      // Update project follows count in UI with proper reactivity
+      // Update local display state immediately (optimistic UI)
       displayProjects = displayProjects.map(p => {
         if (p.id === projectId) {
           return {
@@ -199,41 +191,113 @@
         return p;
       });
       
-      // Show notification with the OPPOSITE of current state (since we're toggling)
-      const message = !currentlyFollowing 
-        ? `You'll be notified when ${getProjectTitle(projectId)} is updated.` 
-        : `You won't be notified about ${getProjectTitle(projectId)}.`;
+      // Show notification immediately (optimistic UI)
+      showNotification(
+        projectId, 
+        newFollowState
+          ? `You are now following ${getProjectTitle(projectId)}.` 
+          : `You have unfollowed ${getProjectTitle(projectId)}.`
+      );
       
-      showNotification(projectId, message);
+      // Then perform the actual database operation
+      const result = await toggleFollow(ContentType.PROJECT, projectId);
+      
+      if (result.needsEmail) {
+        // User needs to provide email, so dismiss notification and show modal
+        dismissNotification(projectId);
+        showEmailModal = true;
+        currentProjectId = projectId;
+        
+        // Revert the follow count change since we'll increment it after email submission
+        displayProjects = displayProjects.map(p => {
+          if (p.id === projectId) {
+            return {
+              ...p,
+              follows: p.follows - 1 // Decrement back since we'll increment after email submission
+            };
+          }
+          return p;
+        });
+      } else if (!result.success) {
+        // Operation failed, revert the follow count change
+        displayProjects = displayProjects.map(p => {
+          if (p.id === projectId) {
+            return {
+              ...p,
+              follows: p.follows + (newFollowState ? -1 : 1) // Revert the change
+            };
+          }
+          return p;
+        });
+        
+        // Show an error notification
+        showNotification(
+          projectId,
+          "Sorry, we couldn't update your follow status. Please try again."
+        );
+      }
     } catch (error) {
-      console.error("Error toggling follow:", error);
-      // Optionally show an error notification here
+      console.error('Failed to toggle follow:', error);
+      // Show error notification
+      showNotification(
+        projectId,
+        "An error occurred. Please try again."
+      );
     }
   }
   
-  // Handle email form submission
-  async function handleSubmitEmail() {
-    if (!email || !currentProjectId) return;
-    
-    submitting = true;
+  // Add email submit handler
+  async function submitEmail() {
+    if (!currentProjectId) return;
     
     try {
-      await completeFollowToggle(currentProjectId, email);
+      submitting = true;
       
-      // Close modal and reset form
-      showEmailModal = false;
-      email = '';
-      currentProjectId = null;
+      // Validate email
+      if (!email || !email.includes('@')) {
+        // Show error
+        return;
+      }
+      
+      const result = await toggleFollow(ContentType.PROJECT, currentProjectId, email);
+      
+      if (result.success) {
+        // Get the project title before closing the modal
+        const projectTitle = getProjectTitle(currentProjectId);
+        const projectIdToNotify = currentProjectId; // Store ID before resetting
+        
+        // Update follow count after successful email submission
+        displayProjects = displayProjects.map(p => {
+          if (p.id === projectIdToNotify) {
+            return {
+              ...p,
+              follows: p.follows + 1 // Now increment the follow count
+            };
+          }
+          return p;
+        });
+        
+        // Close modal
+        showEmailModal = false;
+        currentProjectId = null;
+        
+        // Show notification with project title after a short delay to ensure modal is closed
+        setTimeout(() => {
+          showNotification(
+            projectIdToNotify, 
+            `You are now following ${projectTitle}.`
+          );
+        }, 100);
+      }
     } catch (error) {
-      console.error("Error following project with email:", error);
-      // Optionally show an error message in the modal
+      console.error('Failed to submit email:', error);
     } finally {
       submitting = false;
     }
   }
   
   // Add notification functions
-  function showNotification(projectId: number, message: string) {
+  function showNotification(projectId: string, message: string) {
     // Clear existing notification timer if it exists
     if (activeNotifications[projectId]?.timer) {
       clearTimeout(activeNotifications[projectId].timer);
@@ -252,7 +316,7 @@
     activeNotifications = {...activeNotifications};
   }
 
-  function dismissNotification(projectId: number) {
+  function dismissNotification(projectId: string) {
     if (activeNotifications[projectId]) {
       if (activeNotifications[projectId].timer) {
         clearTimeout(activeNotifications[projectId].timer);
@@ -284,7 +348,7 @@
   }
   
   // Handle comment button click
-  function handleComment(projectId: number): void {
+  function handleComment(projectId: string): void {
     // Placeholder for comment functionality
     console.log('Comment clicked for project:', projectId);
     // TODO: Implement comment functionality
@@ -395,7 +459,7 @@
         </h3>
         <div class="future-project-form-and-button">
           <div class="future-project-form-group">
-            <form on:submit|preventDefault={handleSubmitEmail}>
+            <form on:submit|preventDefault={submitEmail}>
               <input 
                 type="email" 
                 bind:value={email} 
@@ -707,7 +771,6 @@
     transition: transform 0.3s ease;
   }
   
-  /* Modal form */
   .future-project-form-and-button {
     display: flex;
     flex-direction: column;
@@ -828,7 +891,6 @@
     width: 100%;
     height: 40px;
     padding: 10px;
-    margin-bottom: 10px;
     border: 1px solid var(--dark-60);
     border-radius: 4px;
     font-size: 16px;

@@ -9,10 +9,9 @@
     toggleLike, 
     recordShare,
     recordView,
-    ContentType,
     subscribeToInteractions,
     isLiked
-  } from '../services/interactionService';
+  } from '../services/essayInteractionService';
   import InteractionButton from './shared/InteractionButton.svelte';
   import { supabase } from '../lib/supabase';
   

@@ -5,9 +5,10 @@
   import SanityImpactShowcase from './SanityImpactShowcase.svelte';
   import FunImpactShowcase from './FunImpactShowcase.svelte';
   
-  // Updated Project interface with correct launchDate type
+  // Updated Project interface with UUID id and order property
   interface Project {
-    id: number;
+    id: string; // Changed from number to string for UUID
+    order: number; // Added to match the renamed column
     title: string;
     status: string;
     show: boolean;

@@ -10,7 +10,7 @@
         isLiked,
         subscribeToInteractions,
         ContentType,
-    } from "../services/interactionService";
+    } from "../services/essayInteractionService";
     import InteractionButton from "../components/shared/InteractionButton.svelte";
     import { supabase } from "../lib/supabase";
 
@@ -59,7 +59,7 @@
 
     async function handleLike(essayId: string) {
         try {
-            await toggleLike(ContentType.ESSAY, essayId);
+            await toggleLike(essayId);
             // Refresh the essay data to get updated counts
             await refreshEssay(essayId);
         } catch (error) {
@@ -88,7 +88,7 @@
             }, 3000);
             
             // Record the share in the database
-            await recordShare(ContentType.ESSAY, essay.id);
+            await recordShare(essay.id);
             
             // Refresh the essay data to get updated counts
             await refreshEssay(essay.id);
