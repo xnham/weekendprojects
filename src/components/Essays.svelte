@@ -12,6 +12,7 @@
         ContentType,
     } from "../services/interactionService";
     import InteractionButton from "../components/shared/InteractionButton.svelte";
+    import { supabase } from "../lib/supabase";
 
     let essays: EssayMetadata[] = [];
     let interactionState = { likes: {}, shares: {}, views: {} };
@@ -59,7 +60,8 @@
     async function handleLike(essayId: string) {
         try {
             await toggleLike(ContentType.ESSAY, essayId);
-            // State will be updated via subscription
+            // Refresh the essay data to get updated counts
+            await refreshEssay(essayId);
         } catch (error) {
             console.error("Error toggling like:", error);
         }
@@ -87,6 +89,9 @@
             
             // Record the share in the database
             await recordShare(ContentType.ESSAY, essay.id);
+            
+            // Refresh the essay data to get updated counts
+            await refreshEssay(essay.id);
         } catch (error) {
             console.error("Error sharing essay:", error);
             copyFeedback = "Failed to copy URL";
@@ -95,6 +100,36 @@
                 copyFeedback = "";
                 copyFeedbackEssayId = "";
             }, 3000);
+        }
+    }
+
+    // Add this function to refresh a specific essay's metadata
+    async function refreshEssay(essayId: string) {
+        try {
+            const { data, error } = await supabase
+                .from('essays')
+                .select('id, like_count, share_count, view_count')
+                .eq('id', essayId)
+                .single();
+                
+            if (error) throw error;
+            
+            if (data) {
+                // Update the essay in the essays array
+                essays = essays.map(essay => {
+                    if (essay.id === essayId) {
+                        return {
+                            ...essay,
+                            like_count: data.like_count,
+                            share_count: data.share_count,
+                            view_count: data.view_count
+                        };
+                    }
+                    return essay;
+                });
+            }
+        } catch (e) {
+            console.error('Failed to refresh essay:', e);
         }
     }
 

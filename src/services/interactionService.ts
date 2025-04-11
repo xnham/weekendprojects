@@ -580,45 +580,53 @@ async function updateEssayLike(essayId: string, liked: boolean): Promise<void> {
   const state = get(interactionStore);
   const deviceId = state.deviceId;
   
-  // Check if interaction record exists
-  const { data, error } = await supabase
-    .from('essay_interactions')
-    .select('id, has_liked')
-    .eq('device_id', deviceId)
-    .eq('essay_id', essayId)
-    .single();
-  
-  if (error && error.code !== 'PGRST116') { // PGRST116 = not found
-    throw error;
-  }
-  
-  if (data) {
-    // Only update if the state has changed
-    if (data.has_liked !== liked) {
-      // Update existing record
-      const { error: updateError } = await supabase
-        .from('essay_interactions')
-        .update({ 
-          has_liked: liked,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', data.id);
-        
-      if (updateError) throw updateError;
-    }
-  } else {
-    // Create new record
-    const { error: insertError } = await supabase
+  try {
+    // First, check if interaction record exists
+    const { data, error } = await supabase
       .from('essay_interactions')
-      .insert({
-        device_id: deviceId,
-        essay_id: essayId,
-        has_liked: liked,
-        share_count: 0,
-        has_viewed: true // Assume they've viewed it if they're liking it
-      });
-      
-    if (insertError) throw insertError;
+      .select('id, has_liked')
+      .eq('device_id', deviceId)
+      .eq('essay_id', essayId)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+      throw error;
+    }
+    
+    if (data) {
+      // Only update if the state has changed
+      if (data.has_liked !== liked) {
+        // Update existing record - the trigger will handle the essay like_count update
+        const { error: updateError } = await supabase
+          .from('essay_interactions')
+          .update({ 
+            has_liked: liked,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', data.id);
+          
+        if (updateError) throw updateError;
+      }
+    } else {
+      // Create new record - the trigger will handle the essay like_count update if liked is true
+      const { error: insertError } = await supabase
+        .from('essay_interactions')
+        .insert({
+          device_id: deviceId,
+          essay_id: essayId,
+          has_liked: liked,
+          share_count: 0,
+          has_viewed: true // Assume they've viewed it if they're liking it
+        });
+        
+      if (insertError) throw insertError;
+    }
+    
+    // No need to manually call an RPC function - the database trigger handles the count update
+    
+  } catch (error) {
+    console.error('Error updating essay like:', error);
+    throw error;
   }
 }
 
@@ -629,42 +637,51 @@ async function updateEssayShare(essayId: string): Promise<void> {
   const state = get(interactionStore);
   const deviceId = state.deviceId;
   
-  // Check if interaction record exists
-  const { data, error } = await supabase
-    .from('essay_interactions')
-    .select('id, share_count')
-    .eq('device_id', deviceId)
-    .eq('essay_id', essayId)
-    .single();
-  
-  if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+  try {
+    // Check if interaction record exists
+    const { data, error } = await supabase
+      .from('essay_interactions')
+      .select('id, share_count')
+      .eq('device_id', deviceId)
+      .eq('essay_id', essayId)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+      throw error;
+    }
+    
+    if (data) {
+      // Update existing record - increment share count
+      // The trigger will handle updating the essay share_count
+      const { error: updateError } = await supabase
+        .from('essay_interactions')
+        .update({ 
+          share_count: (data.share_count || 0) + 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', data.id);
+        
+      if (updateError) throw updateError;
+    } else {
+      // Create new record - the trigger will handle the essay share_count update
+      const { error: insertError } = await supabase
+        .from('essay_interactions')
+        .insert({
+          device_id: deviceId,
+          essay_id: essayId,
+          has_liked: false,
+          share_count: 1,
+          has_viewed: true // Assume viewed if sharing
+        });
+        
+      if (insertError) throw insertError;
+    }
+    
+    // No need to manually call an RPC function - the database trigger handles the count update
+    
+  } catch (error) {
+    console.error('Error updating essay share:', error);
     throw error;
-  }
-  
-  if (data) {
-    // Update existing record - increment share count
-    const { error: updateError } = await supabase
-      .from('essay_interactions')
-      .update({ 
-        share_count: (data.share_count || 0) + 1,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', data.id);
-      
-    if (updateError) throw updateError;
-  } else {
-    // Create new record
-    const { error: insertError } = await supabase
-      .from('essay_interactions')
-      .insert({
-        device_id: deviceId,
-        essay_id: essayId,
-        has_liked: false,
-        share_count: 1,
-        has_viewed: true // Assume viewed if sharing
-      });
-      
-    if (insertError) throw insertError;
   }
 }
 
