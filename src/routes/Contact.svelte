@@ -117,7 +117,7 @@
     }
 
     .contact-form {
-        width: 75%;
+        width: 70%;
         margin-bottom: 60px;
     }
 
@@ -202,7 +202,7 @@
         }
         
         .contact-form {
-            width: 100%;
+            width: 90%;
         }
     }
 </style>

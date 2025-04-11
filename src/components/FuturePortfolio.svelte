@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, afterUpdate } from 'svelte';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { supabase } from '../lib/supabase';
   import { 
@@ -47,18 +47,30 @@
   let submitting = false;
   
   // Replace legacy userData with interaction state
-  let projectInteractionState = { likes: {}, follows: {}, userEmail: undefined };
+  let projectInteractionState = { likes: {}, follows: {}, userEmail: undefined, initialized: false };
   
   // Add reactive derived values
   $: projectLikedStatus = displayProjects.reduce((acc, project) => {
-    acc[project.id] = projectInteractionState?.likes[`${ContentType.PROJECT}:${project.id}`] || false;
+    acc[project.id] = projectInteractionState?.likes[`${ContentType.PROJECT}:${project.id.toString()}`] || false;
     return acc;
   }, {});
   
   $: projectFollowStatus = displayProjects.reduce((acc, project) => {
-    acc[project.id] = projectInteractionState?.follows[`${ContentType.PROJECT}:${project.id}`] || false;
+    acc[project.id] = projectInteractionState?.follows[`${ContentType.PROJECT}:${project.id.toString()}`] || false;
     return acc;
   }, {});
+  
+  // Add debug logging for interaction state
+  afterUpdate(() => {
+    if (projectInteractionState.initialized) {
+      console.log('Interaction state initialized:', {
+        likes: projectInteractionState.likes,
+        follows: projectInteractionState.follows,
+        likedStatus: projectLikedStatus,
+        followStatus: projectFollowStatus
+      });
+    }
+  });
   
   // Initialize component
   onMount(() => {
@@ -82,6 +94,18 @@
         displayProjects = data || [];
         console.log("Projects loaded:", displayProjects.length);
         
+        // Add debugging for project data
+        console.log("Projects loaded:", displayProjects);
+        
+        // Force trigger to detect interaction state
+        setTimeout(() => {
+          console.log("Current interaction state:", {
+            initialized: projectInteractionState.initialized,
+            likes: projectInteractionState.likes,
+            follows: projectInteractionState.follows
+          });
+        }, 1000);
+        
         loading = false;
       } catch (err) {
         console.error('Error loading projects:', err);
@@ -93,9 +117,14 @@
     // Call the async function
     loadProjects();
     
-    // Subscribe to interaction changes
+    // Subscribe to interaction changes with debug logging
     const unsubscribe = subscribeToInteractions(state => {
-      projectInteractionState = state;
+      console.log("Interaction state updated:", state);
+      projectInteractionState = { ...state, initialized: true };
+      
+      // Log derived values after state update
+      console.log("Derived like status:", projectLikedStatus);
+      console.log("Derived follow status:", projectFollowStatus);
     });
     
     // Return cleanup function
@@ -304,6 +333,7 @@
               count={undefined}
               iconSize="sm"
               on:click={() => handleLike(project.id)}
+              loading={!projectInteractionState.initialized}
             />
             <InteractionButton 
               type="follow"
@@ -311,6 +341,7 @@
               count={undefined}
               iconSize="sm"
               on:click={() => handleFollow(project.id)}
+              loading={!projectInteractionState.initialized}
             />
             <button 
               class="future-project-comment-button" 

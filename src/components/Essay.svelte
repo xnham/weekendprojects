@@ -77,7 +77,9 @@
         
         // Record view once we have the essay ID
         if (metadata?.id) {
-          recordView(ContentType.ESSAY, metadata.id);
+          await recordView(ContentType.ESSAY, metadata.id);
+          // Refresh metadata to get updated counts
+          await refreshEssayMetadata();
         }
       }
     } catch (e) {

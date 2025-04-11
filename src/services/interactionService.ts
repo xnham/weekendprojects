@@ -327,11 +327,6 @@ export async function recordView(contentType: ContentType, contentId: string): P
     const deviceId = state.deviceId;
     const key = `${contentType}:${contentId}`;
     
-    // Skip if we've already recorded this view
-    if (state.views && state.views[key]) {
-      return; 
-    }
-    
     // Update local state
     interactionStore.update(state => ({
       ...state,
@@ -344,12 +339,21 @@ export async function recordView(contentType: ContentType, contentId: string): P
     // Persist to localStorage
     storage.set('interactions', get(interactionStore));
     
-    // Check if interaction record exists - use .match() instead of .eq() for device_id
-    // This avoids issues with UUID formatting in the URL
+    // Use an RPC function to increment the view count directly
+    const { error: viewCountError } = await supabase.rpc('update_essay_views', {
+      essay_id: contentId,
+      increment: 1
+    });
+    
+    if (viewCountError) {
+      console.error('Error updating view count:', viewCountError);
+    }
+    
+    // Check if interaction record exists
     const { data, error } = await supabase
       .from('essay_interactions')
       .select('id, has_viewed')
-      .eq('device_id', deviceId) // Supabase client will format this correctly
+      .eq('device_id', deviceId)
       .eq('essay_id', contentId)
       .single();
     
@@ -359,19 +363,17 @@ export async function recordView(contentType: ContentType, contentId: string): P
     }
     
     if (data) {
-      // Only update if not already viewed
-      if (!data.has_viewed) {
-        const { error: updateError } = await supabase
-          .from('essay_interactions')
-          .update({ 
-            has_viewed: true,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', data.id);
-          
-        if (updateError) {
-          console.error('Error updating interaction:', updateError);
-        }
+      // Always update the updated_at timestamp, even if has_viewed is already true
+      const { error: updateError } = await supabase
+        .from('essay_interactions')
+        .update({ 
+          has_viewed: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', data.id);
+        
+      if (updateError) {
+        console.error('Error updating interaction:', updateError);
       }
     } else {
       // Create new record
