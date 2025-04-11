@@ -42,9 +42,6 @@
     // Load the essay
     loadEssayContent();
     
-    // Record view when the essay loads
-    // This should happen after we have the metadata
-    
     // Listen for scroll events
     window.addEventListener('scroll', handleScroll);
     
@@ -91,35 +88,46 @@
     }
   }
   
-  // Handle like button click
-  async function handleLike() {
+  // Add this function to refresh essay data after interactions
+  async function refreshEssayMetadata() {
     if (!metadata?.id) return;
     
     try {
-      await toggleLike(ContentType.ESSAY, metadata.id);
-      
-      // Refresh the metadata to get updated counts
-      const { data: updatedEssay } = await supabase
+      const { data, error } = await supabase
         .from('essays')
         .select('like_count, share_count, view_count')
         .eq('id', metadata.id)
         .single();
         
-      if (updatedEssay) {
-        // Update only the count fields
-        metadata = { 
-          ...metadata, 
-          like_count: updatedEssay.like_count,
-          share_count: updatedEssay.share_count,
-          view_count: updatedEssay.view_count
+      if (error) throw error;
+      
+      if (data) {
+        // Update only the counts, preserving other metadata
+        metadata = {
+          ...metadata,
+          like_count: data.like_count,
+          share_count: data.share_count,
+          view_count: data.view_count
         };
       }
+    } catch (e) {
+      console.error('Failed to refresh essay counts:', e);
+    }
+  }
+  
+  // Call this after successful interactions
+  async function handleLike() {
+    if (!metadata?.id) return;
+    
+    try {
+      await toggleLike(ContentType.ESSAY, metadata.id);
+      // Refresh metadata to get updated counts
+      await refreshEssayMetadata();
     } catch (e) {
       console.error('Failed to toggle like:', e);
     }
   }
   
-  // Handle share button click
   async function handleShare() {
     if (!metadata?.id) return;
     
@@ -134,25 +142,11 @@
         copyFeedback = "";
       }, 3000);
       
-      // Record share
+      // Record share in database
       await recordShare(ContentType.ESSAY, metadata.id);
       
-      // Refresh the metadata to get updated counts
-      const { data: updatedEssay } = await supabase
-        .from('essays')
-        .select('like_count, share_count, view_count')
-        .eq('id', metadata.id)
-        .single();
-        
-      if (updatedEssay) {
-        // Update only the count fields
-        metadata = { 
-          ...metadata, 
-          like_count: updatedEssay.like_count,
-          share_count: updatedEssay.share_count,
-          view_count: updatedEssay.view_count
-        };
-      }
+      // Refresh metadata to get updated counts
+      await refreshEssayMetadata();
     } catch (e) {
       console.error('Failed to share essay:', e);
       copyFeedback = "Failed to copy URL";
@@ -232,7 +226,7 @@
     return `${monthName} ${dayFormatted}, ${year}`;
   }
 
-  // Add these helpers to access counts
+  // Update these helpers to access counts from Supabase data
   function getEssayLikes(): number {
     return metadata?.like_count || 0;
   }
@@ -340,7 +334,7 @@
   /* Typography */
   .essay-date {
     text-transform: uppercase;
-    letter-spacing: 0.1rem;
+    letter-spacing: 0.07rem;
     color: var(--dark-70);
     font-size: 13px;
     font-weight: 400;
@@ -354,10 +348,15 @@
     font-size: 17px;
     margin-top: 0;
     margin-bottom: 3rem;
+    color: var(--dark-60);
+    font-weight: 400;
   }
 
   .essay-stats {
-    display: none;
+    display: flex;
+    justify-content: flex-start;
+    gap: 20px;
+    /* display: none; */
   }
 
   /* Navigation Elements */
@@ -484,6 +483,10 @@
     .floating-back-button {
       display: none;
     }
+
+    .essay-header-row {
+      margin-bottom: 30px;
+    }
   }
   
   @media (max-width: 768px) {
@@ -493,6 +496,10 @@
 
     .essay-date {
       font-size: 12px;
+    }
+
+    .essay-header-row {
+      margin-bottom: 40px;
     }
 
     .back-button {
