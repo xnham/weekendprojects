@@ -18,6 +18,7 @@
   export let count: number | undefined = undefined;
   export let showText = true;
   export let iconSize: SizeProp | undefined = undefined;
+  export let loading = false;
   
   // Use proper icon imports instead of string arrays
   const icons = {
@@ -52,9 +53,10 @@
 </script>
 
 <button 
-  class="interaction-btn {active ? 'active' : ''} {type}-btn {unlikeAnimation ? 'unlike-animation' : ''}"
+  class="interaction-btn {active ? 'active' : ''} {type}-btn {unlikeAnimation ? 'unlike-animation' : ''} {loading ? 'loading' : ''}"
   on:click
   aria-label="{type} {active ? 'active' : 'inactive'}"
+  disabled={loading}
 >
   <span class="icon-container">
     {#if type === 'like'}
@@ -143,5 +145,12 @@
     font-size: 14px;
     margin-left: 2px;
     color: var(--dark-80);
+  }
+  
+  /* Loading state styles */
+  .interaction-btn.loading {
+    opacity: 0.6;
+    cursor: wait;
+    pointer-events: none;
   }
 </style> 
