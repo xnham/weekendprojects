@@ -358,6 +358,8 @@
     display: flex;
     justify-content: flex-start;
     gap: 20px;
+    color: var(--light-100);
+    font-size: 12px;
     /* display: none; */
   }
 
