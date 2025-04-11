@@ -1,364 +1,264 @@
-/**
- * Essay Interaction Service
- * 
- * This service provides functionality for handling user interactions
- * with essays across the application.
- * 
- * Key features:
- * - Manages likes, shares, and views for essays
- * - Persistent storage using both Supabase and localStorage
- * - Reactive state management using Svelte stores
- */
-
 import { supabase } from '../lib/supabase';
 import { writable, get } from 'svelte/store';
 import { v4 as uuidv4 } from 'uuid';
-import { handleError, ErrorSeverity } from '../utils/errorHandler';
 
-// Implement a simple localStorage wrapper
-const storage = {
-  get: (key: string, defaultValue: any = null) => {
-    try {
-      const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : defaultValue;
-    } catch (e) {
-      console.error(`Error retrieving ${key} from localStorage:`, e);
-      return defaultValue;
-    }
-  },
-  
-  set: (key: string, value: any) => {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-    } catch (e) {
-      console.error(`Error saving ${key} to localStorage:`, e);
-    }
-  },
-  
-  getItem: (key: string, defaultValue: any = null) => {
-    try {
-      const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : defaultValue;
-    } catch (e) {
-      console.error(`Error retrieving ${key} from localStorage:`, e);
-      return defaultValue;
-    }
-  },
-  
-  setItem: (key: string, value: any) => {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-    } catch (e) {
-      console.error(`Error saving ${key} to localStorage:`, e);
-    }
-  }
-};
-
-/**
- * Enum for content types to ensure consistent identification
- */
+// Content type enum to support different content types if needed in the future
 export enum ContentType {
   ESSAY = 'essay'
 }
 
-/**
- * Interface for the essay interaction state store.
- * This defines the structure of user interaction data for essays.
- */
-interface EssayInteractionState {
-  deviceId: string;
-  likes: { [key: string]: boolean };  // Format: "essay:essayId" -> boolean
-  shares: { [key: string]: boolean };  // Format: "essay:essayId" -> boolean
-  views: { [key: string]: boolean };   // Format: "essay:essayId" -> boolean
-  initialized: boolean;
-  loading: boolean;
-  error?: string;
+// Define the structure of our interaction state
+interface InteractionState {
+  likes: Record<string, boolean>;
+  shares: Record<string, number>;
+  views: Record<string, boolean>;
 }
 
-// Create a writable store to manage essay interaction state
-const essayInteractionStore = writable<EssayInteractionState>({
-  deviceId: '',
+// Create a writable store for interaction state
+const interactionState = writable<InteractionState>({
   likes: {},
   shares: {},
-  views: {},
-  initialized: false,
-  loading: true
+  views: {}
 });
 
+// Device ID management
+const DEVICE_ID_KEY = 'device_id';
+
 /**
- * Gets or creates a device ID for the current user
+ * Get or create a device ID for tracking interactions
  */
 export async function getOrCreateDeviceId(): Promise<string> {
-  // Check localStorage first
-  let deviceId = localStorage.getItem('deviceId');
+  // Check local storage first
+  let deviceId = localStorage.getItem(DEVICE_ID_KEY);
   
-  if (deviceId) {
-    // Remove any quotes that might be wrapping the UUID
-    deviceId = deviceId.replace(/^"(.*)"$/, '$1');
-  } else {
-    // Create a new UUID if none exists
-    deviceId = crypto.randomUUID ? crypto.randomUUID() : 
-      Math.random().toString(36).substring(2, 15) + 
-      Math.random().toString(36).substring(2, 15);
-    
-    // Store in localStorage without quotes
-    localStorage.setItem('deviceId', deviceId);
+  // If no device ID exists, create one and store it
+  if (!deviceId) {
+    deviceId = uuidv4();
+    localStorage.setItem(DEVICE_ID_KEY, deviceId);
   }
   
   return deviceId;
 }
 
 /**
- * Initialize the essay interaction system
+ * Initialize interaction service
  */
-export async function initializeEssayInteractions(): Promise<void> {
+export async function initializeInteractions(): Promise<void> {
+  const deviceId = await getOrCreateDeviceId();
+  
+  // Load existing interactions for this device
+  await refreshInteractionState(deviceId);
+}
+
+/**
+ * Refresh interaction state from Supabase
+ */
+async function refreshInteractionState(deviceId: string): Promise<void> {
   try {
-    // Get or create device ID
-    const deviceId = await getOrCreateDeviceId();
-    
-    // Initialize store with device ID
-    essayInteractionStore.update(state => ({
-      ...state,
-      deviceId,
-      initialized: false,
-      loading: true
-    }));
-    
-    // Load essay likes from essay_interactions
-    const { data: essayInteractions, error: essayError } = await supabase
+    // Fetch all interactions for this device
+    const { data, error } = await supabase
       .from('essay_interactions')
-      .select('essay_id, has_liked, has_viewed')
+      .select('essay_id, has_liked, share_count, has_viewed')
       .eq('device_id', deviceId);
-      
-    if (essayError && essayError.code !== 'PGRST116') throw essayError;
     
-    // Convert to state object format
-    const likesMap = {};
-    const viewsMap = {};
+    if (error) throw error;
     
-    // Process essay interactions
-    essayInteractions?.forEach(interaction => {
-      if (interaction.has_liked) {
-        likesMap[`${ContentType.ESSAY}:${interaction.essay_id}`] = true;
-      }
-      
-      if (interaction.has_viewed) {
-        viewsMap[`${ContentType.ESSAY}:${interaction.essay_id}`] = true;
-      }
-    });
+    // Create a new state object
+    const newState: InteractionState = {
+      likes: {},
+      shares: {},
+      views: {}
+    };
     
-    // Update store with all data
-    essayInteractionStore.update(state => ({
-      ...state,
-      likes: { ...state.likes, ...likesMap },
-      views: { ...state.views, ...viewsMap },
-      initialized: true,
-      loading: false
-    }));
+    // Populate the state with data from Supabase
+    if (data) {
+      data.forEach(interaction => {
+        const key = `${ContentType.ESSAY}:${interaction.essay_id}`;
+        newState.likes[key] = interaction.has_liked;
+        newState.shares[key] = interaction.share_count || 0;
+        newState.views[key] = interaction.has_viewed;
+      });
+    }
     
-    // Save to localStorage for offline persistence
-    storage.set('essayInteractions', get(essayInteractionStore));
-    
+    // Update the store
+    interactionState.set(newState);
   } catch (error) {
-    handleError(
-      'Failed to initialize essay interaction service',
-      error,
-      ErrorSeverity.ERROR,
-      'essayInteractionService'
-    );
-    
-    essayInteractionStore.update(state => ({
-      ...state,
-      error: error instanceof Error ? error.message : 'Failed to initialize',
-      initialized: true,
-      loading: false
-    }));
+    console.error('Failed to refresh interaction state:', error);
   }
 }
 
-// Call initialize on module load
-initializeEssayInteractions();
+/**
+ * Subscribe to interaction state changes
+ */
+export function subscribeToInteractions(callback: (state: InteractionState) => void) {
+  const unsubscribe = interactionState.subscribe(callback);
+  return unsubscribe;
+}
+
+/**
+ * Check if essay is liked by the current device
+ */
+export function isLiked(essayId: string): boolean {
+  const state = get(interactionState);
+  const key = `${ContentType.ESSAY}:${essayId}`;
+  return !!state.likes[key];
+}
 
 /**
  * Toggle like status for an essay
  */
-export async function toggleLike(essayId: string): Promise<boolean> {
-  try {
-    const key = `${ContentType.ESSAY}:${essayId}`;
-    const state = get(essayInteractionStore);
-    
-    // Toggle the like status
-    const newLikeState = !state.likes[key];
-    
-    // Update local state immediately for responsive UI
-    essayInteractionStore.update(state => ({
+export async function toggleLike(essayId: string): Promise<void> {
+  const deviceId = await getOrCreateDeviceId();
+  const key = `${ContentType.ESSAY}:${essayId}`;
+  const currentState = get(interactionState);
+  const currentlyLiked = !!currentState.likes[key];
+  
+  // Optimistically update UI
+  interactionState.update(state => {
+    return {
       ...state,
       likes: {
         ...state.likes,
-        [key]: newLikeState
+        [key]: !currentlyLiked
       }
-    }));
-    
-    // Persist to localStorage
-    storage.set('essayInteractions', get(essayInteractionStore));
-    
-    // Update Supabase
-    await updateEssayLike(essayId, newLikeState);
-    
-    return newLikeState;
-  } catch (error) {
-    // Get the previous state before we attempted to toggle
-    const state = get(essayInteractionStore);
-    const key = `${ContentType.ESSAY}:${essayId}`;
-    const previousLikeState = state.likes[key] || false;
-    
-    handleError(
-      `Failed to ${previousLikeState ? 'unlike' : 'like'} essay`,
-      error,
-      ErrorSeverity.WARNING,
-      'essayInteractionService'
-    );
-    
-    // Revert local state on failure
-    essayInteractionStore.update(currentState => ({
-      ...currentState,
-      likes: {
-        ...currentState.likes,
-        [key]: previousLikeState
-      }
-    }));
-    
-    // Persist the reverted state
-    storage.set('essayInteractions', get(essayInteractionStore));
-    
-    return previousLikeState;
-  }
-}
-
-/**
- * Updates like status for an essay in Supabase
- */
-async function updateEssayLike(essayId: string, liked: boolean): Promise<void> {
-  const state = get(essayInteractionStore);
-  const deviceId = state.deviceId;
+    };
+  });
   
   try {
-    // Check if interaction record exists
-    const { data, error } = await supabase
+    // First, check if an interaction record exists
+    const { data: existingData, error: fetchError } = await supabase
       .from('essay_interactions')
-      .select('id')
+      .select('id, has_liked')
       .eq('device_id', deviceId)
       .eq('essay_id', essayId)
       .single();
     
-    if (error && error.code !== 'PGRST116') { // PGRST116 = not found
-      throw error;
+    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "no rows returned" error
+      throw fetchError;
     }
     
-    if (data) {
+    const newLikedState = !currentlyLiked;
+    
+    if (existingData) {
       // Update existing record
       const { error: updateError } = await supabase
         .from('essay_interactions')
-        .update({ 
-          has_liked: liked,
+        .update({
+          has_liked: newLikedState,
           updated_at: new Date().toISOString()
         })
-        .eq('id', data.id);
-          
+        .eq('id', existingData.id);
+        
       if (updateError) throw updateError;
     } else {
-      // Create new record
+      // Create new interaction record
       const { error: insertError } = await supabase
         .from('essay_interactions')
         .insert({
           device_id: deviceId,
           essay_id: essayId,
-          has_liked: liked,
-          has_viewed: true // Assume they've viewed it if they're liking it
+          has_liked: newLikedState,
+          share_count: 0,
+          has_viewed: true, // If they're liking, they've viewed
         });
         
       if (insertError) throw insertError;
     }
     
-    // Update essay like count
-    const { error: countError } = await supabase.rpc('update_essay_likes', {
-      essay_id: essayId,
-      increment: liked ? 1 : -1
+    // Update the essay's like count
+    const increment = newLikedState ? 1 : -1;
+    const { error: essayUpdateError } = await supabase.rpc(
+      'increment_essay_like_count',
+      { essay_id: essayId, increment_by: increment }
+    ).single();
+    
+    // Fallback if RPC isn't set up
+    if (essayUpdateError) {
+      const { data: currentEssay, error: fetchEssayError } = await supabase
+        .from('essays')
+        .select('like_count')
+        .eq('id', essayId)
+        .single();
+        
+      if (fetchEssayError) throw fetchEssayError;
+      
+      const newCount = Math.max(0, (currentEssay.like_count || 0) + increment);
+      
+      const { error: updateEssayError } = await supabase
+        .from('essays')
+        .update({ like_count: newCount })
+        .eq('id', essayId);
+        
+      if (updateEssayError) throw updateEssayError;
+    }
+    
+    // Refresh state to ensure consistency
+    await refreshInteractionState(deviceId);
+    
+  } catch (error) {
+    console.error('Error toggling like:', error);
+    
+    // Revert the optimistic update if there was an error
+    interactionState.update(state => {
+      return {
+        ...state,
+        likes: {
+          ...state.likes,
+          [key]: currentlyLiked
+        }
+      };
     });
     
-    if (countError) throw countError;
-  } catch (error) {
-    console.error('Error updating essay like:', error);
     throw error;
   }
 }
 
 /**
- * Record a share for an essay
+ * Record a share event
  */
 export async function recordShare(essayId: string): Promise<void> {
-  try {
-    const key = `${ContentType.ESSAY}:${essayId}`;
-    const state = get(essayInteractionStore);
-    
-    // Update local state
-    essayInteractionStore.update(state => ({
+  const deviceId = await getOrCreateDeviceId();
+  const key = `${ContentType.ESSAY}:${essayId}`;
+  
+  // Optimistically update UI
+  interactionState.update(state => {
+    const currentShares = state.shares[key] || 0;
+    return {
       ...state,
       shares: {
         ...state.shares,
-        [key]: true
+        [key]: currentShares + 1
       }
-    }));
-    
-    // Persist to localStorage
-    storage.set('essayInteractions', get(essayInteractionStore));
-    
-    // Update Supabase
-    await updateEssayShare(essayId);
-  } catch (error) {
-    handleError(
-      'Failed to record essay share',
-      error,
-      ErrorSeverity.WARNING,
-      'essayInteractionService'
-    );
-  }
-}
-
-/**
- * Updates share count for an essay in Supabase
- * Increments the share count for each share action
- */
-async function updateEssayShare(essayId: string): Promise<void> {
-  const state = get(essayInteractionStore);
-  const deviceId = state.deviceId;
+    };
+  });
   
   try {
     // Check if interaction record exists
-    const { data, error } = await supabase
+    const { data: existingData, error: fetchError } = await supabase
       .from('essay_interactions')
       .select('id, share_count')
       .eq('device_id', deviceId)
       .eq('essay_id', essayId)
       .single();
     
-    if (error && error.code !== 'PGRST116') { // PGRST116 = not found
-      throw error;
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      throw fetchError;
     }
     
-    if (data) {
-      // Update existing record and increment share_count
+    if (existingData) {
+      // Update existing record
+      const newShareCount = (existingData.share_count || 0) + 1;
       const { error: updateError } = await supabase
         .from('essay_interactions')
-        .update({ 
-          share_count: (data.share_count || 0) + 1,
+        .update({
+          share_count: newShareCount,
           updated_at: new Date().toISOString()
         })
-        .eq('id', data.id);
-          
+        .eq('id', existingData.id);
+        
       if (updateError) throw updateError;
     } else {
-      // Create new record with share_count = 1
+      // Create new interaction record
       const { error: insertError } = await supabase
         .from('essay_interactions')
         .insert({
@@ -366,142 +266,134 @@ async function updateEssayShare(essayId: string): Promise<void> {
           essay_id: essayId,
           has_liked: false,
           share_count: 1,
-          has_viewed: true // Assume they've viewed it if they're sharing it
+          has_viewed: true, // If they're sharing, they've viewed
         });
         
       if (insertError) throw insertError;
     }
     
-    // Always increment the essay's share count
-    const { error: countError } = await supabase.rpc('update_essay_shares', {
-      essay_id: essayId,
-      increment: 1
-    });
+    // Update essay's share count
+    const { error: essayUpdateError } = await supabase.rpc(
+      'increment_essay_share_count',
+      { essay_id: essayId, increment_by: 1 }
+    ).single();
     
-    if (countError) throw countError;
+    // Fallback if RPC isn't set up
+    if (essayUpdateError) {
+      const { data: currentEssay, error: fetchEssayError } = await supabase
+        .from('essays')
+        .select('share_count')
+        .eq('id', essayId)
+        .single();
+        
+      if (fetchEssayError) throw fetchEssayError;
+      
+      const newCount = (currentEssay.share_count || 0) + 1;
+      
+      const { error: updateEssayError } = await supabase
+        .from('essays')
+        .update({ share_count: newCount })
+        .eq('id', essayId);
+        
+      if (updateEssayError) throw updateEssayError;
+    }
+    
+    // Refresh state to ensure consistency
+    await refreshInteractionState(deviceId);
+    
   } catch (error) {
-    console.error('Error updating essay share:', error);
+    console.error('Error recording share:', error);
     throw error;
   }
 }
 
 /**
- * Record a view for an essay
+ * Record a view event
  */
 export async function recordView(essayId: string): Promise<void> {
-  try {
-    const key = `${ContentType.ESSAY}:${essayId}`;
-    const state = get(essayInteractionStore);
-    
-    // Optimistically update UI
-    essayInteractionStore.update(state => ({
+  const deviceId = await getOrCreateDeviceId();
+  const key = `${ContentType.ESSAY}:${essayId}`;
+  
+  // Optimistically update UI
+  interactionState.update(state => {
+    return {
       ...state,
       views: {
         ...state.views,
         [key]: true
       }
-    }));
-    
-    // Save to localStorage
-    storage.set('essayInteractions', get(essayInteractionStore));
-    
-    // Update Supabase
-    await updateEssayView(essayId);
-  } catch (error) {
-    console.error('Error recording view:', error);
-    // Errors with views are non-critical, so we don't revert the UI
-  }
-}
-
-/**
- * Updates view count for an essay in Supabase
- */
-async function updateEssayView(essayId: string): Promise<void> {
-  const state = get(essayInteractionStore);
-  const deviceId = state.deviceId;
+    };
+  });
   
   try {
     // Check if interaction record exists
-    const { data, error } = await supabase
+    const { data: existingData, error: fetchError } = await supabase
       .from('essay_interactions')
-      .select('id, has_viewed')
+      .select('id')
       .eq('device_id', deviceId)
       .eq('essay_id', essayId)
       .single();
     
-    if (error && error.code !== 'PGRST116') { // PGRST116 = not found
-      throw error;
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      throw fetchError;
     }
     
-    const alreadyViewed = data?.has_viewed || false;
-    
-    if (data) {
-      // Only update if not already viewed
-      if (!alreadyViewed) {
-        const { error: updateError } = await supabase
-          .from('essay_interactions')
-          .update({ 
-            has_viewed: true,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', data.id);
-            
-        if (updateError) throw updateError;
-      }
+    if (existingData) {
+      // Just update has_viewed to true if not already
+      const { error: updateError } = await supabase
+        .from('essay_interactions')
+        .update({
+          has_viewed: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existingData.id);
+        
+      if (updateError) throw updateError;
     } else {
-      // Create new record
+      // Create new interaction record
       const { error: insertError } = await supabase
         .from('essay_interactions')
         .insert({
           device_id: deviceId,
           essay_id: essayId,
           has_liked: false,
-          has_viewed: true
+          share_count: 0,
+          has_viewed: true,
         });
         
       if (insertError) throw insertError;
     }
     
-    // Only increment the essay view count if this is the first view
-    if (!alreadyViewed) {
-      const { error: countError } = await supabase.rpc('update_essay_views', {
-        essay_id: essayId,
-        increment: 1
-      });
+    // Always increment essay view count regardless of if they've viewed before
+    const { error: essayUpdateError } = await supabase.rpc(
+      'increment_essay_view_count',
+      { essay_id: essayId, increment_by: 1 }
+    ).single();
+    
+    // Fallback if RPC isn't set up
+    if (essayUpdateError) {
+      const { data: currentEssay, error: fetchEssayError } = await supabase
+        .from('essays')
+        .select('view_count')
+        .eq('id', essayId)
+        .single();
+        
+      if (fetchEssayError) throw fetchEssayError;
       
-      if (countError) throw countError;
+      const newCount = (currentEssay.view_count || 0) + 1;
+      
+      const { error: updateEssayError } = await supabase
+        .from('essays')
+        .update({ view_count: newCount })
+        .eq('id', essayId);
+        
+      if (updateEssayError) throw updateEssayError;
     }
+    
+    // Refresh state to ensure consistency
+    await refreshInteractionState(deviceId);
+    
   } catch (error) {
-    console.error('Error updating essay view:', error);
-    throw error;
+    console.error('Error recording view:', error);
   }
 }
-
-/**
- * Checks if an essay is liked by the current user.
- */
-export function isLiked(essayId: string): boolean {
-  const state = get(essayInteractionStore);
-  const key = `${ContentType.ESSAY}:${essayId}`;
-  return !!state.likes[key];
-}
-
-/**
- * Subscribe to essay interaction state changes
- */
-export function subscribeToInteractions(callback: (state: EssayInteractionState) => void): () => void {
-  const unsubscribe = essayInteractionStore.subscribe(callback);
-  return unsubscribe;
-}
-
-// If loaded from a non-app page or as a module
-if (typeof window !== 'undefined') {
-  // Try to load from localStorage on initialization
-  const storedInteractions = storage.get('essayInteractions');
-  if (storedInteractions) {
-    essayInteractionStore.set({
-      ...storedInteractions,
-      initialized: false // Still need server data
-    });
-  }
-} 

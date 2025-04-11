@@ -59,9 +59,29 @@
 
     async function handleLike(essayId: string) {
         try {
+            // Find the essay
+            const essay = essays.find(e => e.id === essayId);
+            if (!essay) return;
+            
+            // Determine if it's currently liked
+            const key = `${ContentType.ESSAY}:${essayId}`;
+            const currentlyLiked = interactionState?.likes[key] || false;
+            
+            // Update the count optimistically
+            const increment = !currentlyLiked ? 1 : -1;
+            essay.like_count = Math.max(0, (essay.like_count || 0) + increment);
+            
+            // Toggle the like in the database
             await toggleLike(essayId);
-            // Refresh the essay data to get updated counts
-            await refreshEssay(essayId);
+            
+            // Refresh essay data in the background
+            refreshEssay(essayId).catch(error => {
+                console.error("Error refreshing essay:", error);
+                // Revert optimistic update on error
+                if (essay) {
+                    essay.like_count = Math.max(0, (essay.like_count || 0) - increment);
+                }
+            });
         } catch (error) {
             console.error("Error toggling like:", error);
         }
@@ -77,6 +97,9 @@
             // Copy to clipboard
             await navigator.clipboard.writeText(shareUrl);
             
+            // Update count optimistically
+            essay.share_count = (essay.share_count || 0) + 1;
+            
             // Show feedback
             copyFeedback = "URL copied to clipboard!";
             copyFeedbackEssayId = essay.id;
@@ -90,8 +113,14 @@
             // Record the share in the database
             await recordShare(essay.id);
             
-            // Refresh the essay data to get updated counts
-            await refreshEssay(essay.id);
+            // Refresh the essay data in the background
+            refreshEssay(essay.id).catch(error => {
+                console.error("Error refreshing essay:", error);
+                // Revert optimistic update on error
+                if (essay) {
+                    essay.share_count = Math.max(0, (essay.share_count || 0) - 1);
+                }
+            });
         } catch (error) {
             console.error("Error sharing essay:", error);
             copyFeedback = "Failed to copy URL";

@@ -7,7 +7,8 @@
   import Writing from './routes/Writing.svelte'
   import About from './routes/About.svelte';
   import Contact from './routes/Contact.svelte';
-  import { initializeInteractions, getOrCreateDeviceId } from './services/projectInteractionService';
+  import { initializeInteractions as initializeProjectInteractions, getOrCreateDeviceId } from './services/projectInteractionService';
+  import { initializeInteractions as initializeEssayInteractions } from './services/essayInteractionService';
   import { supabase } from './lib/supabase';
   
   // State to track current page
@@ -51,7 +52,8 @@
       updateCurrentPage();
       
       // Initialize interaction systems
-      initializeInteractions();
+      initializeProjectInteractions();
+      initializeEssayInteractions();
     };
     
     setupApp();

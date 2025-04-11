@@ -14,6 +14,7 @@
   } from '../services/essayInteractionService';
   import InteractionButton from './shared/InteractionButton.svelte';
   import { supabase } from '../lib/supabase';
+  import { get } from 'svelte/store';
   
   export let slug: string;
   
@@ -30,8 +31,22 @@
   let interactionState = { likes: {}, shares: {}, views: {} };
   
   // Add reactive derived values
-  $: essayKey = metadata?.id ? `${ContentType.ESSAY}:${metadata.id}` : '';
+  $: essayKey = metadata?.id ? `essay:${metadata.id}` : '';
   $: isEssayLiked = essayKey ? !!interactionState.likes[essayKey] : false;
+  
+  // Add optimistic count tracking
+  let optimisticLikeCount = 0;
+  let optimisticShareCount = 0;
+  let optimisticViewCount = 0;
+  let isOptimistic = false;
+  
+  // Update when metadata changes
+  $: if (metadata) {
+    optimisticLikeCount = metadata.like_count || 0;
+    optimisticShareCount = metadata.share_count || 0;
+    optimisticViewCount = metadata.view_count || 0;
+    isOptimistic = false;
+  }
   
   // Replace modal state with simple feedback state
   let copyFeedback = "";
@@ -76,7 +91,7 @@
         
         // Record view once we have the essay ID
         if (metadata?.id) {
-          await recordView(ContentType.ESSAY, metadata.id);
+          await recordView(metadata.id);
           // Refresh metadata to get updated counts
           await refreshEssayMetadata();
         }
@@ -121,11 +136,21 @@
     if (!metadata?.id) return;
     
     try {
-      await toggleLike(ContentType.ESSAY, metadata.id);
-      // Refresh metadata to get updated counts
-      await refreshEssayMetadata();
+      // Apply optimistic update to count
+      const newLikedState = !isEssayLiked;
+      const increment = newLikedState ? 1 : -1;
+      optimisticLikeCount = Math.max(0, optimisticLikeCount + increment);
+      isOptimistic = true;
+      
+      await toggleLike(metadata.id);
+      
+      // Still refresh metadata but don't block the UI
+      refreshEssayMetadata().catch(e => console.error('Error refreshing metadata:', e));
     } catch (e) {
       console.error('Failed to toggle like:', e);
+      // Revert optimistic update on error
+      optimisticLikeCount = metadata?.like_count || 0;
+      isOptimistic = false;
     }
   }
   
@@ -143,17 +168,25 @@
         copyFeedback = "";
       }, 3000);
       
-      // Record share in database
-      await recordShare(ContentType.ESSAY, metadata.id);
+      // Apply optimistic update to count
+      optimisticShareCount += 1;
+      isOptimistic = true;
       
-      // Refresh metadata to get updated counts
-      await refreshEssayMetadata();
+      // Record share in database
+      await recordShare(metadata.id);
+      
+      // Still refresh metadata but don't block the UI
+      refreshEssayMetadata().catch(e => console.error('Error refreshing metadata:', e));
     } catch (e) {
       console.error('Failed to share essay:', e);
       copyFeedback = "Failed to copy URL";
       feedbackTimeout = setTimeout(() => {
         copyFeedback = "";
       }, 3000);
+      
+      // Revert optimistic update on error
+      optimisticShareCount = metadata?.share_count || 0;
+      isOptimistic = false;
     }
   }
   
@@ -227,17 +260,17 @@
     return `${monthName} ${dayFormatted}, ${year}`;
   }
 
-  // Update these helpers to access counts from Supabase data
+  // Update these helpers to use optimistic counts when available
   function getEssayLikes(): number {
-    return metadata?.like_count || 0;
+    return isOptimistic ? optimisticLikeCount : (metadata?.like_count || 0);
   }
   
   function getEssayShares(): number {
-    return metadata?.share_count || 0;
+    return isOptimistic ? optimisticShareCount : (metadata?.share_count || 0);
   }
   
   function getEssayViews(): number {
-    return metadata?.view_count || 0;
+    return isOptimistic ? optimisticViewCount : (metadata?.view_count || 0);
   }
 </script>
 
