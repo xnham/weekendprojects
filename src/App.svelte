@@ -94,6 +94,11 @@
   }
 </script>
 
+<svelte:head>
+  <title>Wendy Ham's Weekend Projects'</title>
+  <meta name="description" content="Weekend Projects: Experiments in creating bespoke 'software for one' using AI tools. Explore how hyperpersonal software is becoming accessible to everyone." />
+</svelte:head>
+
 <div>
   <Nav currentPage={currentPage} />
 
