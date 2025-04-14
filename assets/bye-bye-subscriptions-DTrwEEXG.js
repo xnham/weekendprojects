@@ -1,1 +1,0 @@
-import"./index-CfzTUp3B.js";const e={title:"Bye bye subscriptions",description:"Bye bye subscriptions. Use Webflow as an example.",date:"2025-03-11",published:!1,excerpt:null},{title:i,description:a,date:n,published:o,excerpt:p}=e;function c(t){}export{c as default,e as metadata};
