@@ -15,8 +15,8 @@
   // State to track current page
   let currentPage = 'home';
   
-  // Create JSON-LD data
-  const jsonLd = {
+  // Create JSON-LD data with a reactive declaration
+  $: jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
       {
@@ -48,7 +48,7 @@
       {
         "@type": "WebSite",
         "@id": "#website",
-        "url": typeof window !== 'undefined' ? window.location.origin : "",
+        "url": "https://xnham.com",
         "name": "Wendy Ham - Builder of Software for One",
         "description": "Weekend Projects: Exploring the creation of hyperpersonal, hypertargeted software tailored to solve specific individual and small business needs.",
         "author": {"@id": "#wendyham"}
@@ -65,7 +65,7 @@
             "name": "Expeditr",
             "description": "Tool that consolidates recipe URLs into one ingredient list for easier meal planning and grocery shopping.",
             "author": {"@id": "#wendyham"},
-            "url": typeof window !== 'undefined' ? `${window.location.origin}/projects/expeditr` : ""
+            "url": "https://xnham.com/projects/expeditr"
           },
           {
             "@type": "SoftwareApplication",
@@ -74,7 +74,7 @@
             "description": "Daily text notification system to track expenses against budget, reducing monthly spending by $334 on average.",
             "author": {"@id": "#wendyham"},
             "applicationCategory": "FinanceApplication",
-            "url": typeof window !== 'undefined' ? `${window.location.origin}/projects/miss-penny` : ""
+            "url": "https://xnham.com/projects/miss-penny"
           },
           {
             "@type": "SoftwareApplication",
@@ -83,7 +83,7 @@
             "description": "Automated system that extracts lesson schedules from a club's web app and posts them to Google Calendar for easy access.",
             "author": {"@id": "#wendyham"},
             "applicationCategory": "ProductivityApplication",
-            "url": typeof window !== 'undefined' ? `${window.location.origin}/projects/calendar-integration` : ""
+            "url": "https://xnham.com/projects/calendar-integration"
           }
         ]
       }
