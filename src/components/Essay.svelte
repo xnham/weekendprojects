@@ -53,6 +53,37 @@
   let copyFeedback = "";
   let feedbackTimeout: ReturnType<typeof setTimeout>;
   
+  // Add author information - adjust these values to your actual details
+  const authorInfo = {
+    name: "Wendy Ham",
+    url: "https://xnham.com",
+    image: "/images/wendy-ham.jpg" // Add your profile image path here
+  };
+  
+  // Create a reactive combined description
+  $: combinedDescription = metadata?.description && metadata?.excerpt
+    ? `${metadata.description} ${metadata.excerpt}`
+    : metadata?.description || metadata?.excerpt || "";
+  
+  // Generate Article-specific JSON-LD that references the existing Person entity
+  $: articleJsonLd = metadata ? {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": metadata.title,
+    "description": combinedDescription,
+    "datePublished": metadata.date,
+    "author": {
+      "@id": "#wendyham"  // Reference to the existing Person entity
+    },
+    "publisher": {
+      "@id": "#wendyham"  // Same reference
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": typeof window !== 'undefined' ? window.location.href : ""
+    }
+  } : null;
+  
   onMount(() => {
     // Load the essay
     loadEssayContent();
@@ -99,11 +130,6 @@
         
         // After loading the essay data
         if (metadata) {
-          // Combine description and excerpt, with a space between them
-          const combinedDescription = metadata.description && metadata.excerpt
-            ? `${metadata.description} ${metadata.excerpt}`
-            : metadata.description || metadata.excerpt;
-            
           updateMetadata({
             title: `${metadata.title} | Wendy Ham's Weekend Projects`,
             description: combinedDescription,
@@ -289,6 +315,15 @@
     return isOptimistic ? optimisticViewCount : (metadata?.view_count || 0);
   }
 </script>
+
+<!-- Add Article-specific structured data -->
+<svelte:head>
+  {#if articleJsonLd}
+    <script type="application/ld+json">
+      {JSON.stringify(articleJsonLd)}
+    </script>
+  {/if}
+</svelte:head>
 
 <!-- Back link -->
 <div class="back-button">&lt; 
