@@ -182,16 +182,24 @@
   <meta property="og:url" content={$metadata.url || window.location.href} />
   <meta property="og:title" content={$metadata.title} />
   <meta property="og:description" content={$metadata.description} />
+  <meta property="og:site_name" content="Wendy Ham's Weekend Projects" />
+  <meta property="og:locale" content="en_US" />
   {#if $metadata.image}
     <meta property="og:image" content={$metadata.image} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Software for one, for everyone." />
   {/if}
   
   <!-- Twitter -->
-  <meta name="twitter:card" content={$metadata.twitterCard} />
+  <meta name="twitter:card" content={$metadata.twitterCard || "summary_large_image"} />
+  <meta name="twitter:site" content="@xnham" />
+  <meta name="twitter:creator" content="@xnham" />
   <meta name="twitter:title" content={$metadata.title} />
   <meta name="twitter:description" content={$metadata.description} />
   {#if $metadata.image}
     <meta name="twitter:image" content={$metadata.image} />
+    <meta name="twitter:image:alt" content="Software for one, for everyone." />
   {/if}
   
   <!-- JSON-LD Structured Data -->
