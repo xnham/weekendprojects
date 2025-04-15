@@ -96,7 +96,7 @@
 
 <svelte:head>
   <title>Wendy Ham's Weekend Projects'</title>
-  <meta name="description" content="Weekend Projects: Experiments in creating bespoke 'software for one' using AI tools. Explore how hyperpersonal software is becoming accessible to everyone." />
+  <meta name="description" content="Weekend Projects: Experiments in creating bespoke 'software for one' using AI tools. A look into the rising accessibility of hyperpersonal software for supercharging life tasks."/>
 </svelte:head>
 
 <div>
