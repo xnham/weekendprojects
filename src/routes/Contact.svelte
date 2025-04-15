@@ -1,5 +1,7 @@
 <script lang="ts">
     import { submitContactForm } from '../services/contactService';
+    import { onMount } from 'svelte';
+    import { updateMetadata } from '../stores/metadataStore';
     
     // Form data
     let name = '';
@@ -52,6 +54,14 @@
             submitting = false;
         }
     }
+
+    onMount(() => {
+        updateMetadata({
+            title: "Contact | Wendy Ham's Weekend Projects",
+            description: "Get in touch to discuss collaboration ideas, personal software solutions, or shared interests.",
+            type: "website"
+        });
+    });
 </script>
 
 <div class="container">

@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import Essays from '../components/Essays.svelte';
   import Essay from '../components/Essay.svelte';
+  import { updateMetadata } from '../stores/metadataStore';
   
   let currentEssay: string | null = null;
   
@@ -13,6 +14,16 @@
   
   function updateCurrentEssay() {
     currentEssay = getSlugFromUrl();
+    
+    // Update metadata for the main writing page (when no specific essay is selected)
+    if (!currentEssay) {
+      updateMetadata({
+        title: "Writing | Wendy Ham's Weekend Projects",
+        description: "Thoughts about creating software that quietly complements our lives.",
+        type: "website"
+      });
+    }
+    // Essay-specific metadata will be handled in the Essay component
   }
   
   onMount(() => {

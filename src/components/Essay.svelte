@@ -15,6 +15,7 @@
   import InteractionButton from './shared/InteractionButton.svelte';
   import { supabase } from '../lib/supabase';
   import { get } from 'svelte/store';
+  import { updateMetadata } from '../stores/metadataStore';
   
   export let slug: string;
   
@@ -94,6 +95,21 @@
           await recordView(metadata.id);
           // Refresh metadata to get updated counts
           await refreshEssayMetadata();
+        }
+        
+        // After loading the essay data
+        if (metadata) {
+          // Combine description and excerpt, with a space between them
+          const combinedDescription = metadata.description && metadata.excerpt
+            ? `${metadata.description} ${metadata.excerpt}`
+            : metadata.description || metadata.excerpt;
+            
+          updateMetadata({
+            title: `${metadata.title} | Wendy Ham's Weekend Projects`,
+            description: combinedDescription,
+            image: "/images/og-image.png",
+            type: "article"
+          });
         }
       }
     } catch (e) {

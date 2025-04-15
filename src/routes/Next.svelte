@@ -1,5 +1,15 @@
 <script lang="ts">
   import FuturePortfolio from '../components/FuturePortfolio.svelte';
+  import { onMount } from 'svelte';
+  import { updateMetadata } from '../stores/metadataStore';
+  
+  onMount(() => {
+    updateMetadata({
+      title: "Next | Wendy Ham's Weekend Projects",
+      description: "Have a say in what I build next. Like the projects that resonate with you and follow the ones you want access to.",
+      type: "website"
+    });
+  });
 </script>
 
 <div class="container">

@@ -1,4 +1,15 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { updateMetadata } from '../stores/metadataStore';
+  
+  onMount(() => {
+    updateMetadata({
+      title: "About | Wendy Ham's Weekend Projects",
+      description: "From academia to tennis and software.",
+      type: "profile"
+    });
+  });
+
   // You can add any reactive variables or logic here if needed
 </script>
 

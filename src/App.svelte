@@ -10,13 +10,52 @@
   import { initializeInteractions as initializeProjectInteractions, getOrCreateDeviceId } from './services/projectInteractionService';
   import { initializeInteractions as initializeEssayInteractions } from './services/essayInteractionService';
   import { supabase } from './lib/supabase';
+  import metadata, { resetMetadata } from './stores/metadataStore';
   
   // State to track current page
   let currentPage = 'home';
   
+  // Create JSON-LD data
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        "@id": "#wendyham",
+        "name": "Wendy Ham",
+        "jobTitle": "CEO of Ocams",
+        "description": "Founder/CEO of Ocams",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "New York",
+          "addressRegion": "NY",
+          "addressCountry": "US"
+        },
+        "sameAs": [
+          "https://www.linkedin.com/in/whamwhamwham/",
+          "https://www.instagram.com/whamwhamwham/",
+          "https://www.ocamsclub.com/team-careers",
+          "https://scholar.google.com/citations?user=vTgiK8cAAAAJ&hl=en",
+          "https://www.crunchbase.com/person/wendy-ham"
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "#website",
+        "url": typeof window !== 'undefined' ? window.location.origin : "",
+        "name": "Wendy Ham - CEO of Ocams",
+        "description": "Personal portfolio website of Wendy Ham, Founder and CEO of Ocams",
+        "author": {"@id": "#wendyham"}
+      }
+    ]
+  };
+  
   // Function to determine current page from URL
   function updateCurrentPage() {
     const path = window.location.pathname;
+    
+    // Reset metadata when page changes
+    resetMetadata();
     
     if (path === '/about') {
       currentPage = 'about';
@@ -95,8 +134,30 @@
 </script>
 
 <svelte:head>
-  <title>Wendy Ham's Weekend Projects'</title>
-  <meta name="description" content="Weekend Projects: Experiments in creating bespoke 'software for one' using AI tools. A look into the rising accessibility of hyperpersonal software for supercharging life tasks."/>
+  <title>{$metadata.title}</title>
+  <meta name="description" content={$metadata.description} />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content={$metadata.type} />
+  <meta property="og:url" content={$metadata.url || window.location.href} />
+  <meta property="og:title" content={$metadata.title} />
+  <meta property="og:description" content={$metadata.description} />
+  {#if $metadata.image}
+    <meta property="og:image" content={$metadata.image} />
+  {/if}
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content={$metadata.twitterCard} />
+  <meta name="twitter:title" content={$metadata.title} />
+  <meta name="twitter:description" content={$metadata.description} />
+  {#if $metadata.image}
+    <meta name="twitter:image" content={$metadata.image} />
+  {/if}
+  
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+    {JSON.stringify(jsonLd)}
+  </script>
 </svelte:head>
 
 <div>
