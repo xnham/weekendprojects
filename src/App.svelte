@@ -108,6 +108,15 @@
     } else {
       currentPage = 'home';
     }
+    
+    // Send page view to Google Analytics when page changes
+    if (typeof gtag === 'function') {
+      gtag('event', 'page_view', {
+        page_title: $metadata.title,
+        page_location: window.location.href,
+        page_path: window.location.pathname
+      });
+    }
   }
   
   // Handle navigation events
