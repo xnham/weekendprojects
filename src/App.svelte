@@ -23,8 +23,15 @@
         "@type": "Person",
         "@id": "#wendyham",
         "name": "Wendy Ham",
-        "jobTitle": "CEO of Ocams",
-        "description": "Founder/CEO of Ocams",
+        "jobTitle": "Builder of Software for One",
+        "description": "Building hyperpersonal software to create bespoke custom automation for individuals and small businesses.",
+        "knowsAbout": [
+          "AI-assisted software development",
+          "Vibe coding",
+          "Software for one",
+          "Custom automation",
+          "Hyperpersonal software solutions"
+        ],
         "address": {
           "@type": "PostalAddress",
           "addressLocality": "New York",
@@ -34,7 +41,6 @@
         "sameAs": [
           "https://www.linkedin.com/in/whamwhamwham/",
           "https://www.instagram.com/whamwhamwham/",
-          "https://www.ocamsclub.com/team-careers",
           "https://scholar.google.com/citations?user=vTgiK8cAAAAJ&hl=en",
           "https://www.crunchbase.com/person/wendy-ham"
         ]
@@ -43,9 +49,43 @@
         "@type": "WebSite",
         "@id": "#website",
         "url": typeof window !== 'undefined' ? window.location.origin : "",
-        "name": "Wendy Ham - CEO of Ocams",
-        "description": "Personal portfolio website of Wendy Ham, Founder and CEO of Ocams",
+        "name": "Wendy Ham - Builder of Software for One",
+        "description": "Weekend Projects: Exploring the creation of hyperpersonal, hypertargeted software tailored to solve specific individual and small business needs.",
         "author": {"@id": "#wendyham"}
+      },
+      {
+        "@type": "ItemList",
+        "@id": "#projectCollection",
+        "name": "Software for One Projects",
+        "description": "Collection of hyperpersonal software solutions developed by Wendy Ham",
+        "itemListElement": [
+          {
+            "@type": "CreativeWork",
+            "position": 1,
+            "name": "Expeditr",
+            "description": "Tool that consolidates recipe URLs into one ingredient list for easier meal planning and grocery shopping.",
+            "author": {"@id": "#wendyham"},
+            "url": typeof window !== 'undefined' ? `${window.location.origin}/projects/expeditr` : ""
+          },
+          {
+            "@type": "SoftwareApplication",
+            "position": 2,
+            "name": "Miss Penny",
+            "description": "Daily text notification system to track expenses against budget, reducing monthly spending by $334 on average.",
+            "author": {"@id": "#wendyham"},
+            "applicationCategory": "FinanceApplication",
+            "url": typeof window !== 'undefined' ? `${window.location.origin}/projects/miss-penny` : ""
+          },
+          {
+            "@type": "SoftwareApplication",
+            "position": 3,
+            "name": "Custom Google Calendar Integration",
+            "description": "Automated system that extracts lesson schedules from a club's web app and posts them to Google Calendar for easy access.",
+            "author": {"@id": "#wendyham"},
+            "applicationCategory": "ProductivityApplication",
+            "url": typeof window !== 'undefined' ? `${window.location.origin}/projects/calendar-integration` : ""
+          }
+        ]
       }
     ]
   };
