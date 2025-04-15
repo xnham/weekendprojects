@@ -6,7 +6,8 @@
     updateMetadata({
       title: "About | Wendy Ham's Weekend Projects",
       description: "From academia to tennis and software.",
-      type: "profile"
+      type: "profile",
+      canonicalUrl: "https://xnham.com/about"
     });
   });
 

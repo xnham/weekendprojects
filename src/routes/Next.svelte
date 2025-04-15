@@ -7,7 +7,8 @@
     updateMetadata({
       title: "Next | Wendy Ham's Weekend Projects",
       description: "Have a say in what I build next. Like the projects that resonate with you and follow the ones you want access to.",
-      type: "website"
+      type: "website",
+      canonicalUrl: "https://xnham.com/next"
     });
   });
 </script>

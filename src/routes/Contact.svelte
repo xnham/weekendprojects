@@ -59,7 +59,8 @@
         updateMetadata({
             title: "Contact | Wendy Ham's Weekend Projects",
             description: "Get in touch to discuss collaboration ideas, personal software solutions, or shared interests.",
-            type: "website"
+            type: "website",
+            canonicalUrl: "https://xnham.com/contact"
         });
     });
 </script>

@@ -7,6 +7,7 @@ interface MetadataState {
   url?: string;
   type?: string;
   twitterCard?: string;
+  canonicalUrl?: string;
 }
 
 // Default/global metadata
@@ -15,7 +16,8 @@ const defaultMetadata: MetadataState = {
   description: "Experiments in creating bespoke 'software for one' using AI tools. A look into the rising accessibility of hyperpersonal software for supercharging life tasks.",
   image: "/images/og-image.png", // Default og-image
   type: "website",
-  twitterCard: "summary_large_image"
+  twitterCard: "summary_large_image",
+  canonicalUrl: "https://xnham.com/" // Default canonical URL for the homepage
 };
 
 // Create the writable store with default values

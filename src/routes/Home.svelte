@@ -9,7 +9,8 @@
   onMount(() => {
     updateMetadata({
       title: "Wendy Ham's Weekend Projects",
-      description: "Experiments in creating bespoke 'software for one' using AI tools. A look into the rising accessibility of hyperpersonal software for supercharging life tasks."
+      description: "Experiments in creating bespoke 'software for one' using AI tools. A look into the rising accessibility of hyperpersonal software for supercharging life tasks.",
+      canonicalUrl: "https://xnham.com/"
     });
   });
 </script>

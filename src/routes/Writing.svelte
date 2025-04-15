@@ -20,7 +20,8 @@
       updateMetadata({
         title: "Writing | Wendy Ham's Weekend Projects",
         description: "Thoughts about creating software that quietly complements our lives.",
-        type: "website"
+        type: "website",
+      canonicalUrl: "https://xnham.com/writing"
       });
     }
     // Essay-specific metadata will be handled in the Essay component

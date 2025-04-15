@@ -177,6 +177,9 @@
   <title>{$metadata.title}</title>
   <meta name="description" content={$metadata.description} />
   
+  <!-- Canonical URL -->
+  <link rel="canonical" href={$metadata.canonicalUrl || window.location.href} />
+  
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content={$metadata.type} />
   <meta property="og:url" content={$metadata.url || window.location.href} />
