@@ -57,7 +57,7 @@
         "@type": "ItemList",
         "@id": "#projectCollection",
         "name": "Software for One Projects",
-        "description": "Collection of hyperpersonal software solutions developed by Wendy Ham",
+        "description": "Collection of hyperpersonal software solutions built by Wendy Ham",
         "itemListElement": [
           {
             "@type": "CreativeWork",
@@ -215,9 +215,7 @@
   {/if}
   
   <!-- JSON-LD Structured Data -->
-  <script type="application/ld+json">
-    {JSON.stringify(jsonLd)}
-  </script>
+  {@html `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`}
 </svelte:head>
 
 <div>
