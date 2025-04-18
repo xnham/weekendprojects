@@ -64,7 +64,7 @@
 
         <p>I'm curious: Have the economic forces now enabled, maybe even favored, hyperpersonal software creation? Can someone with my patchy technical background build software that's actually worth using?</p>
 
-        <p>Btw, one of the things I built was a friendly voice robot called Mr. Benedict. If you have your own project in mind, how about <a href="/mr-benedict">giving it a call</a> to get some feedback?</p>
+        <p>Btw, one of the things I built was an AI voice agent called Ms. Florentine. If you'd like to uncover time-saving opportunities in your life or just see what it's like to talk to a robot, how about <a href="/ms-florentine">giving it a call</a>?</p>
 
       </div>
     </div>
