@@ -1,1 +1,0 @@
-import"./index-ChCC-N9Z.js";const e={title:"The value of taste in the AI age",description:"Taste is what's valuable. Why is that? How do we develop it?",date:"2025-03-11",published:!1,excerpt:null},{title:i,description:s,date:l,published:o,excerpt:d}=e;function n(t){}export{n as default,e as metadata};
