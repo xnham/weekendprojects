@@ -24,3 +24,4 @@
    *.sln
    *.sw?
 .git.backup
+node_modules/
