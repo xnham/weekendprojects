@@ -1,4 +1,4 @@
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import sveltePreprocess from 'svelte-preprocess';
 import { mdsvex } from 'mdsvex';
 
 // Custom remark plugin to change heading levels
@@ -21,7 +21,7 @@ function remarkHeadingLevel() {
 const config = {
   extensions: ['.svelte', '.md'],
   preprocess: [
-    vitePreprocess(),
+    sveltePreprocess(),
     mdsvex({
       extensions: ['.md'],
       remarkPlugins: [remarkHeadingLevel]
