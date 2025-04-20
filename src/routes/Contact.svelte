@@ -76,6 +76,9 @@
             help you build, or if you just feel like we have a common interest.
             I will respond within 24 hours.
         </p>
+        <p>
+            Feel like chatting with my robot before sending me a message? Call Sunny <a href="/sunny">here</a>.
+        </p>
     </div>
 
     <form class="contact-form" on:submit|preventDefault={handleSubmit}>
@@ -123,8 +126,12 @@
 
 <style>
     .contact-intro {
-        margin-bottom: 20px;
+        margin-bottom: 40px;
         width: 75%;
+    }
+
+    .contact-intro p {
+        margin-bottom: 1rem;
     }
 
     .contact-form {
@@ -208,7 +215,6 @@
     /* Tablet responsiveness */
     @media (max-width: 768px) {
         .contact-intro {
-            margin-bottom: 40px;
             width: 100%;
         }
         
