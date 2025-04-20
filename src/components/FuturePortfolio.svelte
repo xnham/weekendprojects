@@ -473,7 +473,8 @@
                 class="modal-action-btn" 
                 disabled={submitting || !email}
               >
-                {submitting ? 'Subscribing...' : 'Subscribe to updates'}
+                <FontAwesomeIcon icon={['far', 'bell']} />
+                <span style="margin-left: 8px">{submitting ? 'Subscribing...' : 'Subscribe to updates'}</span>
               </button>
             </form>
           </div>

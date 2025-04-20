@@ -3,6 +3,7 @@
   import { onMount, onDestroy } from "svelte";
   import Vapi from "@vapi-ai/web";
   import WaveSurfer from "wavesurfer.js";
+  import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
 
   // Local state for this specific modal
   export let isOpen = false;
@@ -431,7 +432,8 @@
                 class="modal-action-btn"
                 on:click={() => handleBrowserCall()}
               >
-                Start Browser Call
+                <FontAwesomeIcon icon={['fas', 'phone']} />
+                <span style="margin-left: 8px">Start Browser Call</span>
               </button>
             </div>
             <p class="sunny-privacy-note">Your call may be recorded.</p>
@@ -561,7 +563,7 @@
     display: block;
     width: auto;
     height: 40px;
-    padding: 0 40px;
+    padding: 0 40px 0 30px;
     background-color: var(--purple-100);
     color: var(--light-100);
     border: none;

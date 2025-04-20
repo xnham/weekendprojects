@@ -2,6 +2,7 @@
     import { submitContactForm } from '../services/contactService';
     import { onMount } from 'svelte';
     import { updateMetadata } from '../stores/metadataStore';
+    import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
     
     // Form data
     let name = '';
@@ -118,7 +119,8 @@
                 class="submit-button {!isFormValid ? 'disabled' : ''}" 
                 disabled={!isFormValid}
             >
-                Send Message
+                <FontAwesomeIcon icon={['far', 'envelope']} />
+                <span style="margin-left: 8px">Send Message</span>
             </button>
         {/if}
     </form>

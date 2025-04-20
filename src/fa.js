@@ -12,13 +12,15 @@ import {
   faComment as fasComment,
   faArrowUpRightFromSquare,
   faShareFromSquare as fasShareFromSquare,
-  faInfoCircle
+  faInfoCircle,
+  faPhone
 } from '@fortawesome/free-solid-svg-icons';
 import { 
   faHeart as farHeart, 
   faBell as farBell,
   faComment as farComment,
-  faShareFromSquare as farShareFromSquare
+  faShareFromSquare as farShareFromSquare,
+  faEnvelope as farEnvelope
 } from '@fortawesome/free-regular-svg-icons';
 
 // Add icons to the library
@@ -39,5 +41,7 @@ library.add(
   faArrowUpRightFromSquare,
   fasShareFromSquare,
   farShareFromSquare,
-  faInfoCircle
+  faInfoCircle,
+  faPhone,
+  farEnvelope
 );
