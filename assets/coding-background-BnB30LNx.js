@@ -1,1 +1,0 @@
-import"./index-6pc-iigx.js";const t={title:"My coding background",description:"What did I know about coding prior to using AI.",date:"2025-03-22",published:!1,excerpt:null},{title:e,description:i,date:n,published:a,excerpt:c}=t;function r(o){}export{r as default,t as metadata};
