@@ -18,6 +18,9 @@
   let lastVolumeTime = 0;
   let dailyCallObject: any = null; // To store the Daily call object
   let audioProcessor: any = null;
+  let canvasContext: CanvasRenderingContext2D | null = null;
+  let animationFrame: number | null = null;
+  let devMode = false; // Add this flag for development mode
 
   // VAPI setup
   const vapi = new Vapi("18aebfed-8669-4ace-beec-e219652fc662"); // Initialize VAPI with your public key
@@ -43,51 +46,20 @@
   }
 
   function handleResize() {
-    // Recreate wavesurfer when the window is resized
-    if (waveSurfer && audioData.length > 0) {
-      updateWaveform();
-    }
+    // No need to recreate wavesurfer when the window is resized
+    // Just let the CSS handle responsive sizing of the bars
   }
 
   function updateWaveform() {
-    if (!waveSurfer || !modalElement) return;
-    
-    try {
-      // Check if the container exists and is visible
-      const container = modalElement.querySelector('.audio-wave-container') as HTMLElement;
-      if (!container) {
-        console.error("Audio wave container not found");
-        return;
-      }
-      
-      // Check if container has dimensions
-      if (container.offsetWidth === 0 || container.offsetHeight === 0) {
-        console.error("Container has zero dimensions:", container.offsetWidth, "x", container.offsetHeight);
-        return;
-      }
-      
-      console.log("Container dimensions:", container.offsetWidth, "x", container.offsetHeight);
-      
-      // Destroy the old instance
-      waveSurfer.destroy();
-      
-      // Create a new instance with our updated data
-      waveSurfer = WaveSurfer.create({
-        container: container,
-        waveColor: 'violet',
-        progressColor: 'purple',
-        cursorColor: 'transparent',
-        height: 80,
-        normalize: true,
-        peaks: [audioData.length > 0 ? audioData : [0.5, -0.5, 0.5, -0.5]], // Higher amplitude for visibility
-        duration: audioData.length / (audioContext?.sampleRate || 44100)
-      });
+    // We no longer need this function since we're using animated bars
+    // Let's make it a no-op function to avoid breaking any existing calls
+    return;
+  }
 
-      // WaveSurfer will automatically render when created
-      console.log("Waveform updated with data length:", audioData.length);
-    } catch (error) {
-      console.error("Error updating waveform:", error);
-    }
+  // Simplified visualization - no need for complex drawing logic
+  function updateVisualization() {
+    // This function is now simpler - volume level is applied directly in the template
+    lastVolumeTime = Date.now();
   }
 
   // Simulate some activity if we haven't received volume updates
@@ -97,19 +69,9 @@
     const now = Date.now();
     // If it's been more than 500ms since the last volume update and we're in a call
     if (now - lastVolumeTime > 500) {
-      // Add some random data to create a dynamic waveform
-      for (let i = 0; i < 10; i++) {
-        // Generate random values between -0.3 and 0.3
-        audioData.push((Math.random() * 0.6) - 0.3);
-      }
-      
-      // Keep a reasonable amount of data points
-      if (audioData.length > 1000) {
-        audioData = audioData.slice(audioData.length - 1000);
-      }
-      
+      // Generate a random volume level to keep bars moving
+      volumeLevel = Math.random() * 0.5; // Generate moderate activity
       lastVolumeTime = now;
-      updateWaveform();
     }
   }
 
@@ -117,50 +79,21 @@
     document.addEventListener("keydown", handleKeydown);
     document.addEventListener("mousedown", handleClickOutside);
     
-    // Wait for DOM to be ready before initializing WaveSurfer
-    setTimeout(() => {
-      if (modalElement) {
-        // Create an audio context for processing audio data
-        audioContext = new AudioContext();
-        
-        // Initialize with some sample data
-        audioData = Array(100).fill(0).map(() => (Math.random() * 0.4) - 0.2);
-        
-        const container = modalElement.querySelector('.audio-wave-container') as HTMLElement;
-        if (!container) {
-          console.error("Audio wave container not found during initialization");
-          return;
-        }
-        
-        console.log("Initializing WaveSurfer in container:", container);
-        
-        // Initialize WaveSurfer with minimal options
-        try {
-          waveSurfer = WaveSurfer.create({
-            container: container,
-            waveColor: 'violet',
-            progressColor: 'purple',
-            cursorColor: 'transparent',
-            height: 80,
-            normalize: true,
-            peaks: [audioData],
-            duration: audioData.length / (audioContext.sampleRate || 44100)
-          });
-          console.log("WaveSurfer initialized successfully");
-        } catch (error) {
-          console.error("Error initializing WaveSurfer:", error);
-        }
-
-        // Set up a timer to simulate activity if needed
-        const activityTimer = setInterval(simulateActivityIfNeeded, 200);
-        
-        window.addEventListener('resize', handleResize);
-        
-        return () => {
-          clearInterval(activityTimer);
-        };
-      }
-    }, 1000); // Increased delay to ensure DOM is fully ready
+    // Create audio context right away
+    try {
+      audioContext = new AudioContext();
+    } catch (err) {
+      console.error("Failed to create AudioContext:", err);
+    }
+    
+    // Set up a timer to simulate activity if needed
+    const activityTimer = setInterval(simulateActivityIfNeeded, 200);
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      clearInterval(activityTimer);
+    };
   });
 
   onDestroy(() => {
@@ -171,6 +104,9 @@
     }
     if (audioProcessor) {
       clearInterval(audioProcessor);
+    }
+    if (animationFrame) {
+      cancelAnimationFrame(animationFrame);
     }
     window.removeEventListener('resize', handleResize);
   });
@@ -243,7 +179,7 @@
         console.error("Error accessing Daily call object:", dailyErr);
       }
 
-      // Keep our existing volume-level event listener as a backup
+      // Keep our existing volume-level event listener
       vapi.on("volume-level", (volume) => {
         volumeLevel = volume;
         lastVolumeTime = Date.now();
@@ -252,19 +188,6 @@
         
         // Only consider it speaking if volume is above a threshold
         isSpeaking = volume > 0.1;
-        
-        // Update the audio data array with new volume info
-        // Scale volume to get more visible changes
-        const scaledVolume = Math.min(volume * 3, 1) * 2 - 1;
-        audioData.push(scaledVolume);
-        
-        // Keep a reasonable amount of data points
-        if (audioData.length > 1000) {
-          audioData = audioData.slice(audioData.length - 1000);
-        }
-        
-        // Update the waveform visualization
-        updateWaveform();
       });
       
       // Listen for message events instead of transcript
@@ -278,25 +201,18 @@
           // When we get a transcript, we know someone is speaking
           if (!isSpeaking) {
             // If we're not already marked as speaking, simulate some activity
-            for (let i = 0; i < 20; i++) {
-              // Generate random values between -0.5 and 0.5 for visible activity
-              audioData.push((Math.random() * 1.0) - 0.5);
-            }
-            
-            // Keep a reasonable amount of data points
-            if (audioData.length > 1000) {
-              audioData = audioData.slice(audioData.length - 1000);
-            }
-            
-            updateWaveform();
+            volumeLevel = 0.5; // Set a moderate volume level
+            updateVisualization();
           }
         }
       });
 
-      // Replace the "*" event listener with individual listeners for key events
+      // Event handlers for various events
       vapi.on("speech-start", () => {
         console.log("VAPI speech started");
         isSpeaking = true;
+        // Make sure there's some visual indication
+        if (volumeLevel < 0.2) volumeLevel = 0.5;
       });
 
       vapi.on("speech-end", () => {
@@ -334,33 +250,34 @@
       // Create a source node from the stream
       const source = audioContext.createMediaStreamSource(stream);
       
-      // Create an analyzer node to get waveform data
+      // Create an analyzer node to get volume data
       const analyzer = audioContext.createAnalyser();
       analyzer.fftSize = 2048;
       
       // Connect the source to the analyzer
       source.connect(analyzer);
       
-      // Set up processing interval to read waveform data
+      // Set up processing interval to read volume data
       const bufferLength = analyzer.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
       
       // Save the analyzer for cleanup
       audioProcessor = setInterval(() => {
-        // Get waveform data
+        // Get volume data
         analyzer.getByteTimeDomainData(dataArray);
         
-        // Convert to float values between -1 and 1 for waveform
-        const floatData: number[] = [];
-        for (let i = 0; i < bufferLength; i += 10) { // Sample every 10th value to reduce data
-          floatData.push((dataArray[i] / 128.0) - 1.0);
+        // Calculate average volume
+        let sum = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          sum += Math.abs((dataArray[i] / 128.0) - 1.0);
+        }
+        const avgVolume = sum / bufferLength;
+        
+        // Update our volume level if it's higher than current
+        if (avgVolume > volumeLevel) {
+          volumeLevel = avgVolume * 1.5; // Amplify for better visualization
         }
         
-        // Update our audio data
-        audioData = [...floatData];
-        
-        // Update the waveform visualization
-        updateWaveform();
       }, 100); // Update 10 times per second
       
       console.log("Audio processing set up successfully for track");
@@ -395,6 +312,36 @@
     
     return buffer;
   }
+
+  // Add this function to simulate pulses
+  function simulatePulses() {
+    let pulsing = true;
+    const interval = setInterval(() => {
+      if (!pulsing) {
+        clearInterval(interval);
+        return;
+      }
+      
+      // Create a random pulse effect
+      volumeLevel = Math.random();
+      
+      // After 2 seconds, turn off pulsing
+      setTimeout(() => {
+        pulsing = false;
+      }, 5000);
+    }, 300);
+  }
+
+  // Make the modal open and in call mode for development
+  onMount(() => {
+    // ... existing code ...
+    
+    // Auto open and simulate call for development
+    if (devMode) {
+      isOpen = true;
+      callActive = true;
+    }
+  });
 </script>
 
 <!-- Only show when isOpen is true -->
@@ -425,8 +372,41 @@
         {#if callActive}
           <!-- Call Active Content -->
           <div class="call-active-content">
-            <!-- Audio wave visualization -->
-            <div class="audio-wave-container"></div>
+            <!-- Pulsing Circle visualization -->
+            <div class="audio-pulse-container">
+              <div 
+                class="pulse-circle" 
+                style="transform: scale({1 + Math.min(volumeLevel * 2, 1)}); 
+                       opacity: {0.6 + Math.min(volumeLevel, 0.4)}"
+              ></div>
+              <div 
+                class="pulse-ripple" 
+                style="transform: scale({1 + Math.min(volumeLevel * 3, 2)}); 
+                       opacity: {Math.max(0, Math.min(volumeLevel - 0.1, 0.5))}"
+              ></div>
+            </div>
+
+            <!-- Development controls (only visible in dev mode) -->
+            {#if devMode}
+              <div class="dev-controls">
+                <label>
+                  Volume Level: {volumeLevel.toFixed(2)}
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="1" 
+                    step="0.01" 
+                    bind:value={volumeLevel} 
+                  />
+                </label>
+                <button on:click={() => volumeLevel = 0}>Zero</button>
+                <button on:click={() => volumeLevel = 0.3}>Low</button>
+                <button on:click={() => volumeLevel = 0.6}>Medium</button>
+                <button on:click={() => volumeLevel = 0.9}>High</button>
+                <button on:click={() => simulatePulses()}>Auto Pulse</button>
+              </div>
+            {/if}
+
             <button
               class="modal-action-btn end-call-btn"
               on:click={() => endCall()}
@@ -609,20 +589,8 @@
     color: var(--dark-70);
   }
 
-  .audio-wave-container {
-    width: 100%;
-    height: 80px;
-    min-height: 80px;
-    background-color: rgba(0, 0, 0, 0.03);
-    border-radius: 4px;
-    overflow: hidden;
-    margin: 10px 0;
-    display: block;
-    position: relative;
-  }
-
   .end-call-btn {
-    background-color: red;
+    background-color: #DB0000;
     color: white;
     margin-top: 20px;
   }
@@ -637,6 +605,39 @@
     align-items: center;
     justify-content: center;
     height: 100%;
+  }
+
+  .audio-pulse-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100px;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 4px;
+    margin: 10px 0;
+    position: relative;
+  }
+  
+  .pulse-circle {
+    width: 20px;
+    height: 20px;
+    background-color: var(--dark-purple-100);
+    border-radius: 50%;
+    transition: all 0.15s ease-out;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .pulse-ripple {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: transparent;
+    border: 2px solid var(--dark-purple-100);
+    border-radius: 50%;
+    transition: all 0.2s ease-out;
+    z-index: 1;
   }
 
   /* ======================
@@ -672,5 +673,39 @@
       top: 16px;
       right: 16px;
     }
+  }
+
+  .dev-controls {
+    margin: 20px 0;
+    padding: 10px;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .dev-controls label {
+    display: block;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+  
+  .dev-controls input[type="range"] {
+    width: 100%;
+    margin-top: 5px;
+  }
+  
+  .dev-controls button {
+    margin: 0 5px;
+    padding: 5px 10px;
+    background-color: #eee;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .dev-controls button:hover {
+    background-color: #ddd;
   }
 </style>
