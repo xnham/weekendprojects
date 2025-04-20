@@ -11,9 +11,13 @@
   import { initializeInteractions as initializeEssayInteractions } from './services/essayInteractionService';
   import { supabase } from './lib/supabase';
   import metadata, { resetMetadata } from './stores/metadataStore';
+  import SunnyModal from './components/SunnyModal.svelte';
   
   // State to track current page
   let currentPage = 'home';
+  
+  // Add this after your other variables
+  let sunnyModal;
   
   // Create JSON-LD data with a reactive declaration
   $: jsonLd = {
@@ -165,13 +169,23 @@
     };
   });
   
-  // Intercept link clicks for SPA navigation
+  // Intercept link clicks for SPA navigation and modals
   function handleLinkClick(event: MouseEvent) {
     // Only handle links within our app
     const target = (event.target as Element).closest('a');
     if (target && target.href && new URL(target.href).origin === window.location.origin) {
-      event.preventDefault();
       const href = target.getAttribute('href');
+      
+      // Check if this is the Sunny modal link
+      if (href === '/sunny') {
+        event.preventDefault();
+        event.stopPropagation();
+        sunnyModal.open();
+        return;
+      }
+      
+      // Otherwise proceed with normal SPA navigation
+      event.preventDefault();
       
       // Update URL without full page reload
       window.history.pushState({}, '', href);
@@ -217,6 +231,8 @@
   <!-- JSON-LD Structured Data -->
   {@html `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`}
 </svelte:head>
+
+<SunnyModal bind:this={sunnyModal} />
 
 <div>
   <Nav currentPage={currentPage} />
