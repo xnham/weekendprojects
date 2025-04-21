@@ -8,10 +8,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST_FOLDER = path.resolve(__dirname, '../dist');
 const PORT = 5173;
 
+// Check if running in GitHub Actions
+const isCI = process.env.CI === 'true';
+
 async function prerender() {
   console.log('Starting prerendering process...');
   
-  // Start the dev server (you can also use 'preview' if already built)
+  // Start the dev server
   const { createServer } = await import('vite');
   const server = await createServer({
     configFile: path.resolve(__dirname, '../vite.config.js'),
@@ -24,7 +27,13 @@ async function prerender() {
   await server.listen();
   console.log(`Server started at http://localhost:${PORT}`);
   
-  const browser = await puppeteer.launch();
+  // Configure browser launch options for CI environment
+  const browserOptions = isCI ? 
+    { args: ['--no-sandbox', '--disable-setuid-sandbox'] } : 
+    {};
+  
+  console.log('Launching browser with options:', browserOptions);
+  const browser = await puppeteer.launch(browserOptions);
   const page = await browser.newPage();
   
   try {
@@ -55,6 +64,7 @@ async function prerender() {
     }
   } catch (error) {
     console.error('Error during prerendering:', error);
+    process.exit(1); // Exit with error code for CI
   } finally {
     await browser.close();
     await server.close();
