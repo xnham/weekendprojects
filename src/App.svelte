@@ -130,6 +130,9 @@
   
   // Initialize and set up listeners
   onMount(() => {
+    // Ensure we initialize with the correct page based on the URL
+    updateCurrentPage();
+    
     // Define original fetch before we potentially modify it
     const originalFetch = window.fetch;
     
@@ -139,9 +142,6 @@
       
       // No longer modifying fetch to add device-id header
       // Just use the original fetch function
-      
-      // Set initial page based on URL
-      updateCurrentPage();
       
       // Initialize interaction systems
       initializeProjectInteractions();
