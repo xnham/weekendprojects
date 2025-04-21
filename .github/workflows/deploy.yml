@@ -26,8 +26,18 @@ jobs:
       - name: Install dependencies
         run: npm install
         
+      - name: Generate routes
+        run: npm run generate-routes
+        
       - name: Build
         run: npm run build
+        
+      - name: Install browser for prerendering
+        run: |
+          npx playwright install --with-deps chromium
+          
+      - name: Prerender pages
+        run: npm run prerender
         
       - name: Create .nojekyll file
         run: |
