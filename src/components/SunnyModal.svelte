@@ -3,7 +3,7 @@
   import { onMount, onDestroy } from "svelte";
   import Vapi from "@vapi-ai/web";
   import WaveSurfer from "wavesurfer.js";
-  import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
+  import { FontAwesomeIcon } from "@fortawesome/svelte-fontawesome";
 
   // Local state for this specific modal
   export let isOpen = false;
@@ -66,7 +66,7 @@
   // Simulate some activity if we haven't received volume updates
   function simulateActivityIfNeeded() {
     if (!callActive) return;
-    
+
     const now = Date.now();
     // If it's been more than 500ms since the last volume update and we're in a call
     if (now - lastVolumeTime > 500) {
@@ -79,19 +79,19 @@
   onMount(() => {
     document.addEventListener("keydown", handleKeydown);
     document.addEventListener("mousedown", handleClickOutside);
-    
+
     // Create audio context right away
     try {
       audioContext = new AudioContext();
     } catch (err) {
       console.error("Failed to create AudioContext:", err);
     }
-    
+
     // Set up a timer to simulate activity if needed
     const activityTimer = setInterval(simulateActivityIfNeeded, 200);
-    
-    window.addEventListener('resize', handleResize);
-    
+
+    window.addEventListener("resize", handleResize);
+
     return () => {
       clearInterval(activityTimer);
     };
@@ -109,7 +109,7 @@
     if (animationFrame) {
       cancelAnimationFrame(animationFrame);
     }
-    window.removeEventListener('resize', handleResize);
+    window.removeEventListener("resize", handleResize);
   });
 
   // This function opens the modal
@@ -143,30 +143,42 @@
       try {
         dailyCallObject = vapi.getDailyCallObject();
         if (dailyCallObject) {
-          console.log("Successfully retrieved Daily call object:", dailyCallObject);
-          
+          console.log(
+            "Successfully retrieved Daily call object:",
+            dailyCallObject,
+          );
+
           // Try to subscribe to audio data if possible
           // This is experimental based on VAPI's suggestion
           setTimeout(() => {
             try {
               if (dailyCallObject && dailyCallObject.participants()) {
-                console.log("Daily participants:", dailyCallObject.participants());
-                
+                console.log(
+                  "Daily participants:",
+                  dailyCallObject.participants(),
+                );
+
                 // Set up audio processing for all participants
-                Object.keys(dailyCallObject.participants()).forEach(participantId => {
-                  const participant = dailyCallObject.participants()[participantId];
-                  console.log("Setting up audio for participant:", participant);
-                  
-                  // Try to access audio stream if available
-                  if (participant.audioTrack) {
-                    setupAudioProcessingForTrack(participant.audioTrack);
-                  }
-                });
-                
+                Object.keys(dailyCallObject.participants()).forEach(
+                  (participantId) => {
+                    const participant =
+                      dailyCallObject.participants()[participantId];
+                    console.log(
+                      "Setting up audio for participant:",
+                      participant,
+                    );
+
+                    // Try to access audio stream if available
+                    if (participant.audioTrack) {
+                      setupAudioProcessingForTrack(participant.audioTrack);
+                    }
+                  },
+                );
+
                 // Listen for track started events to capture new audio tracks
-                dailyCallObject.on('track-started', (event: any) => {
-                  if (event.track.kind === 'audio') {
-                    console.log('New audio track started:', event);
+                dailyCallObject.on("track-started", (event: any) => {
+                  if (event.track.kind === "audio") {
+                    console.log("New audio track started:", event);
                     setupAudioProcessingForTrack(event.track);
                   }
                 });
@@ -184,21 +196,21 @@
       vapi.on("volume-level", (volume) => {
         volumeLevel = volume;
         lastVolumeTime = Date.now();
-        
+
         console.log("Volume level:", volume);
-        
+
         // Only consider it speaking if volume is above a threshold
         isSpeaking = volume > 0.1;
       });
-      
+
       // Listen for message events instead of transcript
       vapi.on("message", (message) => {
         console.log("Message received:", message);
-        
+
         // Check if the message contains transcript data
-        if (message && message.type === 'transcript') {
+        if (message && message.type === "transcript") {
           console.log("Transcript received:", message);
-          
+
           // When we get a transcript, we know someone is speaking
           if (!isSpeaking) {
             // If we're not already marked as speaking, simulate some activity
@@ -244,43 +256,42 @@
       if (!audioContext) {
         audioContext = new AudioContext();
       }
-      
+
       // Create a media stream from the track
       const stream = new MediaStream([track]);
-      
+
       // Create a source node from the stream
       const source = audioContext.createMediaStreamSource(stream);
-      
+
       // Create an analyzer node to get volume data
       const analyzer = audioContext.createAnalyser();
       analyzer.fftSize = 2048;
-      
+
       // Connect the source to the analyzer
       source.connect(analyzer);
-      
+
       // Set up processing interval to read volume data
       const bufferLength = analyzer.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
-      
+
       // Save the analyzer for cleanup
       audioProcessor = setInterval(() => {
         // Get volume data
         analyzer.getByteTimeDomainData(dataArray);
-        
+
         // Calculate average volume
         let sum = 0;
         for (let i = 0; i < bufferLength; i++) {
-          sum += Math.abs((dataArray[i] / 128.0) - 1.0);
+          sum += Math.abs(dataArray[i] / 128.0 - 1.0);
         }
         const avgVolume = sum / bufferLength;
-        
+
         // Update our volume level if it's higher than current
         if (avgVolume > volumeLevel) {
           volumeLevel = avgVolume * 1.5; // Amplify for better visualization
         }
-        
       }, 100); // Update 10 times per second
-      
+
       console.log("Audio processing set up successfully for track");
     } catch (err) {
       console.error("Error setting up audio processing:", err);
@@ -304,13 +315,17 @@
 
   // Helper function to create an audio buffer
   function createAudioBuffer(data: Float32Array): AudioBuffer {
-    const buffer = audioContext!.createBuffer(1, data.length, audioContext!.sampleRate);
+    const buffer = audioContext!.createBuffer(
+      1,
+      data.length,
+      audioContext!.sampleRate,
+    );
     const channel = buffer.getChannelData(0);
-    
+
     for (let i = 0; i < data.length; i++) {
       channel[i] = data[i];
     }
-    
+
     return buffer;
   }
 
@@ -322,10 +337,10 @@
         clearInterval(interval);
         return;
       }
-      
+
       // Create a random pulse effect
       volumeLevel = Math.random();
-      
+
       // After 2 seconds, turn off pulsing
       setTimeout(() => {
         pulsing = false;
@@ -336,13 +351,25 @@
   // Make the modal open and in call mode for development
   onMount(() => {
     // ... existing code ...
-    
+
     // Auto open and simulate call for development
     if (devMode) {
       isOpen = true;
       callActive = true;
     }
   });
+
+  function copyToClipboard(text: string) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        // Optionally provide visual feedback
+        console.log("Phone number copied to clipboard");
+      })
+      .catch((err) => {
+        console.error("Could not copy text: ", err);
+      });
+  }
 </script>
 
 <!-- Only show when isOpen is true -->
@@ -375,13 +402,13 @@
           <div class="call-active-content">
             <!-- Pulsing Circle visualization -->
             <div class="audio-pulse-container">
-              <div 
-                class="pulse-circle" 
+              <div
+                class="pulse-circle"
                 style="transform: scale({1 + Math.min(volumeLevel * 2, 1)}); 
                        opacity: {0.6 + Math.min(volumeLevel, 0.4)}"
               ></div>
-              <div 
-                class="pulse-ripple" 
+              <div
+                class="pulse-ripple"
                 style="transform: scale({1 + Math.min(volumeLevel * 3, 2)}); 
                        opacity: {Math.max(0, Math.min(volumeLevel - 0.1, 0.5))}"
               ></div>
@@ -392,18 +419,18 @@
               <div class="dev-controls">
                 <label>
                   Volume Level: {volumeLevel.toFixed(2)}
-                  <input 
-                    type="range" 
-                    min="0" 
-                    max="1" 
-                    step="0.01" 
-                    bind:value={volumeLevel} 
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    bind:value={volumeLevel}
                   />
                 </label>
-                <button on:click={() => volumeLevel = 0}>Zero</button>
-                <button on:click={() => volumeLevel = 0.3}>Low</button>
-                <button on:click={() => volumeLevel = 0.6}>Medium</button>
-                <button on:click={() => volumeLevel = 0.9}>High</button>
+                <button on:click={() => (volumeLevel = 0)}>Zero</button>
+                <button on:click={() => (volumeLevel = 0.3)}>Low</button>
+                <button on:click={() => (volumeLevel = 0.6)}>Medium</button>
+                <button on:click={() => (volumeLevel = 0.9)}>High</button>
                 <button on:click={() => simulatePulses()}>Auto Pulse</button>
               </div>
             {/if}
@@ -421,8 +448,14 @@
             <div class="sunny-option">
               <p class="sunny-modal-option">Option 1</p>
               <p class="sunny-modal-option-description">
-                Use your phone to call <span
-                  class="sunny-modal-option-description-phone">617-329-4181</span
+                Call <span class="sunny-modal-option-description-phone"
+                  >617-329-4181 <button
+                    class="copy-button"
+                    on:click={() => copyToClipboard("617-329-4181")}
+                    aria-label="Copy phone number"
+                  >
+                    <FontAwesomeIcon icon={["far", "copy"]} />
+                  </button></span
                 >
               </p>
             </div>
@@ -432,8 +465,8 @@
                 class="modal-action-btn"
                 on:click={() => handleBrowserCall()}
               >
-                <FontAwesomeIcon icon={['fas', 'phone']} />
-                <span style="margin-left: 8px">Start Browser Call</span>
+                <FontAwesomeIcon icon={["fas", "phone"]} />
+                <span class="button-icon-text">Start Web Call</span>
               </button>
             </div>
             <p class="sunny-privacy-note">Your call may be recorded.</p>
@@ -446,7 +479,7 @@
 
 <style>
   /* ======================
-     MODAL DIALOG
+     1. MODAL STRUCTURE
      ====================== */
   .sunny-modal-backdrop {
     position: fixed;
@@ -483,16 +516,6 @@
     padding: 60px 0 50px 0;
   }
 
-  .sunny-modal-title {
-    font-family: "DM Serif Text", serif;
-    text-align: center;
-    font-size: 24px;
-    font-weight: 500;
-    line-height: 1.3;
-    margin-bottom: 40px;
-    color: var(--dark-100);
-  }
-
   .close-button {
     position: absolute;
     top: 20px;
@@ -519,6 +542,30 @@
     transition: transform 0.3s ease;
   }
 
+  /* ======================
+     2. CONTENT & TYPOGRAPHY
+     ====================== */
+  .sunny-modal-title {
+    font-family: "DM Serif Text", serif;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.3;
+    margin-bottom: 40px;
+    color: var(--dark-100);
+  }
+
+  .sunny-privacy-note {
+    margin-top: 14px;
+    text-align: center;
+    line-height: 1.4;
+    font-size: 13px;
+    color: var(--dark-70);
+  }
+
+  /* ======================
+     3. DEFAULT CONTENT OPTIONS
+     ====================== */
   .sunny-content {
     display: flex;
     flex-direction: column;
@@ -555,52 +602,18 @@
   }
 
   .sunny-modal-option-description-phone {
+    font-size: 16px;
     font-weight: 600;
     color: var(--dark-80);
-  }
-
-  .modal-action-btn {
-    display: block;
-    width: auto;
-    height: 40px;
-    padding: 0 40px 0 30px;
-    background-color: var(--purple-100);
-    color: var(--light-100);
-    border: none;
+    border: 1px dashed var(--dark-40);
     border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    margin: 0;
+    padding: 6px 14px 6px 20px;
+    margin-left: 10px;
   }
 
-  .modal-action-btn:hover:not(:disabled) {
-    background-color: var(--dark-purple-100);
-  }
-
-  .modal-action-btn:disabled {
-    background-color: var(--purple-30);
-    cursor: not-allowed;
-  }
-
-  .sunny-privacy-note {
-    margin-top: 14px;
-    text-align: center;
-    line-height: 1.4;
-    font-size: 13px;
-    color: var(--dark-70);
-  }
-
-  .end-call-btn {
-    background-color: #DB0000;
-    color: white;
-    margin-top: 20px;
-  }
-
-  .modal-action-btn.end-call-btn:hover {
-    background-color: #B20000;
-  }
-
+  /* ======================
+     4. CALL ACTIVE STATE
+     ====================== */
   .call-active-content {
     display: flex;
     flex-direction: column;
@@ -620,7 +633,7 @@
     margin: 10px 0;
     position: relative;
   }
-  
+
   .pulse-circle {
     width: 20px;
     height: 20px;
@@ -630,7 +643,7 @@
     position: relative;
     z-index: 2;
   }
-  
+
   .pulse-ripple {
     position: absolute;
     width: 20px;
@@ -643,7 +656,105 @@
   }
 
   /* ======================
-     RESPONSIVE STYLES
+     5. BUTTONS & INTERACTIVE ELEMENTS
+     ====================== */
+  .modal-action-btn {
+    display: block;
+    width: auto;
+    height: 40px;
+    padding: 0 20px 0 18px;
+    background-color: var(--purple-100);
+    color: var(--light-100);
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin: 0;
+  }
+
+  .modal-action-btn:hover:not(:disabled) {
+    background-color: var(--dark-purple-100);
+    transform: scale(1.02);
+    transition: transform 0.3s ease;
+  }
+
+  .modal-action-btn:disabled {
+    background-color: var(--purple-30);
+    cursor: not-allowed;
+  }
+
+  .end-call-btn {
+    background-color: #db0000;
+    color: white;
+    margin-top: 20px;
+  }
+
+  .modal-action-btn.end-call-btn:hover {
+    background-color: #b20000;
+  }
+
+  .copy-button {
+    background: none;
+    border: none;
+    color: var(--dark-80);
+    cursor: pointer;
+    padding: 4px;
+    margin-left: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+  }
+
+  .copy-button:hover {
+    transform: scale(1.2);
+    transition: transform 0.3s ease;
+  }
+
+  .button-icon-text {
+    margin-left: 4px;
+  }
+
+  /* ======================
+     6. DEVELOPER MODE
+     ====================== */
+  .dev-controls {
+    margin: 20px 0;
+    padding: 10px;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .dev-controls label {
+    display: block;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+
+  .dev-controls input[type="range"] {
+    width: 100%;
+    margin-top: 5px;
+  }
+
+  .dev-controls button {
+    margin: 0 5px;
+    padding: 5px 10px;
+    background-color: #eee;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .dev-controls button:hover {
+    background-color: #ddd;
+  }
+
+  /* ======================
+     7. RESPONSIVE STYLES
      ====================== */
   /* Tablet */
   @media (max-width: 768px) {
@@ -675,39 +786,5 @@
       top: 16px;
       right: 16px;
     }
-  }
-
-  .dev-controls {
-    margin: 20px 0;
-    padding: 10px;
-    border: 1px dashed #ccc;
-    border-radius: 4px;
-    background-color: #f5f5f5;
-    width: 100%;
-    max-width: 400px;
-  }
-  
-  .dev-controls label {
-    display: block;
-    margin-bottom: 10px;
-    width: 100%;
-  }
-  
-  .dev-controls input[type="range"] {
-    width: 100%;
-    margin-top: 5px;
-  }
-  
-  .dev-controls button {
-    margin: 0 5px;
-    padding: 5px 10px;
-    background-color: #eee;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .dev-controls button:hover {
-    background-color: #ddd;
   }
 </style>

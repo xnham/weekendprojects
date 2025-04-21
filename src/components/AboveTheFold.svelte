@@ -6,6 +6,9 @@
   let rotatingText = "";
   let currentIndex = 0;
   let rotatingTextElement: HTMLElement | null = null;
+  
+  // Variable to store just the dynamic year part
+  let yearPhrase = "a year";
 
   // Function to get random index different from current one
   function getRandomIndex(currentIndex: number, arrayLength: number): number {
@@ -30,6 +33,25 @@
       }, 500);
     }
   }
+  
+  // Function to calculate just the year phrase
+  function calculateYearPhrase(): string {
+    const startYear = 2024; // The baseline year when it was "a year ago"
+    const currentYear = new Date().getFullYear();
+    const yearDiff = currentYear - startYear;
+    
+    if (yearDiff <= 0) return "recently"; // Changed to lowercase for better sentence integration
+    if (yearDiff === 1) return "a year";
+    
+    // Convert number to word for 2-10 years
+    const yearWords = ["two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+    if (yearDiff >= 2 && yearDiff <= 10) {
+      return `${yearWords[yearDiff-2]} years`;
+    }
+    
+    // For 11+ years, use the number
+    return `${yearDiff} years`;
+  }
 
   onMount(() => {
     // Initial text update
@@ -37,6 +59,9 @@
     
     // Update text every 3 seconds
     const interval = setInterval(updateRotatingText, 3000);
+    
+    // Calculate the year phrase
+    yearPhrase = calculateYearPhrase();
     
     // Clean up interval on component unmount
     return () => clearInterval(interval);
@@ -51,12 +76,13 @@
   <div class="intro-wrapper">
     <div class="intro-text two-columns">
       <div class="column">
-        <p>Building and maintaining software used to be expensive, which meant custom solutions were mainly accessible to large enterprises.</p>
-        
-        <p>That has changed. Now, pretty much anyone can create production-grade software using everyday language (a.k.a. by vibe coding). It's becoming completely normal for small businesses, families, and individuals to deploy bespoke software that's precisely tailored—even adaptive—to their needs.
+        <p>Building and maintaining software used to be expensive, which meant custom solutions were mainly accessible to large enterprises. That has changed. Now, pretty much anyone can create production-grade software using everyday language—such as by <a href="https://en.wikipedia.org/wiki/Vibe_coding" target="_blank">vibe coding</a>.
+        </p>
+          
+        <p>It's becoming completely normal for small businesses, families, and individuals to deploy bespoke software that's precisely tailored—even adaptive—to their needs.
         </p>
 
-        <p>Through Weekend Projects, I hope to deepen and share my understanding of this exciting era of software long tail. Empowered by Claude, Cursor, and other AI tools, I started building various pieces of 'software for one' to squash small yet pesky problems that were bugging me and my family.</p>
+        <p>Through Weekend Projects, I hope to expand and share my understanding of this exciting era of software long tail. About {yearPhrase} ago, empowered by Claude, Cursor, and other AI tools, I started building various pieces of 'software for one' to squash small yet pesky problems that were bugging me and my family.</p>
       </div>
 
       <div class="column">

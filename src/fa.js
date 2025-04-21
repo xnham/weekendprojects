@@ -20,7 +20,8 @@ import {
   faBell as farBell,
   faComment as farComment,
   faShareFromSquare as farShareFromSquare,
-  faEnvelope as farEnvelope
+  faEnvelope as farEnvelope,
+  faCopy as farCopy
 } from '@fortawesome/free-regular-svg-icons';
 
 // Add icons to the library
@@ -43,5 +44,6 @@ library.add(
   farShareFromSquare,
   faInfoCircle,
   faPhone,
-  farEnvelope
+  farEnvelope,
+  farCopy
 );

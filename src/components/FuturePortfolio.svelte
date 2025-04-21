@@ -474,7 +474,7 @@
                 disabled={submitting || !email}
               >
                 <FontAwesomeIcon icon={['far', 'bell']} />
-                <span style="margin-left: 8px">{submitting ? 'Subscribing...' : 'Subscribe to updates'}</span>
+                <span class="button-icon-text">{submitting ? 'Subscribing...' : 'Subscribe to updates'}</span>
               </button>
             </form>
           </div>
@@ -801,6 +801,8 @@
   
   .modal-action-btn:hover:not(:disabled) {
     background-color: var(--dark-purple-100);
+    transform: scale(1.02);
+    transition: transform 0.3s ease;
   }
   
   .modal-action-btn:disabled {
@@ -905,5 +907,9 @@
   .follow-email-input:focus {
     border-color: var(--dark-80);
     outline: none;
+  }
+  
+  .button-icon-text {
+    margin-left: 4px;
   }
 </style>

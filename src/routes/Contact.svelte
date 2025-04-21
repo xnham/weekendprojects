@@ -120,7 +120,7 @@
                 disabled={!isFormValid}
             >
                 <FontAwesomeIcon icon={['far', 'envelope']} />
-                <span style="margin-left: 8px">Send Message</span>
+                <span class="button-icon-text">Send Message</span>
             </button>
         {/if}
     </form>
@@ -198,14 +198,20 @@
         box-sizing: border-box;
     }
 
-    .submit-button:hover {
+    .submit-button:hover:not(:disabled) {
         background-color: var(--dark-purple-100);
+        transform: scale(1.02);
+        transition: transform 0.3s ease;
     }
 
     .submit-button.disabled {
         background-color: var(--purple-100);
         cursor: not-allowed;
         opacity: 0.7;
+    }
+
+    .button-icon-text {
+        margin-left: 6px;
     }
 
     .success-message {
