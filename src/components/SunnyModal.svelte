@@ -771,7 +771,7 @@
     }
   }
 
-  /* Mobile */
+  /* Mobile large */
   @media (max-width: 576px) {
     .sunny-modal-container {
       width: 95%;
@@ -791,12 +791,39 @@
     }
 
     .sunny-modal-option-description-phone {
-      padding: 6px 10px 6px 16px;
+      padding: 6px 6px 6px 12px;
+      margin-left: 6px;
     }
 
     .close-button {
       top: 16px;
       right: 16px;
+    }
+  }
+
+  /* Mobile small */
+  @media (max-width: 375px) {
+    .sunny-modal-option-description-phone {
+      font-size: 14px;
+      padding: 6px 2px 6px 8px;
+      margin-left: 4px;
+    }
+
+    .sunny-option {
+      padding: 0 14px;
+    }
+
+    .sunny-modal-option {
+      font-size: 12px;
+    }
+
+    .modal-action-btn {
+      font-size: 14px;
+      padding: 0 2px 0 0;
+    }
+
+    .button-icon-text {
+      margin-left: 2px;
     }
   }
 </style>
