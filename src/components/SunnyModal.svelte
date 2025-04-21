@@ -697,7 +697,7 @@
   .copy-button {
     background: none;
     border: none;
-    color: var(--dark-80);
+    color: var(--dark-90);
     cursor: pointer;
     padding: 4px;
     margin-left: 4px;
