@@ -86,7 +86,7 @@
       </div>
 
       <div class="column">
-        <p>Before these powerful AI assistants came along, owing to my disjointed coding skills, I would've had to hire a developer or toil for months to build each piece of software, which would have been a silly use of resources.</p>
+        <p>Before these powerful AI helpers came along, owing to my disjointed coding skills, I would've had to hire a developer or toil for months to build each piece of software, which would have been a silly use of resources.</p>
 
         <p>I'm curious: Have the economic forces now enabled, maybe even favored, hyperpersonal software creation? Can someone with my patchy technical background build software that's actually worth using?</p>
 
