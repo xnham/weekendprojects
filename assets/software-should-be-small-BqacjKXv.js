@@ -1,0 +1,1 @@
+import"./index-BtOBcADO.js";const e={title:"Software Should be Small",description:"Software should be modular.",date:"2025-03-08",published:!1,excerpt:"tbd."},{title:o,description:d,date:l,published:r,excerpt:s}=e;function i(t){}export{i as default,e as metadata};
