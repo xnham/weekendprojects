@@ -782,6 +782,18 @@
       font-size: 22px;
     }
 
+    .sunny-option {
+      padding: 0 20px;
+    }
+
+    .sunny-modal-option-description {
+      font-size: 14px;
+    }
+
+    .sunny-modal-option-description-phone {
+      padding: 6px 10px 6px 16px;
+    }
+
     .close-button {
       top: 16px;
       right: 16px;
