@@ -120,13 +120,19 @@
   .nav-links a {
     text-decoration: none;
     font-weight: 500;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.2s ease, transform 0.3s ease;
     color: var(--pure-white-100);
     opacity: 0.8;
+    display: inline-block;
   }
 
   .nav-links a:hover, .nav-links a.active {
     opacity: 1;
+  }
+
+  .nav-links a:hover {
+    transform: scale(1.05);
+    transform-origin: center;
   }
   
   /* Hamburger menu */
