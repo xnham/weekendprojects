@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
 
   // Array of rotating texts (copied from your original implementation)
-  const rotatingTexts = ['^Claude', '^Cursor', '^Replit', '^n8n', '^AutoGPT', '^Gumloop', '^VAPI'];
+  const rotatingTexts = ['^Claude', '^Cursor', '^Vapi', 'Replit'];
   let rotatingText = "";
   let currentIndex = 0;
   let rotatingTextElement: HTMLElement | null = null;
