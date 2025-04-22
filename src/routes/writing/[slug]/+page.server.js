@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { loadEssay } from '$lib/utils/essays.js';
+import { loadEssay } from '$lib/utils/essays';
 
 export async function load({ params }) {
   const { slug } = params;

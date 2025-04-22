@@ -1,33 +1,56 @@
-<script>
+<script lang="ts">
+  import FuturePortfolio from '$lib/components/FuturePortfolio.svelte';
   import { onMount } from 'svelte';
-  import { metadata } from '$lib/stores/metadataStore';
+  import { updateMetadata } from '$lib/stores/metadataStore';
   
   onMount(() => {
-    metadata.set({
+    updateMetadata({
       title: "Next | Wendy Ham's Weekend Projects",
-      description: "Upcoming projects and ideas for future software for one implementations.",
-      canonicalUrl: "https://xnham.com/next",
+      description: "Have a say in what I build next. Like the projects that resonate with you and follow the ones you want access to.",
       type: "website",
-      url: window.location.href
+      canonicalUrl: "https://xnham.com/next"
     });
   });
 </script>
 
-<svelte:head>
-  <title>Next | Wendy Ham's Weekend Projects</title>
-  <meta name="description" content="Upcoming projects and ideas for future software for one implementations." />
-  <link rel="canonical" href="https://xnham.com/next" />
-  
-  <!-- Open Graph -->
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://xnham.com/next" />
-  <meta property="og:title" content="Next | Wendy Ham's Weekend Projects" />
-  <meta property="og:description" content="Upcoming projects and ideas for future software for one implementations." />
-</svelte:head>
-
 <div class="container">
-  <h2>Coming <span class="purple">Next</span></h2>
+  <h2 class="small-bottom-margin">Tell Me What to Build <span class="purple">Next.</span></h2>
   
-  <!-- We'll populate the Next content later -->
-  <p>Next page content will go here.</p>
-</div> 
+  <div class="future-project-intro">
+    <p>Like the projects that resonate with you. Follow the ones you want access to.</p>
+    <p>If you have your own project idea, how about having a chat with <a href="/mr-benedict">Mr. Benedict</a>, my gentle robot? It will help you figure out how to best build it.</p>
+  </div>
+  
+  <FuturePortfolio />
+</div>
+
+<style>
+  
+  .future-project-intro {
+    margin-bottom: 60px;
+    width: 75%
+  }
+  
+  .future-project-intro a {
+    color: var(--dark-85);
+    text-decoration: none;
+    border-bottom: 1px solid var(--dark-100);
+    transition: opacity 0.2s ease;
+  }
+  
+  .future-project-intro a:hover {
+    opacity: 0.7;
+  }
+  
+  /* Tablet responsiveness */
+  @media (max-width: 768px) {
+    .future-project-intro {
+      margin-bottom: 40px;
+      width: 100%;
+    }
+
+    .future-project-intro p {
+      margin-bottom: 1.5rem;
+    }
+  }
+</style>

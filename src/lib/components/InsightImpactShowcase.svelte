@@ -54,25 +54,25 @@
   afterUpdate(updateContentHeight);
 </script>
 
-<div class="sanity-impact-container">
-  <div class="sanity-impact-tabs">
-    <button class="sanity-tab" class:active={activeTab === 'before'} 
+<div class="insight-impact-container">
+  <div class="insight-impact-tabs">
+    <button class="insight-tab" class:active={activeTab === 'before'} 
             on:click={() => changeTab('before')}>
       Before
     </button>
-    <button class="sanity-tab" class:active={activeTab === 'after'} 
+    <button class="insight-tab" class:active={activeTab === 'after'} 
             on:click={() => changeTab('after')}>
       After
     </button>
     <div class="tab-slider" class:slide-right={activeTab === 'after'}></div>
   </div>
   
-  <div class="sanity-impact-content" bind:this={contentContainer}>
+  <div class="insight-impact-content" bind:this={contentContainer}>
     <div class="slides-container">
-      <div class="sanity-slide" class:active={activeTab === 'after'} bind:this={afterSlide}>
+      <div class="insight-slide" class:active={activeTab === 'after'} bind:this={afterSlide}>
         {@html formatTextWithParagraphs(afterImpact)}
       </div>
-      <div class="sanity-slide" class:active={activeTab === 'before'} bind:this={beforeSlide}>
+      <div class="insight-slide" class:active={activeTab === 'before'} bind:this={beforeSlide}>
         {@html formatTextWithParagraphs(beforeImpact)}
       </div>
     </div>
@@ -80,7 +80,7 @@
 </div>
 
 <style>
-  .sanity-impact-container {
+  .insight-impact-container {
     width: 100%;
     height: 100%;
     margin: 0;
@@ -91,7 +91,7 @@
     /* border: 1px solid var(--dark-100); */
   }
   
-  .sanity-impact-tabs {
+  .insight-impact-tabs {
     display: flex;
     position: relative;
     margin: 0 auto;
@@ -101,7 +101,7 @@
     background-color: var(--dark-5);
   }
   
-  .sanity-tab {
+  .insight-tab {
     padding: 10px;
     background: none;
     border: none;
@@ -115,7 +115,7 @@
     z-index: 2;
   }
   
-  .sanity-tab.active {
+  .insight-tab.active {
     color: var(--pure-white-100);
     font-weight: 500;
   }
@@ -124,7 +124,7 @@
     position: absolute;
     height: 100%;
     width: 50%;
-    background-color: var(--dark-pink-100);
+    background-color: var(--plum-100);
     border-radius: 2px;
     transition: transform 0.3s ease;
     z-index: 1;
@@ -134,7 +134,7 @@
     transform: translateX(100%);
   }
   
-  .sanity-impact-content {
+  .insight-impact-content {
     position: relative;
     overflow: hidden;
     transition: height 0.3s ease;
@@ -149,15 +149,15 @@
     transform: translateX(0);
   }
   
-  .slides-container:has(.sanity-slide:nth-child(1).active) {
+  .slides-container:has(.insight-slide:nth-child(1).active) {
     transform: translateX(0);
   }
   
-  .slides-container:has(.sanity-slide:nth-child(2).active) {
+  .slides-container:has(.insight-slide:nth-child(2).active) {
     transform: translateX(-50%);
   }
   
-  .sanity-slide {
+  .insight-slide {
     flex: 1;
     min-width: 50%;
     opacity: 0.5;
@@ -165,18 +165,18 @@
     width: 100%;
   }
   
-  .sanity-slide.active {
+  .insight-slide.active {
     opacity: 1;
   }
   
-  :global(.sanity-slide p) {
+  :global(.insight-slide p) {
     text-align: left;
     font-size: 15px;
     color: var(--dark-85);
     margin: 0 40px 1.5rem;
   }
 
-  :global(.sanity-slide p:last-child) {
+  :global(.insight-slide p:last-child) {
     margin-bottom: 0;
   }
 </style>

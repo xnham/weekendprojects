@@ -21,6 +21,12 @@ const config = {
 		// Example: paths: { base: '/my-repo-name' }
 		paths: {
 			base: ''  // Empty for custom domain (xnham.com)
+		},
+		// Use the correct format for configuring file paths
+		files: {
+			lib: 'src/lib',
+			routes: 'src/routes',
+			assets: 'static' 
 		}
 	}
 };

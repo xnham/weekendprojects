@@ -1,73 +1,156 @@
-<script>
+<script lang="ts">
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-  import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
-  import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
-  import { faShareNodes } from '@fortawesome/free-solid-svg-icons';
-  import { faEye } from '@fortawesome/free-solid-svg-icons';
+  import type { IconDefinition } from '@fortawesome/fontawesome-common-types';
+  import type { SizeProp } from '@fortawesome/fontawesome-svg-core';
+  import { 
+    faHeart as fasHeart, 
+    faShareFromSquare as fasShareFromSquare, 
+    faBell as fasBell 
+  } from '@fortawesome/free-solid-svg-icons';
+  import { 
+    faHeart as farHeart, 
+    faShareFromSquare as farShareFromSquare, 
+    faBell as farBell 
+  } from '@fortawesome/free-regular-svg-icons';
   
-  // Props
-  export let type = 'like'; // 'like', 'share', or 'view'
-  export let count = 0;
+  export let type: 'like' | 'share' | 'follow';
   export let active = false;
-  export let onClick = () => {};
-  export let disabled = false;
+  export let count: number | undefined = undefined;
+  export let showText = true;
+  export let iconSize: SizeProp | undefined = undefined;
+  export let loading = false;
   
-  // CSS classes based on props
-  $: buttonClass = `interaction-btn ${type}-btn ${active ? 'active' : ''} ${disabled ? 'disabled' : ''}`;
+  // Use proper icon imports instead of string arrays
+  const icons = {
+    like: { active: fasHeart, inactive: farHeart },
+    share: { active: fasShareFromSquare, inactive: farShareFromSquare },
+    follow: { active: fasBell, inactive: farBell },
+  };
   
-  // Determine which icon to use
-  $: icon = 
-    type === 'like' 
-      ? (active ? faHeartSolid : faHeartRegular)
-      : type === 'share'
-        ? faShareNodes
-        : faEye;
+  const labels = {
+    like: { active: 'Liked', inactive: 'Like' },
+    share: { active: 'Shared', inactive: 'Share' },
+    follow: { active: 'Following', inactive: 'Follow' },
+  };
+
+  // Track previous active state to detect transitions
+  let wasActive = active;
+  let unlikeAnimation = false;
+
+  // When active changes, check if it's a transition from active to inactive
+  $: {
+    if (wasActive && !active && type === 'like') {
+      unlikeAnimation = true;
+      // Reset after animation duration
+      setTimeout(() => {
+        unlikeAnimation = false;
+      }, 500); // 500ms matches the animation duration
+    }
+    wasActive = active;
+  }
+
+  $: activeClass = active ? `btn-${type === 'follow' ? 'followed' : `${type}d`}` : '';
 </script>
 
 <button 
-  class={buttonClass} 
-  on:click={onClick}
-  disabled={disabled}
-  aria-label={`${type} button, count: ${count}`}
+  class="interaction-btn {active ? 'active' : ''} {type}-btn {unlikeAnimation ? 'unlike-animation' : ''} {loading ? 'loading' : ''}"
+  on:click
+  aria-label="{type} {active ? 'active' : 'inactive'}"
+  disabled={loading}
 >
-  <FontAwesomeIcon icon={icon} />
-  <span class="interaction-count">{count}</span>
+  <span class="icon-container">
+    {#if type === 'like'}
+      {#if active}
+        <FontAwesomeIcon icon={icons.like.active} size={iconSize || 'sm'} />
+      {:else}
+        <FontAwesomeIcon icon={icons.like.inactive} size={iconSize || 'sm'} />
+      {/if}
+    {:else if type === 'follow'}
+      {#if active}
+        <FontAwesomeIcon icon={icons.follow.active} size={iconSize || 'sm'} />
+      {:else}
+        <FontAwesomeIcon icon={icons.follow.inactive} size={iconSize || 'sm'} />
+      {/if}
+    {:else if type === 'share'}
+      {#if active}
+        <FontAwesomeIcon icon={icons.share.active} size={iconSize || 'sm'} />
+      {:else}
+        <FontAwesomeIcon icon={icons.share.inactive} size={iconSize || 'sm'} />
+      {/if}
+    {/if}
+  </span>
+  {#if showText !== false}
+    <span class="text">{labels[type][active ? 'active' : 'inactive']}</span>
+  {/if}
+  {#if count !== undefined}
+    <span class="count">{count}</span>
+  {/if}
 </button>
 
 <style>
   .interaction-btn {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 6px;
-    padding: 6px 12px;
-    border-radius: 4px;
-    border: 1px solid var(--dark-20);
-    background-color: transparent;
+    background: none;
+    padding: 6px 28px 6px 0;
+    font-size: 14px;
+    color: var(--dark-80);
     cursor: pointer;
     transition: all 0.2s ease;
-    font-size: 14px;
-    color: var(--dark-70);
+  }
+
+  /* Remove padding-right when this button is the last child */
+  :global(.interaction-btn:last-child) {
+    padding-right: 0;
+  }
+
+  .icon-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
-  .interaction-btn:hover:not(.disabled) {
-    border-color: var(--dark-40);
-    color: var(--dark-90);
+  /* Pulse animation keyframes */
+  @keyframes iconPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
   }
   
-  .like-btn.active {
+  /* Style for active state */
+  .interaction-btn.like-btn.active :global(svg) {
     color: var(--dark-pink-100);
-    border-color: var(--dark-pink-100);
+    animation: iconPulse 0.5s ease;
   }
   
-  .interaction-count {
-    font-family: 'Roboto', sans-serif;
+  /* Style for unlike animation */
+  .interaction-btn.like-btn.unlike-animation :global(svg) {
+    animation: iconPulse 0.5s ease;
+  }
+  
+  .interaction-btn.follow-btn.active :global(svg) {
+    color: var(--dark-orange-100);
+    animation: iconPulse 0.5s ease;
+  }
+  
+  /* Text styles */
+  .text {
     font-size: 14px;
-    font-weight: 500;
   }
   
-  .interaction-btn.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  /* Count styles */
+  .count {
+    font-size: 14px;
+    margin-left: 2px;
+    color: var(--dark-80);
+  }
+  
+  /* Loading state styles */
+  .interaction-btn.loading {
+    opacity: 0.6;
+    cursor: wait;
+    pointer-events: none;
   }
 </style> 

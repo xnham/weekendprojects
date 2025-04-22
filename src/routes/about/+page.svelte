@@ -1,125 +1,210 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
-  import { metadata } from '$lib/stores/metadataStore';
+  import { updateMetadata } from '$lib/stores/metadataStore';
   
   onMount(() => {
-    metadata.set({
+    updateMetadata({
       title: "About | Wendy Ham's Weekend Projects",
       description: "From academia to tennis and software.",
-      canonicalUrl: "https://xnham.com/about",
       type: "profile",
-      url: window.location.href
+      canonicalUrl: "https://xnham.com/about"
     });
   });
+
+  // You can add any reactive variables or logic here if needed
 </script>
 
-<svelte:head>
-  <title>About | Wendy Ham's Weekend Projects</title>
-  <meta name="description" content="From academia to tennis and software." />
-  <link rel="canonical" href="https://xnham.com/about" />
-  
-  <!-- Open Graph -->
-  <meta property="og:type" content="profile" />
-  <meta property="og:url" content="https://xnham.com/about" />
-  <meta property="og:title" content="About | Wendy Ham's Weekend Projects" />
-  <meta property="og:description" content="From academia to tennis and software." />
-  <meta property="og:image" content="/images/og-image.png" />
-</svelte:head>
-
 <div class="container">
-  <div class="about-content">
-    <h2>Hi, I'm <span class="purple">Wendy Ham.</span></h2>
-    
-    <div class="about-image">
-      <img src="/images/wendy.jpg" alt="Wendy Ham" />
+  <h2>
+    Hi, I'm <span class="purple">Wendy Ham.</span>
+  </h2>
+
+  <div class="about-layout">
+    <div class="about-row">
+      <div class="about-timeline">
+        <p><span class="year">2024</span> <span class="arrow">→</span></p>
+      </div>
+      <div class="about-content">
+        <p>
+          Having accumulated a long list of business and personal
+          problems, I started using AI tools to build various pieces of '<a
+            href="/writing/software-for-one"
+            class="essay-card-link">software for one</a
+          >' to solve them.
+          <span id="hide"
+            >Surprised by the meaningful impact they delivered, particularly
+            given their simplicity, I felt encouraged to build more hyper-custom
+            solutions and uncover the implications of this new style of software
+            development.</span
+          >
+        </p>
+      </div>
     </div>
-    
-    <div class="about-text">
-      <p>I build personalized software that solves real problems in my life.</p>
-      
-      <p>After spending years in academia and working with enterprise tools, I realized that the software I needed didn't exist. So I started building it myself — small, focused applications designed to solve specific problems.</p>
-      
-      <p>My background spans cognitive science, machine learning, and user experience design. I'm passionate about creating software that respects people's time, attention, and agency.</p>
-      
-      <p>When I'm not coding, you'll find me playing tennis, reading books on cognitive science, or exploring new hiking trails.</p>
-      
-      <h3>The "Software for One" Philosophy</h3>
-      
-      <p>I believe in building software that:</p>
-      
-      <ul>
-        <li>Solves real problems, not hypothetical ones</li>
-        <li>Is designed for a specific person (usually me) rather than a generic user</li>
-        <li>Respects attention and cognitive bandwidth</li>
-        <li>Values simplicity over features</li>
-        <li>Can be extended by its users</li>
-      </ul>
-      
-      <p>Want to chat about personalized software, weekend projects, or tennis? <a href="/contact">Drop me a line</a>.</p>
+
+    <div class="about-row">
+      <div class="about-timeline">
+        <p><span class="year">2015</span> <span class="arrow">→</span></p>
+      </div>
+      <div class="about-content">
+        <p>
+          I cofounded a SaaS company called <a
+            href="https://www.ocamsclub.com"
+            target="_blank"
+            rel="noopener">Ocams</a
+          >. It was among the early systems for automating video recording and
+          delivery for tennis players.
+        </p>
+
+        <p>
+          In my interactions with clients, I kept noticing that technology often
+          faltered not because of technical shortcomings but because there
+          was no interface capable of delivering it smoothly to users with
+          complex and diverse behaviors, creating a '<a
+            href="/writing/the-last-mile"
+            class="essay-card-link">last mile</a
+          >' problem. This observation made me feel excited about AI's
+          potential to help us build software that adapts to humans, not the
+          other way around.
+        </p>
+      </div>
+    </div>
+
+    <div class="about-row">
+      <div class="about-timeline">
+        <p><span class="arrow">←</span> <span class="year">2015</span></p>
+      </div>
+      <div class="about-content">
+        <p>
+          Before Ocams, I spent many years in academia, to a large extent due to visa restrictions.
+        </p>
+
+        <p>
+          I started out studying molecular biology as an undergraduate at MIT.
+          Later, I managed a neurobiology laboratory and helped develop
+          case-based medical training simulations at Harvard Medical School. I
+          then pursued a PhD at Wharton, where I built computational models to
+          study how different choices and attributes help people learn better
+          and make more accurate predictions. While at Wharton, I was also introduced to complexity science through a summer program at the Santa Fe Institute.
+        </p>
+
+        <span id="hide"><p>
+          In grad school, I spent a summer month at the Santa Fe Institute,
+          where I was introduced to complexity science. I loved its premise:
+          that universal principles can govern systems as different as ant
+          colonies, economies, and weather systems. It gave me a new way to look
+          past rigid disciplinary boundaries and synthesize insights across
+          them.
+        </p>
+        </span>
+
+        <p>
+          Around 2015, I received my green card, which allowed me to pursue projects outside academia. After years of theoretical work, I was eager to
+          create something that delivered value directly to people.
+          Tennis happened to be my obsession at the time, and I observed a need
+          in the tennis community that prompted me to start Ocams.
+        </p>
+      </div>
+    </div>
+
+    <div class="about-row">
+      <div class="about-timeline">
+        <p><span class="arrow">←</span> <span class="year">all that</span></p>
+      </div>
+      <div class="about-content">
+        <p>I grew up in Jakarta, Indonesia.</p>
+      </div>
     </div>
   </div>
 </div>
 
 <style>
-  .about-content {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem 0 4rem;
-  }
-  
   h2 {
-    font-size: 2.5rem;
-    margin-bottom: 2rem;
-    text-align: center;
+    margin-bottom: 100px;
   }
-  
-  h3 {
-    font-size: 1.5rem;
-    margin: 2rem 0 1rem;
+
+  .about-layout {
+    width: 75%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .about-row {
+    display: flex;
+    margin-bottom: 40px;
+  }
+
+  .about-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .about-timeline {
+    flex: 0 0 100px;
+    width: 100px;
+    padding-right: 30px;
+    padding-bottom: 30px;
+    border-right: 1px solid var(--dark-100);
+    border-bottom: 1px solid var(--dark-100);
+    white-space: nowrap;
     color: var(--dark-80);
   }
-  
-  .about-image {
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    overflow: hidden;
-    margin: 0 auto 2rem;
-    border: 3px solid var(--purple-100);
+
+  .about-content {
+    flex: 1;
+    padding-left: 40px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid var(--dark-100);
   }
-  
-  .about-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .about-text p {
-    margin-bottom: 1.25rem;
-    font-size: 1.1rem;
-    line-height: 1.7;
-    color: var(--dark-80);
-  }
-  
-  ul {
+
+  .about-content p {
     margin-bottom: 1.5rem;
-    padding-left: 1.5rem;
   }
-  
-  li {
-    margin-bottom: 0.5rem;
-    font-size: 1.05rem;
-    line-height: 1.6;
-    color: var(--dark-80);
+
+  .about-content p:last-child {
+    margin-bottom: 0;
   }
-  
+
+  #hide {
+    display: none;
+  }
+
+  /* Tablet responsiveness */
   @media (max-width: 768px) {
-    .about-content {
-      padding: 1rem 1.5rem 3rem;
-    }
-    
     h2 {
-      font-size: 2rem;
+      margin-bottom: 80px;
+    }
+
+    .about-layout {
+      width: 100%;
+    }
+
+    .about-timeline {
+      flex: 0 0 90px;
+      width: 90px;
+      padding-right: 15px;
+    }
+
+    .about-content {
+      padding-left: 20px;
     }
   }
-</style> 
+
+  /* Mobile responsiveness */
+  @media (max-width: 576px) {
+    .about-timeline {
+      flex: 0 0 60px;
+      width: 60px;
+    }
+
+    .about-timeline p {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .about-timeline .arrow,
+    .about-timeline .year {
+      display: block;
+    }
+  }
+</style>

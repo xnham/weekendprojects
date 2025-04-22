@@ -1,17 +1,17 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
 
-  // Array of rotating texts
+  // Array of rotating texts (copied from your original implementation)
   const rotatingTexts = ['^Claude', '^Cursor', '^Vapi', '^Replit', '^ChatGPT'];
   let rotatingText = "";
   let currentIndex = 0;
-  let rotatingTextElement;
+  let rotatingTextElement: HTMLElement | null = null;
   
   // Variable to store just the dynamic year part
   let yearPhrase = "a year";
 
   // Function to get random index different from current one
-  function getRandomIndex(currentIndex, arrayLength) {
+  function getRandomIndex(currentIndex: number, arrayLength: number): number {
     let newIndex;
     do {
       newIndex = Math.floor(Math.random() * arrayLength);
@@ -20,7 +20,7 @@
   }
 
   // Function to update rotating text with fade effect
-  function updateRotatingText() {
+  function updateRotatingText(): void {
     if (rotatingTextElement) {
       rotatingTextElement.style.opacity = '0';
       
@@ -35,7 +35,7 @@
   }
   
   // Function to calculate just the year phrase
-  function calculateYearPhrase() {
+  function calculateYearPhrase(): string {
     const startYear = 2024; // The baseline year when it was "a year ago"
     const currentYear = new Date().getFullYear();
     const yearDiff = currentYear - startYear;
@@ -87,25 +87,24 @@
 
       <div class="column">
         <p>Before these powerful AI helpers came along, owing to my disjointed coding skills, I would've had to hire a developer or toil for months to build each piece of software, which would have been a silly use of resources.</p>
-        
-        <p>Instead, I found I could iterate my way to useful, production-level tools in a matter of hours or days, simply by describing what I needed in plain English and making it incrementally better over time.</p>
-        
-        <p>If we extrapolate from this new trend, we're likely to see a long-awaited growth in software that caters to individuals and small communities with niche needs—an exciting contrast to the current focus on building products for the masses.</p>
+
+        <p>I'm curious: Have the economic forces now enabled, maybe even favored, hyperpersonal software creation? Can someone with my patchy technical background build software that's actually worth using?</p>
+
+        <p>Btw, one of the things I made was an AI voice agent called Sunny, designed to help spark project ideas. If you'd love to streamline some aspects of your life, or just see what talking to a robot is like, 
+          <a href="/sunny">how about giving it a call</a>?
+        </p>
+
       </div>
     </div>
   </div>
+  <div class="divider"></div>
 </header>
 
 <style>
-  header {
-    padding-top: 130px; /* Account for fixed nav */
-    margin-bottom: 60px;
-  }
-  
   .title {
-    font-size: 72px;
-    position: relative;
+    font-size: 76px;
     margin-bottom: 60px;
+    text-align: left;
     line-height: 1.1;
   }
   
@@ -133,6 +132,17 @@
   .intro-text.two-columns .column {
     flex: 1;
   }
+  
+  /*
+  .asterisk-explanation {
+    border-top: 1px solid var(--dark-100);
+    margin-top: 20px;
+    padding-top: 10px;
+    font-size: 12px;
+    text-align: right;
+    line-height: 1.6;
+  }
+  */
   
   /* Small desktop breakpoint */
   @media (max-width: 1200px) {    
@@ -183,4 +193,4 @@
       margin-bottom: 1.2rem;
     }
   }
-</style> 
+</style>

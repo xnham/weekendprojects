@@ -1,44 +1,54 @@
-<script>
-  // You can add any dynamic functionality here if needed
+<script lang="ts">
+  // Get current year for copyright
+  const currentYear = new Date().getFullYear();
 </script>
 
 <footer>
   <p class="footer-nav">
-    <a href="/">Portfolio</a> | 
-    <a href="/next">Next</a> | 
-    <a href="/writing">Writing</a> | 
-    <a href="/about">About</a> | 
-    <a href="/contact">Contact</a>
+    <a href="/" data-sveltekit-preload-data="hover">Portfolio</a> | 
+    <a href="/next" data-sveltekit-preload-data="hover">Next</a> |
+    <a href="/writing" data-sveltekit-preload-data="hover">Writing</a> | 
+    <a href="/about" data-sveltekit-preload-data="hover">About</a> | 
+    <a href="/contact" data-sveltekit-preload-data="hover">Contact</a>
   </p>
-  <p>© Wendy Ham {new Date().getFullYear()}</p>
+  <p>© Wendy Ham {currentYear}</p>
 </footer>
 
 <style>
   footer {
-    background-color: transparent;
-    color: var(--dark-60);
-    text-align: center;
-    padding: 40px 20px;
-    margin-top: 80px;
+    background-color: var(--dark-80);
+    color: var(--pure-white-100);
+    padding: 2.5rem 0;
+    margin-top: 200px;
     font-size: 14px;
+    font-weight: 600;
+    text-align: center;
   }
-  
-  p {
-    margin: 0;
-    line-height: 1.8;
-  }
-  
+
   .footer-nav {
-    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--pure-white-100);
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    margin-bottom: 1rem;
+    gap: 1rem;
   }
-  
-  a {
-    color: var(--dark-70);
+
+  .footer-nav a {
+    color: var(--pure-white-100);
     text-decoration: none;
-    transition: color 0.2s ease;
+    border-bottom: none;
   }
-  
-  a:hover {
-    color: var(--purple-100);
+
+  /* ===== BREAKPOINTS ===== */
+
+  /* Small desktop breakpoint */
+    
+  @media (max-width: 768px) {
+    footer {
+      margin-top: 160px;
+    }
   }
-</style> 
+
+</style>

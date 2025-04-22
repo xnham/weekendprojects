@@ -1,186 +1,246 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
   
-  // Props
+  // Accept currentPage as a prop
   export let currentPage = 'home';
   
-  // State
   let isMenuOpen = false;
-  let isScrolled = false;
+  let isDesktop = true;
+  let isLogoHovered = false;
   
-  // Toggle mobile menu
+  const staticLogoSrc = '/images/eggs_ham.png';
+  const animatedLogoSrc = '/images/eggs_ham_animated.gif';
+  
   function toggleMenu() {
     isMenuOpen = !isMenuOpen;
   }
   
-  // Close menu when clicking outside or navigating
   function closeMenu() {
     isMenuOpen = false;
   }
   
-  // Handle scrolling effect
+  function handleKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      toggleMenu();
+    }
+    if (event.key === 'Escape') {
+      closeMenu();
+    }
+  }
+  
+  function checkScreenSize() {
+    isDesktop = window.innerWidth > 768;
+    if (isDesktop) closeMenu();
+  }
+  
   onMount(() => {
-    const handleScroll = () => {
-      isScrolled = window.scrollY > 30;
-    };
-    
-    window.addEventListener('scroll', handleScroll);
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
     
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', checkScreenSize);
     };
   });
 </script>
 
-<nav class="nav" class:scrolled={isScrolled}>
+<nav class="nav">
   <div class="nav-container">
     <div class="nav-logo">
-      <a href="/">
-        <img src="/images/eggs_ham.png" alt="xnham logo" title="xnham" />
+      <a href="/" data-sveltekit-preload-data="hover">
+        <img 
+          src={isLogoHovered ? animatedLogoSrc : staticLogoSrc} 
+          alt="xnham logo" 
+          title="xnham"
+          on:mouseenter={() => isLogoHovered = true}
+          on:mouseleave={() => isLogoHovered = false}
+        />
       </a>
     </div>
     
     <button 
       class="nav-hamburger" 
-      aria-label="Toggle navigation menu"
-      aria-expanded={isMenuOpen}
+      class:active={isMenuOpen} 
       on:click={toggleMenu}
+      on:keydown={handleKeyDown}
+      aria-expanded={isMenuOpen}
+      aria-label="Toggle navigation menu"
     >
       <span class="hamburger-line"></span>
       <span class="hamburger-line"></span>
       <span class="hamburger-line"></span>
     </button>
     
-    <ul class="nav-links" class:open={isMenuOpen}>
-      <li><a href="/" class:active={currentPage === 'home'}>Portfolio</a></li>
-      <li><a href="/next" class:active={currentPage === 'next'}>Next</a></li>
-      <li><a href="/writing" class:active={currentPage === 'writing'}>Writing</a></li>
-      <li><a href="/about" class:active={currentPage === 'about'}>About</a></li>
-      <li><a href="/contact" class:active={currentPage === 'contact'}>Contact</a></li>
+    <ul class="nav-links" class:active={isMenuOpen}>
+      <li><a href="/" data-sveltekit-preload-data="hover" class:active={currentPage === 'home'} on:click={closeMenu}>Portfolio</a></li>
+      <li><a href="/next" data-sveltekit-preload-data="hover" class:active={currentPage === 'next'} on:click={closeMenu}>Next</a></li>
+      <li><a href="/writing" data-sveltekit-preload-data="hover" class:active={currentPage === 'writing'} on:click={closeMenu}>Writing</a></li>
+      <li><a href="/about" data-sveltekit-preload-data="hover" class:active={currentPage === 'about'} on:click={closeMenu}>About</a></li>
+      <li><a href="/contact" data-sveltekit-preload-data="hover" class:active={currentPage === 'contact'} on:click={closeMenu}>Contact</a></li>
     </ul>
   </div>
 </nav>
 
-{#if isMenuOpen}
-  <div class="overlay" on:click={closeMenu}></div>
-{/if}
-
 <style>
   .nav {
-    position: fixed;
-    top: 0;
-    left: 0;
     width: 100%;
-    z-index: 1000;
-    transition: background-color 0.3s ease;
-    font-family: 'Roboto', sans-serif;
+    color: var(--pure-white-100);
+    margin-bottom: 60px;
   }
-  
-  .nav.scrolled {
-    background-color: var(--light-100);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  }
-  
+
   .nav-container {
-    max-width: 1200px;
-    margin: 0 auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 40px;
   }
-  
-  .nav-logo img {
-    height: 32px;
-    width: auto;
-  }
-  
-  .nav-links {
-    display: flex;
-    list-style: none;
-    gap: 30px;
-  }
-  
-  .nav-links a {
-    color: var(--dark-80);
+
+  /* Nav Logo */
+  .nav-logo a {
+    display: block;
     text-decoration: none;
-    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .nav-logo img {
+    height: 140px;
+    width: auto;
+    display: block;
+    padding: 20px 0px 5px 20px;
+  }
+
+  /* Nav Links */
+  .nav-links {
+    list-style: none;
+    display: flex;
+    gap: 2.4rem;
+    padding: 6px 40px 6px 40px;
+    background-color: var(--dark-75);
+    transform: translateY(-10px);
+  }
+
+  .nav-links a {
+    text-decoration: none;
     font-weight: 500;
-    transition: color 0.2s ease;
+    transition: opacity 0.2s ease, transform 0.3s ease;
+    color: var(--pure-white-100);
+    opacity: 0.8;
+    display: inline-block;
+  }
+
+  .nav-links a:hover, .nav-links a.active {
+    opacity: 1;
+  }
+
+  .nav-links a:hover {
+    transform: scale(1.05);
+    transform-origin: center;
   }
   
-  .nav-links a:hover, 
-  .nav-links a.active {
-    color: var(--purple-100);
-  }
-  
+  /* Hamburger menu */
   .nav-hamburger {
     display: none;
-    background: none;
-    border: none;
+    position: relative;
     cursor: pointer;
-    padding: 10px;
+    margin-right: 5vw;
+    z-index: 100;
+    background: transparent;
+    border: none;
+    width: 36px;
+    height: 36px;
+    padding: 6px;
   }
   
   .hamburger-line {
     display: block;
-    width: 25px;
-    height: 2px;
+    position: absolute;
+    height: 3px;
+    width: 30px;
+    left: 3px;
     background-color: var(--dark-80);
-    margin: 5px 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    border-radius: 2px;
   }
   
-  .overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0,0,0,0.5);
-    z-index: 900;
+  .hamburger-line:nth-child(1) {
+    top: 8px;
   }
   
-  /* Media Queries */
+  .hamburger-line:nth-child(2) {
+    top: 16px;
+  }
+  
+  .hamburger-line:nth-child(3) {
+    top: 24px;
+  }
+
+  /* Smaller desktop breakpoint */
+  @media (max-width: 940px) {   
+    .nav {
+      margin-bottom: 20px;
+    }
+  }
+
+  /* Tablet and mobile styles */
   @media (max-width: 768px) {
-    .nav-container {
-      padding: 15px 20px;
+    .nav {
+      margin-bottom: 20px;
+    }
+
+    .nav-logo img {
+      height: clamp(100px, 20vw, 120px);
+      padding: 20px 0px 5px 3vw;
+    }
+
+    .nav-hamburger {
+      display: block; /* Ensure it's displayed */
     }
     
     .nav-links {
       position: fixed;
-      top: 70px;
-      left: 0;
-      right: 0;
+      top: 0;
+      right: -100vw;
+      height: 100vh;
+      width: 100vw;
+      padding: 120px 0 0 7vw; /* Moved top margin to padding to preserve full background */
+      background-color: var(--dark-95);
+      font-size: 24px;
+      display: flex;
       flex-direction: column;
-      background-color: var(--light-100);
-      padding: 20px;
-      gap: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      transform: translateY(-150%);
-      transition: transform 0.3s ease;
-      z-index: 1000;
+      align-items: flex-start;
+      justify-content: flex-start;
+      transition: right 0.3s ease;
+      z-index: 90;
+      gap: clamp(16px, 4vh, 24px);
     }
-    
-    .nav-links.open {
-      transform: translateY(0);
-    }
-    
-    .nav-hamburger {
+
+    .nav-links a {
+      color: var(--pure-white-90);
+      font-weight: 600;
       display: block;
-      z-index: 1001;
+      width: 85vw; /* Use viewport width instead of percentage */
+      padding: 10px 0; /* Add vertical padding */
     }
     
-    .nav-hamburger[aria-expanded="true"] .hamburger-line:nth-child(1) {
-      transform: translateY(7px) rotate(45deg);
+    .nav-links.active {
+      color: var(--pure-white-100);
+      right: 0;
     }
     
-    .nav-hamburger[aria-expanded="true"] .hamburger-line:nth-child(2) {
+    /* Hamburger animation */
+    .nav-hamburger.active .hamburger-line {
+      background-color: var(--pure-white-90);
+    }
+    
+    .nav-hamburger.active .hamburger-line:nth-child(1) {
+      transform: translateY(8px) rotate(45deg);
+      top: 8px;
+    }
+    
+    .nav-hamburger.active .hamburger-line:nth-child(2) {
       opacity: 0;
     }
     
-    .nav-hamburger[aria-expanded="true"] .hamburger-line:nth-child(3) {
-      transform: translateY(-7px) rotate(-45deg);
+    .nav-hamburger.active .hamburger-line:nth-child(3) {
+      transform: translateY(-8px) rotate(-45deg);
+      top: 24px;
     }
   }
-</style> 
+</style>

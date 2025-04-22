@@ -26,28 +26,31 @@ import {
   faCopy as farCopy
 } from '@fortawesome/free-regular-svg-icons';
 
-// Add icons to the library
-library.add(
-  fasHeart, 
-  farHeart,
-  fasBell,
-  farBell,
-  faUser,
-  faPerson,
-  faHouseChimneyWindow,
-  faBriefcase,
-  faTreeCity,
-  faAngleLeft,
-  faAngleRight,
-  fasComment,
-  farComment,
-  faArrowUpRightFromSquare,
-  fasShareFromSquare,
-  farShareFromSquare,
-  faInfoCircle,
-  faPhone,
-  farEnvelope,
-  farCopy,
-  faShareNodes,
-  faEye
-); 
+// Export an initialization function instead of adding to library at module scope
+export function initFA() {
+  // Add icons to the library
+  library.add(
+    fasHeart, 
+    farHeart,
+    fasBell,
+    farBell,
+    faUser,
+    faPerson,
+    faHouseChimneyWindow,
+    faBriefcase,
+    faTreeCity,
+    faAngleLeft,
+    faAngleRight,
+    fasComment,
+    farComment,
+    faArrowUpRightFromSquare,
+    fasShareFromSquare,
+    farShareFromSquare,
+    faInfoCircle,
+    faPhone,
+    farEnvelope,
+    farCopy,
+    faShareNodes,
+    faEye
+  );
+} 

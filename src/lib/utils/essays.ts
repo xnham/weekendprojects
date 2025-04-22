@@ -1,7 +1,27 @@
 import { supabase } from '../supabase';
 
+// Define the essay metadata type
+export interface EssayMetadata {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  excerpt?: string;
+  date: string;
+  published: boolean;
+  like_count?: number;
+  share_count?: number;
+  view_count?: number;
+}
+
+interface EssayLoadResult {
+  essay: EssayMetadata | null;
+  content: any;
+  error?: string;
+}
+
 // Load a specific essay by slug
-export async function loadEssay(slug) {
+export async function loadEssay(slug: string): Promise<EssayLoadResult> {
   try {
     // Fetch the essay metadata from Supabase
     const { data: essay, error: essayError } = await supabase
@@ -18,22 +38,32 @@ export async function loadEssay(slug) {
       throw new Error('Essay not found');
     }
     
-    // For now, return just the metadata
-    // In a real implementation, you'd also load the content
+    // Try to dynamically import the essay content
+    let content = null;
+    try {
+      // In SvelteKit, we need to use a different approach to import markdown
+      // This will depend on your setup and how you're storing/retrieving essay content
+      content = { default: null }; // Placeholder - replace with actual content loading
+    } catch (contentError) {
+      console.error('Error loading essay content:', contentError);
+    }
+    
     return {
       essay,
-      content: null
+      content
     };
-  } catch (err) {
+  } catch (err: unknown) {
     console.error('Error loading essay:', err);
     return {
-      error: err.message
+      essay: null,
+      content: null,
+      error: err instanceof Error ? err.message : 'Unknown error occurred'
     };
   }
 }
 
 // Load all published essays
-export async function loadEssays() {
+export async function loadEssays(): Promise<EssayMetadata[]> {
   try {
     const { data: essays, error } = await supabase
       .from('essays')
@@ -46,11 +76,13 @@ export async function loadEssays() {
     }
     
     return essays || [];
-  } catch (err) {
+  } catch (err: unknown) {
     console.error('Error loading essays:', err);
     return [];
   }
 }
+
+// Add additional functions from old essays.ts as needed
 
 // Define the essay metadata type for TypeScript/JSDoc
 /**
