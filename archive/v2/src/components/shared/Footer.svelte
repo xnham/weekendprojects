@@ -21,12 +21,12 @@
     padding: 2.5rem 0;
     margin-top: 200px;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 400;
     text-align: center;
   }
 
   .footer-nav {
-    font-weight: 600;
+    font-weight: 400;
     color: var(--pure-white-100);
     display: flex;
     justify-content: center;
