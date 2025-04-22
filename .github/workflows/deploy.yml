@@ -2,49 +2,36 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ['main']
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    
     steps:
       - uses: actions/checkout@v3
       
-      - name: Install Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          
-      - name: Create .env file
-        run: |
-          echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" > .env
-          echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> .env
-          echo "VITE_EMAILJS_PUBLIC_KEY=${{ secrets.VITE_EMAILJS_PUBLIC_KEY }}" >> .env
-          echo "VITE_EMAILJS_SERVICE_ID=${{ secrets.VITE_EMAILJS_SERVICE_ID }}" >> .env
-          echo "VITE_EMAILJS_TEMPLATE_ID=${{ secrets.VITE_EMAILJS_TEMPLATE_ID }}" >> .env
+          cache: 'npm'
           
       - name: Install dependencies
-        run: npm install
-        
-      - name: Generate routes
-        run: npm run generate-routes
+        run: npm ci
         
       - name: Build
         run: npm run build
-        
-      - name: Install browser for prerendering
-        run: |
-          npx playwright install --with-deps chromium
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           
-      - name: Prerender pages
-        run: npm run prerender
+      - name: Add .nojekyll file
+        run: touch build/.nojekyll
         
-      - name: Create .nojekyll file
-        run: |
-          touch dist/.nojekyll
-          
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: dist
+          folder: build
           branch: gh-pages

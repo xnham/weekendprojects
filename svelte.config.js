@@ -1,32 +1,28 @@
-import sveltePreprocess from 'svelte-preprocess';
-import { mdsvex } from 'mdsvex';
+import adapter from '@sveltejs/adapter-static';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
-// Custom remark plugin to change heading levels
-function remarkHeadingLevel() {
-  return (tree) => {
-    // Walk through the tree and adjust heading levels
-    // This specifically changes h2 to h3
-    const visit = (node) => {
-      if (node.type === 'heading' && node.depth === 2) {
-        node.depth = 3;
-      }
-      if (node.children) {
-        node.children.forEach(visit);
-      }
-    };
-    visit(tree);
-  };
-}
-
+/** @type {import('@sveltejs/kit').Config} */
 const config = {
-  extensions: ['.svelte', '.md'],
-  preprocess: [
-    sveltePreprocess(),
-    mdsvex({
-      extensions: ['.md'],
-      remarkPlugins: [remarkHeadingLevel]
-    })
-  ]
+	// Consult https://svelte.dev/docs/kit/integrations
+	// for more information about preprocessors
+	preprocess: vitePreprocess(),
+
+	kit: {
+		// adapter-auto only supports some environments, see https://svelte.dev/docs/kit/adapter-auto for a list.
+		// If your environment is not supported, or you settled on a specific environment, switch out the adapter.
+		// See https://svelte.dev/docs/kit/adapters for more information about adapters.
+		adapter: adapter({
+			pages: 'build',
+			assets: 'build',
+			fallback: '404.html',
+			precompress: false
+		}),
+		// Set this to your repo name if you're not using a custom domain
+		// Example: paths: { base: '/my-repo-name' }
+		paths: {
+			base: ''  // Empty for custom domain (xnham.com)
+		}
+	}
 };
 
 export default config;
