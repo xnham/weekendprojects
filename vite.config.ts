@@ -7,7 +7,25 @@ import { normalizePath } from 'vite';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-	plugins: [sveltekit()],
+	plugins: [
+		sveltekit(),
+		// Add a plugin to handle rewriting URLs for GitHub Pages SPA routing
+		{
+			name: 'gh-pages-spa-routing',
+			configureServer(server) {
+				server.middlewares.use((req, res, next) => {
+					// Handle GitHub Pages style routing in development
+					const url = req.url || '';
+					if (url.startsWith('/?/')) {
+						const newUrl = url.replace('/?/', '/');
+						console.log(`[gh-pages-spa] Rewriting ${url} to ${newUrl}`);
+						req.url = newUrl;
+					}
+					next();
+				});
+			}
+		}
+	],
 	build: {
 		rollupOptions: {
 			external: ['archive/**']
