@@ -67,6 +67,7 @@
     "headline": data.essay.title,
     "description": combinedDescription,
     "datePublished": data.essay.date,
+    "image": "https://xnham.com/images/og-image.png",
     "author": {
       "@type": "Person",
       "name": "Wendy Ham",
@@ -161,11 +162,9 @@
     <meta name="description" content={combinedDescription} />
     <link rel="canonical" href={`https://xnham.com/writing/${$page.params.slug}`} />
     
-    <!-- Structured data -->
+    <!-- Structured data - ensure proper serialization -->
     {#if articleJsonLd}
-      <script type="application/ld+json">
-        {JSON.stringify(articleJsonLd)}
-      </script>
+      {@html `<script type="application/ld+json">${JSON.stringify(articleJsonLd)}</script>`}
     {/if}
     
     <!-- Open Graph -->
