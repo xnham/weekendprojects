@@ -552,10 +552,11 @@
   :global(.completed-project-icon .interaction-btn) {
     padding: 0;
     background: transparent;
-    margin-left: auto; /* This pushes the button to the right */
+    margin-left: auto;
     width: fit-content;
     display: flex;
     justify-content: flex-end;
+    padding-right: 0 !important;
   }
 
   .completed-project-icon::after {
