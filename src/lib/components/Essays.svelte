@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, createEventDispatcher } from "svelte";
   import { fade } from "svelte/transition";
+  import { supabase } from '$lib/supabase';
   import InteractionButton from "$lib/components/shared/InteractionButton.svelte";
   import { 
     subscribeToInteractions, 
@@ -20,8 +21,10 @@
     error: any;
   }>();
 
-  // Essays data passed from parent
-  export let essays: EssayMetadata[] = [];
+  // Replace essays prop with local state
+  let essays: EssayMetadata[] = [];
+  let loading = true;
+  let loadError: string | null = null;
 
   // Variables for user feedback
   let copyFeedback = "";
@@ -48,6 +51,38 @@
     return acc;
   }, {}) || {};
 
+  // Function to load essays from Supabase
+  async function loadEssays() {
+    try {
+      console.log("Loading essays from Supabase...");
+      
+      // Fetch essays from Supabase
+      const { data: supabaseEssays, error } = await supabase
+        .from('essays')
+        .select(`
+          id, title, description, date, published, excerpt, slug,
+          like_count, share_count, view_count
+        `)
+        .eq('published', true)
+        .order('date', { ascending: false });
+      
+      if (error) {
+        throw error;
+      }
+      
+      console.log(`Successfully loaded ${supabaseEssays?.length || 0} essays from Supabase`);
+      
+      // Update the essays array
+      essays = supabaseEssays || [];
+      loading = false;
+    } catch (error) {
+      console.error('Error loading essays:', error);
+      loadError = error instanceof Error ? error.message : 'Failed to load essays';
+      loading = false;
+      dispatch('error', error);
+    }
+  }
+
   onMount(() => {
     // Initialize interaction system with try/catch to identify issues
     console.log('Initializing interactions on Essays component');
@@ -60,6 +95,7 @@
       // Add a small delay before initializing interactions to allow SPA routing to complete
       initTimer = setTimeout(async () => {
         try {
+          // Initialize interactions
           const deviceId = await initializeInteractions();
           console.log('Interactions initialized with device ID:', deviceId);
           
@@ -68,6 +104,9 @@
             dispatch('error', new Error('Failed to initialize interactions'));
             return;
           }
+          
+          // Load essays data
+          await loadEssays();
           
           // Subscribe to interaction updates
           unsubscribe = subscribeToInteractions((state: InteractionState) => {
@@ -298,7 +337,11 @@
 </script>
 
 <div class="essays">
-  {#if !essays || essays.length === 0}
+  {#if loading}
+    <div class="loading-state">Loading essays...</div>
+  {:else if loadError}
+    <div class="error-state">Error: {loadError}</div>
+  {:else if !essays || essays.length === 0}
     <div class="no-essays">
       <p>No essays found. Please check your database connection or create some essays.</p>
       <div class="debug-actions">
@@ -376,6 +419,22 @@
     flex-direction: column;
     gap: 60px;
     width: 100%;
+  }
+
+  /* Loading and error states */
+  .loading-state,
+  .error-state {
+    padding: 2rem;
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--dark-60);
+    width: 100%;
+    max-width: 600px;
+    margin: 40px 0;
+  }
+  
+  .error-state {
+    color: var(--dark-pink-100);
   }
 
   /* Essay card styles */

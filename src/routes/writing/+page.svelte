@@ -3,8 +3,7 @@
   import { metadata } from "$lib/stores/metadataStore";
   import Essays from "$lib/components/Essays.svelte";
 
-  // Essays data loaded from +page.server.js
-  export let data: { essays: any[] };
+  // Remove the data import since Essays now loads its own data
   
   // Add state for component error handling
   let essaysError = false;
@@ -30,7 +29,7 @@
     try {
       return {
         component: Essays,
-        props: { essays: data.essays }
+        props: {}  // No props needed now since Essays loads its own data
       };
     } catch (error) {
       console.error('Error while preparing Essays component:', error);
@@ -110,7 +109,6 @@
         {#if result}
           <svelte:component 
             this={result.component} 
-            essays={result.props.essays}
             on:error={handleEssaysError}
           />
         {/if}
