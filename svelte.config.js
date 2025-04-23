@@ -31,7 +31,7 @@ const config = {
 		
 		// Enable prerendering for all routes
 		prerender: {
-			// The entries will be set at build time via the prerender.js script
+			entries: ['*'],
 			crawl: true,
 			handleMissingId: 'warn',
 			handleHttpError: ({ path, referrer, message }) => {

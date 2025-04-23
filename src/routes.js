@@ -8,7 +8,8 @@ const baseRoutes = [
   '/',
   '/about',
   '/contact',
-  '/writing'
+  '/writing',
+  '/next'
 ];
 
 // Get essay routes - hardcoded since we now store content in Supabase

@@ -153,6 +153,7 @@
   
   <!-- SEO essentials -->
   <meta name="robots" content="index, follow">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="author" content="Wendy Ham">
   <meta name="keywords" content="Wendy Ham, building with AI, software for one, vibe coding, coding with AI, AI tools">
   <link rel="canonical" href={$metadata.canonicalUrl || 'https://xnham.com' + $page.url.pathname}>
