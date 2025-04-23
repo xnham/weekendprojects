@@ -9,8 +9,7 @@
     toggleLike, 
     recordShare, 
     recordView,
-    ContentType,
-    getEssayInteractionCounts
+    ContentType
   } from '$lib/services/essayInteractionService';
   
   // Access the essay data loaded by the page.server.js file
@@ -22,62 +21,93 @@
   let copyFeedback = "";
   let copyFeedbackTimeout;
   
-  // Variables for scroll UI
+  // Optimistic count tracking
+  let optimisticLikeCount = 0;
+  let optimisticShareCount = 0;
+  let optimisticViewCount = 0;
+  let isOptimistic = false;
+  
+  // Update when essay data changes
+  $: if (data?.essay) {
+    optimisticLikeCount = data.essay.like_count || 0;
+    optimisticShareCount = data.essay.share_count || 0;
+    optimisticViewCount = data.essay.view_count || 0;
+    isOptimistic = false;
+  }
+  
+  // Scroll UI variables
   let showFloatingButton = false;
   let buttonVisible = false;
   let hideTimeout = null;
   let isScrolling = false;
+  
+  // Create a reactive combined description
+  $: combinedDescription = data?.essay?.description && data?.essay?.excerpt
+    ? `${data.essay.description} ${data.essay.excerpt}`
+    : data?.essay?.description || data?.essay?.excerpt || "";
+  
+  // Generate Article-specific JSON-LD 
+  $: articleJsonLd = data?.essay ? {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": data.essay.title,
+    "description": combinedDescription,
+    "datePublished": data.essay.date,
+    "author": {
+      "@type": "Person",
+      "name": "Wendy Ham",
+      "url": "https://xnham.com"
+    },
+    "publisher": {
+      "@type": "Person",
+      "name": "Wendy Ham",
+      "url": "https://xnham.com"
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": typeof window !== 'undefined' ? window.location.href : ""
+    }
+  } : null;
 
-  // Add smooth scroll behavior
   onMount(async () => {
     // Set metadata for the essay
     if (data.essay) {
       metadata.set({
         title: `${data.essay.title} | Wendy Ham's Weekend Projects`,
-        description: data.essay.description || data.essay.excerpt || '',
+        description: combinedDescription,
         canonicalUrl: `https://xnham.com/writing/${$page.params.slug}`,
         type: "article",
-        url: window.location.href
+        url: window.location.href,
+        image: "/images/og-image.png"
       });
       
-      // Initialize interactions and record view
+      // Record view
       if (data.essay.id) {
-        // Set up subscription to interaction state
-        const unsubscribe = subscribeToInteractions((state) => {
-          interactionState = state;
-          
-          // Update liked status whenever the interaction state changes
-          if (data.essay) {
-            const key = `${ContentType.ESSAY}:${data.essay.id}`;
-            likedByUser = !!state.likes[key];
-          }
-        });
-        
-        // Record view
         await recordView(data.essay.id);
-        
-        // Get initial counts
-        try {
-          const counts = await getEssayInteractionCounts(data.essay.id);
-          data.essay.like_count = counts.likeCount;
-          data.essay.share_count = counts.shareCount;
-          data.essay.view_count = counts.viewCount;
-        } catch (error) {
-          console.error("Error getting initial counts:", error);
-        }
-        
-        // Clean up on component destruction
-        return () => {
-          unsubscribe();
-          window.removeEventListener('scroll', handleScroll);
-          if (hideTimeout) clearTimeout(hideTimeout);
-          if (copyFeedbackTimeout) clearTimeout(copyFeedbackTimeout);
-        };
       }
     }
     
+    // Subscribe to interaction state changes
+    const unsubscribe = subscribeToInteractions((state) => {
+      interactionState = state;
+      
+      // Update liked status whenever the interaction state changes
+      if (data.essay) {
+        const key = `${ContentType.ESSAY}:${data.essay.id}`;
+        likedByUser = !!state.likes[key];
+      }
+    });
+    
     // Listen for scroll events
     window.addEventListener('scroll', handleScroll);
+    
+    // Clean up on component destruction
+    return () => {
+      unsubscribe();
+      window.removeEventListener('scroll', handleScroll);
+      if (hideTimeout) clearTimeout(hideTimeout);
+      if (copyFeedbackTimeout) clearTimeout(copyFeedbackTimeout);
+    };
   });
   
   // Format date helper
@@ -138,58 +168,32 @@
 
   // Handle like button clicks
   async function handleLike() {
+    if (!data.essay || !data.essay.id) return;
+    
     try {
-      if (!data.essay || !data.essay.id) return;
+      // Apply optimistic update to count and UI
+      const newLikedState = !likedByUser;
+      const increment = newLikedState ? 1 : -1;
       
-      // Determine if it's currently liked
-      const key = `${ContentType.ESSAY}:${data.essay.id}`;
-      const currentlyLiked = interactionState?.likes[key] || false;
-      
-      // Update the count optimistically
-      const increment = !currentlyLiked ? 1 : -1;
-      const oldCount = data.essay.like_count || 0;
-      const newCount = Math.max(0, oldCount + increment);
-      
-      // Update UI immediately - needs to be forced with assignment
-      data.essay = {
-        ...data.essay,
-        like_count: newCount
-      };
-      console.log(`Optimistic update - like count for essay ${data.essay.id}: ${oldCount} → ${newCount}`);
+      // Update optimistic counts
+      optimisticLikeCount = Math.max(0, optimisticLikeCount + increment);
+      isOptimistic = true;
       
       // Also update the UI state optimistically
-      likedByUser = !currentlyLiked;
+      likedByUser = newLikedState;
       
       // Toggle the like in the database
       await toggleLike(data.essay.id);
       
-      // After toggling, we can update the counts from the database
-      // This helps ensure our UI is accurate
-      try {
-        const counts = await getEssayInteractionCounts(data.essay.id);
-        console.log(`Database counts for essay ${data.essay.id}:`, counts);
-        
-        // Force UI update by creating a new object
-        data.essay = {
-          ...data.essay,
-          like_count: counts.likeCount,
-          share_count: counts.shareCount,
-          view_count: counts.viewCount
-        };
-      } catch (error) {
-        console.error("Error refreshing essay counts:", error);
-      }
+      // The database update will trigger the subscription which will update the UI
     } catch (error) {
       console.error("Error toggling like:", error);
       
-      // If there was an error, revert the UI
-      if (data.essay) {
-        const key = `${ContentType.ESSAY}:${data.essay.id}`;
-        const currentlyLiked = interactionState?.likes[key] || false;
-        const increment = currentlyLiked ? 1 : -1;
-        data.essay.like_count = Math.max(0, (data.essay.like_count || 0) - increment);
-        likedByUser = currentlyLiked; // Revert like status
-      }
+      // Revert optimistic updates on error
+      const revertIncrement = likedByUser ? -1 : 1;
+      optimisticLikeCount = Math.max(0, optimisticLikeCount + revertIncrement);
+      likedByUser = !likedByUser;
+      isOptimistic = false;
     }
   }
 
@@ -204,16 +208,9 @@
       // Copy to clipboard
       await navigator.clipboard.writeText(shareUrl);
       
-      // Update count optimistically
-      const oldShareCount = data.essay.share_count || 0;
-      const newShareCount = oldShareCount + 1;
-      
-      // Update UI immediately with a new object to force reactivity
-      data.essay = {
-        ...data.essay,
-        share_count: newShareCount
-      };
-      console.log(`Optimistic update - share count for essay ${data.essay.id}: ${oldShareCount} → ${newShareCount}`);
+      // Apply optimistic update to count
+      optimisticShareCount += 1;
+      isOptimistic = true;
       
       // Show feedback
       copyFeedback = "URL copied to clipboard!";
@@ -226,21 +223,7 @@
       // Record the share in the database
       await recordShare(data.essay.id);
       
-      // Refresh the counts
-      try {
-        const counts = await getEssayInteractionCounts(data.essay.id);
-        console.log(`Database counts for essay ${data.essay.id}:`, counts);
-        
-        // Force UI update by creating a new object
-        data.essay = {
-          ...data.essay,
-          like_count: counts.likeCount,
-          share_count: counts.shareCount,
-          view_count: counts.viewCount
-        };
-      } catch (error) {
-        console.error("Error refreshing essay counts:", error);
-      }
+      // The database update will trigger the subscription which will update the UI
     } catch (error) {
       console.error("Error sharing essay:", error);
       copyFeedback = "Failed to copy URL";
@@ -248,29 +231,45 @@
         copyFeedback = "";
       }, 3000);
       
-      // If there was an error, revert the UI
-      if (data.essay) {
-        // Create a new object to ensure reactivity
-        data.essay = {
-          ...data.essay,
-          share_count: Math.max(0, (data.essay.share_count || 0) - 1)
-        };
-      }
+      // Revert optimistic update on error
+      optimisticShareCount = Math.max(0, optimisticShareCount - 1);
+      isOptimistic = false;
     }
+  }
+  
+  // Update these helpers to use optimistic counts when available
+  function getEssayLikes() {
+    return isOptimistic ? optimisticLikeCount : (data?.essay?.like_count || 0);
+  }
+  
+  function getEssayShares() {
+    return isOptimistic ? optimisticShareCount : (data?.essay?.share_count || 0);
+  }
+  
+  function getEssayViews() {
+    return isOptimistic ? optimisticViewCount : (data?.essay?.view_count || 0);
   }
 </script>
 
 <svelte:head>
   {#if data.essay}
     <title>{data.essay.title} | Wendy Ham's Weekend Projects</title>
-    <meta name="description" content={data.essay.description || data.essay.excerpt || ''} />
+    <meta name="description" content={combinedDescription} />
     <link rel="canonical" href={`https://xnham.com/writing/${$page.params.slug}`} />
+    
+    <!-- Structured data -->
+    {#if articleJsonLd}
+      <script type="application/ld+json">
+        {JSON.stringify(articleJsonLd)}
+      </script>
+    {/if}
     
     <!-- Open Graph -->
     <meta property="og:type" content="article" />
     <meta property="og:url" content={window.location.href} />
     <meta property="og:title" content={`${data.essay.title} | Wendy Ham's Weekend Projects`} />
-    <meta property="og:description" content={data.essay.description || data.essay.excerpt || ''} />
+    <meta property="og:description" content={combinedDescription} />
+    <meta property="og:image" content="https://xnham.com/images/og-image.png" />
   {:else}
     <title>Essay Not Found | Wendy Ham's Weekend Projects</title>
   {/if}
@@ -330,19 +329,39 @@
       <p class="essay-description">{data.essay.description}</p>
       
       <div class="content">
-        {#if data.content && data.content.default}
-          <svelte:component this={data.content.default} />
+        {#if data.content && typeof data.content === 'string'}
+          <!-- Handle HTML content from marked -->
+          <div class="markdown-content">{@html data.content}</div>
+        {:else if data.content}
+          <!-- Handle any other content format -->
+          <div class="content-debug">
+            <p class="warning">
+              Content loaded but couldn't render properly. This might be due to a markdown formatting issue.
+            </p>
+            <details>
+              <summary>Debug info</summary>
+              <pre>Content type: {typeof data.content}</pre>
+              <pre>Raw content data: {JSON.stringify(data.content, null, 2)}</pre>
+            </details>
+          </div>
         {:else}
-          <p>Essay content is being loaded...</p>
+          <!-- No content at all -->
+          <p class="loading">
+            Essay content could not be loaded. Please try again later.
+          </p>
+          <details>
+            <summary>Debug info</summary>
+            <pre>{JSON.stringify(data, null, 2)}</pre>
+          </details>
         {/if}
       </div>
     </div>
     
     <!-- Essay stats -->
     <div class="essay-stats">
-      <span class="essay-stat">{data.essay.like_count || 0} {data.essay.like_count === 1 ? 'like' : 'likes'}</span>
-      <span class="essay-stat">{data.essay.share_count || 0} {data.essay.share_count === 1 ? 'share' : 'shares'}</span>
-      <span class="essay-stat">{data.essay.view_count || 0} {data.essay.view_count === 1 ? 'view' : 'views'}</span>
+      <span class="essay-stat">{getEssayLikes()} {getEssayLikes() === 1 ? 'like' : 'likes'}</span>
+      <span class="essay-stat">{getEssayShares()} {getEssayShares() === 1 ? 'share' : 'shares'}</span>
+      <span class="essay-stat">{getEssayViews()} {getEssayViews() === 1 ? 'view' : 'views'}</span>
     </div>
   {/if}
 </article>
@@ -351,7 +370,7 @@
   /* Layout & Container Elements */
   article {
     width: 75%;
-    margin: 0 auto;
+    margin: 0;
     padding: 0;
   }
 
@@ -367,10 +386,92 @@
     align-items: center;
   }
   
-  .content :global(p) {
+  .content p {
     margin-top: 0;
     margin-bottom: 1.5rem;
     font-size: 15px;
+  }
+  
+  /* Styling for headings in essay content */
+  .content h1 {
+    font-size: 2rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-family: "DM Serif Text", serif;
+  }
+  
+  .content h2 {
+    font-size: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-family: "DM Serif Text", serif;
+    color: var(--dark-100);
+  }
+  
+  .content h3 {
+    font-size: 1.25rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-family: "DM Serif Text", serif;
+    color: var(--dark-90);
+  }
+  
+  /* Additional markdown styling */
+  .content ul, .content ol {
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+  }
+  
+  .content li {
+    margin-bottom: 0.5rem;
+    font-size: 15px;
+  }
+  
+  .content blockquote {
+    border-left: 3px solid var(--dark-40);
+    margin-left: 0;
+    padding-left: 1rem;
+    color: var(--dark-80);
+    font-style: italic;
+  }
+  
+  .content a {
+    color: var(--dark-blue-100);
+    text-decoration: underline;
+  }
+  
+  .content a:hover {
+    color: var(--dark-blue-120);
+  }
+  
+  .content hr {
+    border: none;
+    border-top: 1px solid var(--dark-20);
+    margin: 2rem 0;
+  }
+  
+  .content strong {
+    font-weight: 600;
+  }
+  
+  .content em {
+    font-style: italic;
+  }
+  
+  .content code {
+    font-family: monospace;
+    background-color: var(--dark-10);
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.9em;
+  }
+  
+  /* Markdown content specific styles */
+  .markdown-content {
+    width: 100%;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--dark-100);
   }
 
   /* Typography */
@@ -471,9 +572,12 @@
   }
 
   /* Status Elements */
-  .error {
+  .loading, .error {
     text-align: center;
     padding: 2rem;
+  }
+  
+  .error {
     color: #d32f2f;
   }
 
@@ -483,6 +587,46 @@
     gap: 8px;
     padding-right: 4px;
     position: relative;
+  }
+  
+  .share-button-container {
+    position: relative;
+    display: inline-block;
+  }
+
+  /* Copy feedback styling */
+  .copy-feedback {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    transform: none;
+    white-space: nowrap;
+    font-size: 14px;
+    color: var(--dark-80);
+    background-color: #f5f6f6;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-top: 5px;
+    z-index: 100;
+    animation: slideUp 0.15s ease-out;
+    box-shadow:
+      inset 0 1px 1px rgba(0, 0, 0, 0.05),
+      0 1px 2px rgba(0, 0, 0, 0.08),
+      0 2px 4px rgba(0, 0, 0, 0.08),
+      0 4px 6px rgba(0, 0, 0, 0.08),
+      0 6px 8px rgba(0, 0, 0, 0.08);
+    pointer-events: none;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   /* Responsive Styles */
@@ -512,31 +656,5 @@
     .back-button {
       font-size: 12px;
     }
-  }
-
-  .share-button-container {
-    position: relative;
-    display: inline-block;
-  }
-
-  /* Copy feedback styling */
-  .copy-feedback {
-    position: absolute;
-    bottom: -35px;
-    left: 0;
-    white-space: nowrap;
-    font-size: 14px;
-    color: var(--dark-80);
-    background-color: #f5f6f6;
-    padding: 8px 12px;
-    border-radius: 4px;
-    z-index: 1000;
-    box-shadow:
-      inset 0 1px 1px rgba(0, 0, 0, 0.05),
-      0 1px 2px rgba(0, 0, 0, 0.08),
-      0 2px 4px rgba(0, 0, 0, 0.08),
-      0 4px 6px rgba(0, 0, 0, 0.08),
-      0 6px 8px rgba(0, 0, 0, 0.08);
-    pointer-events: none;
   }
 </style>
