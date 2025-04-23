@@ -12,7 +12,7 @@
   } from '$lib/services/projectInteractionService';
   import InteractionButton from './shared/InteractionButton.svelte';
   import type { InteractionState } from '$lib/types/interactions';
-  import type { Project } from '$lib/types/content';
+  import type { Project as ContentProject } from '$lib/types/content';
   
   // Accept preloaded projects from the server
   export let preloadedProjects: Project[] = [];
@@ -53,7 +53,8 @@
       alternativeUses?: string[];
     } | null;
 
-    launchDate?: Date | string | null;
+    // Updated to match ImpactShowcase's expected type
+    launchDate?: Date | null;
     likes?: number;
   }
   
@@ -89,7 +90,7 @@
     if (preloadedProjects.length > 0 && completedProjects.length === 0) {
       completedProjects = preloadedProjects.map(project => ({
         ...project,
-        // Convert ISO string dates back to Date objects if needed on client
+        // Convert ISO string dates to Date objects explicitly
         launchDate: typeof project.launchDate === 'string' 
           ? new Date(project.launchDate) 
           : project.launchDate
@@ -623,6 +624,7 @@
     color: var(--dark-85);
     text-align: right;
     font-weight: 400;
+    padding-right: 0;
   }
 
   /* ===== LABEL STYLES ===== */

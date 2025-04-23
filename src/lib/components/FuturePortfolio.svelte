@@ -362,7 +362,7 @@
     }
     
     // Both likes and followers
-    return `${likes} ${likes === 1 ? 'like' : 'likes'} & ${followers} ${followers === 1 ? 'follower' : 'followers'}`;
+    return `${likes} ${likes === 1 ? 'like' : 'likes'} · ${followers} ${followers === 1 ? 'follower' : 'followers'}`;
   }
   
   // Handle comment button click
@@ -595,6 +595,7 @@
   .future-project-buttons {
     display: flex;
     justify-content: column;
+    gap: 28px;
   }
   
   .future-project-counters {

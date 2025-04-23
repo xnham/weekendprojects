@@ -1,17 +1,17 @@
 <script lang="ts">
   import { onMount, createEventDispatcher } from "svelte";
   import { fade } from "svelte/transition";
-  import { supabase } from '$lib/supabase';
-  import { browser } from '$app/environment';
+  import { supabase } from "$lib/supabase";
+  import { browser } from "$app/environment";
   import InteractionButton from "$lib/components/shared/InteractionButton.svelte";
-  import { 
-    subscribeToInteractions, 
-    toggleLike, 
-    recordShare, 
+  import {
+    subscribeToInteractions,
+    toggleLike,
+    recordShare,
     isLiked,
     initializeInteractions,
     ContentType,
-    getEssayInteractionCounts
+    getEssayInteractionCounts,
   } from "$lib/services/essayInteractionService";
 
   // Import EssayMetadata type
@@ -35,31 +35,32 @@
   let copyFeedback = "";
   let copyFeedbackEssayId = "";
   let feedbackTimeout: ReturnType<typeof setTimeout> | null = null;
-  
+
   // Define interface for interaction state
   interface InteractionState {
     likes: Record<string, boolean>;
     shares: Record<string, number>;
     views: Record<string, boolean>;
   }
-  
+
   // Interaction state
   let interactionState: InteractionState = { likes: {}, shares: {}, views: {} };
   let essayLikedStatus: Record<string, boolean> = {};
-  
+
   // Derived value to compute liked status for each essay
-  $: essayLikedStatus = essays?.reduce((acc: Record<string, boolean>, essay: EssayMetadata) => {
-    if (essay.id) {
-      const key = `${ContentType.ESSAY}:${essay.id}`;
-      acc[essay.id] = interactionState?.likes[key] || false;
-    }
-    return acc;
-  }, {}) || {};
+  $: essayLikedStatus =
+    essays?.reduce((acc: Record<string, boolean>, essay: EssayMetadata) => {
+      if (essay.id) {
+        const key = `${ContentType.ESSAY}:${essay.id}`;
+        acc[essay.id] = interactionState?.likes[key] || false;
+      }
+      return acc;
+    }, {}) || {};
 
   // Function to format date for display
   function formatDate(dateStr: string) {
     if (!dateStr) return "";
-    
+
     try {
       const date = new Date(dateStr);
       return date.toLocaleDateString("en-US", {
@@ -78,23 +79,23 @@
     const likes = essay.like_count || 0;
     const shares = essay.share_count || 0;
     const views = essay.view_count || 0;
-    
+
     let countersText = "";
-    
+
     if (likes > 0) {
       countersText += `${likes} ${likes === 1 ? "like" : "likes"}`;
     }
-    
+
     if (shares > 0) {
       if (countersText) countersText += " · ";
       countersText += `${shares} ${shares === 1 ? "share" : "shares"}`;
     }
-    
+
     if (views > 0) {
       if (countersText) countersText += " · ";
       countersText += `${views} ${views === 1 ? "view" : "views"}`;
     }
-    
+
     return countersText || "No interactions yet";
   }
 
@@ -102,155 +103,165 @@
   async function loadEssays() {
     // Skip loading if we already have essays from preloading
     if (preloadedEssays.length > 0) {
-      console.log('Using preloaded essays, skipping client-side fetch');
+      console.log("Using preloaded essays, skipping client-side fetch");
       return;
     }
 
     try {
       console.log("Loading essays from Supabase...");
-      
+
       // Fetch essays from Supabase
       const { data: supabaseEssays, error } = await supabase
-        .from('essays')
-        .select(`
+        .from("essays")
+        .select(
+          `
           id, title, description, date, published, excerpt, slug,
           like_count, share_count, view_count
-        `)
-        .eq('published', true)
-        .order('date', { ascending: false });
-      
+        `,
+        )
+        .eq("published", true)
+        .order("date", { ascending: false });
+
       if (error) {
         throw error;
       }
-      
-      console.log(`Successfully loaded ${supabaseEssays?.length || 0} essays from Supabase`);
-      
+
+      console.log(
+        `Successfully loaded ${supabaseEssays?.length || 0} essays from Supabase`,
+      );
+
       // Update the essays array
       essays = supabaseEssays || [];
       loading = false;
     } catch (error) {
-      console.error('Error loading essays:', error);
-      loadError = error instanceof Error ? error.message : 'Failed to load essays';
+      console.error("Error loading essays:", error);
+      loadError =
+        error instanceof Error ? error.message : "Failed to load essays";
       loading = false;
-      dispatch('error', error);
+      dispatch("error", error);
     }
   }
 
   // Function to handle the like button
   async function handleLike(essayId: string) {
     if (!browser || !essayId) return;
-    
+
     console.log(`Like button clicked for essay: ${essayId}`);
-    
+
     try {
       // Toggle the like status in the interaction service
       const newLikeStatus = await toggleLike(essayId);
       console.log(`New like status for essay ${essayId}:`, newLikeStatus);
     } catch (error) {
       console.error(`Error toggling like for essay ${essayId}:`, error);
-      dispatch('error', error);
+      dispatch("error", error);
     }
   }
 
   // Function to handle the share button and copy the URL
   async function handleShare(essay: EssayMetadata) {
     if (!browser || !essay?.id || !essay?.slug) return;
-    
+
     console.log(`Share button clicked for essay: ${essay.id}`);
-    
+
     // Create the URL to share
     const url = `https://xnham.com/writing/${essay.slug}`;
-    
+
     try {
       // Try to use the Web Share API if available
       if (navigator.share) {
         await navigator.share({
           title: essay.title,
-          text: essay.description || essay.excerpt || 'Check out this essay',
-          url: url
+          text: essay.description || essay.excerpt || "Check out this essay",
+          url: url,
         });
-        
-        console.log('Successfully shared via Web Share API');
-        copyFeedback = 'Shared!';
+
+        console.log("Successfully shared via Web Share API");
+        copyFeedback = "Shared!";
       } else {
         // Fall back to clipboard copy
         await navigator.clipboard.writeText(url);
-        console.log('URL copied to clipboard');
-        copyFeedback = 'Link copied!';
+        console.log("URL copied to clipboard");
+        copyFeedback = "Link copied!";
       }
-      
+
       // Store the essay ID we're showing feedback for
       copyFeedbackEssayId = essay.id;
-      
+
       // Record the share in the interaction service
       await recordShare(essay.id);
-      
+
       // Clear the feedback after a delay
       if (feedbackTimeout) {
         clearTimeout(feedbackTimeout);
       }
-      
+
       feedbackTimeout = setTimeout(() => {
-        copyFeedback = '';
-        copyFeedbackEssayId = '';
+        copyFeedback = "";
+        copyFeedbackEssayId = "";
       }, 2000);
     } catch (error) {
-      console.error('Error sharing essay:', error);
-      copyFeedback = 'Error sharing';
+      console.error("Error sharing essay:", error);
+      copyFeedback = "Error sharing";
       copyFeedbackEssayId = essay.id;
-      
+
       // Clear error feedback after a delay
       if (feedbackTimeout) {
         clearTimeout(feedbackTimeout);
       }
-      
+
       feedbackTimeout = setTimeout(() => {
-        copyFeedback = '';
-        copyFeedbackEssayId = '';
+        copyFeedback = "";
+        copyFeedbackEssayId = "";
       }, 2000);
-      
-      dispatch('error', error);
+
+      dispatch("error", error);
     }
   }
 
   onMount(() => {
     if (!browser) return;
-    
+
     // Initialize interaction system with try/catch to identify issues
-    console.log('Initializing interactions on Essays component');
-    
+    console.log("Initializing interactions on Essays component");
+
     // Create a reference to hold the unsubscribe function and timer
     let unsubscribe: () => void = () => {};
     let initTimer: ReturnType<typeof setTimeout> | null = null;
-    
+
     try {
       // Add a small delay before initializing interactions to allow SPA routing to complete
       initTimer = setTimeout(async () => {
         try {
           // Initialize interactions
           const deviceId = await initializeInteractions();
-          console.log('Interactions initialized with device ID:', deviceId);
-          
+          console.log("Interactions initialized with device ID:", deviceId);
+
           if (!deviceId) {
-            console.error('Failed to initialize interactions - no device ID returned');
-            dispatch('error', new Error('Failed to initialize interactions'));
+            console.error(
+              "Failed to initialize interactions - no device ID returned",
+            );
+            dispatch("error", new Error("Failed to initialize interactions"));
             return;
           }
-          
+
           // Load essays data if needed
           await loadEssays();
-          
+
           // Subscribe to interaction updates
           unsubscribe = subscribeToInteractions((state: InteractionState) => {
-            console.log('Interaction state updated', state);
+            console.log("Interaction state updated", state);
             interactionState = state;
           });
         } catch (error) {
-          console.error('Error during delayed interaction initialization:', error);
-          dispatch('error', error);
+          console.error(
+            "Error during delayed interaction initialization:",
+            error,
+          );
+          dispatch("error", error);
         }
       }, 300); // 300ms delay to ensure SPA routing is complete
-      
+
       // Add global ESC key handler for feedback dialog
       const handleKeydown = (e: KeyboardEvent) => {
         if (e.key === "Escape") {
@@ -258,28 +269,28 @@
           copyFeedbackEssayId = "";
         }
       };
-      
+
       window.addEventListener("keydown", handleKeydown);
-      
+
       // Return the cleanup function
       return () => {
         if (unsubscribe) {
           unsubscribe();
         }
-        
+
         if (initTimer) {
           clearTimeout(initTimer);
         }
-        
+
         if (feedbackTimeout) {
           clearTimeout(feedbackTimeout);
         }
-        
+
         window.removeEventListener("keydown", handleKeydown);
       };
     } catch (error) {
-      console.error('Error in Essays component onMount:', error);
-      dispatch('error', error);
+      console.error("Error in Essays component onMount:", error);
+      dispatch("error", error);
     }
   });
 </script>
@@ -300,7 +311,11 @@
   {:else}
     {#each essays as essay}
       <div class="essay-card">
-        <a href="/writing/{essay.slug}" class="essay-card-link" data-sveltekit-preload-data="off">
+        <a
+          href="/writing/{essay.slug}"
+          class="essay-card-link"
+          data-sveltekit-preload-data="off"
+        >
           <div class="essay-content">
             <p class="essay-date">{formatDate(essay.date)}</p>
             <h3 class="essay-title">{essay.title}</h3>
@@ -318,27 +333,30 @@
         </a>
         <div class="essay-interaction-container">
           <div class="essay-buttons">
-            <InteractionButton 
+            <InteractionButton
               type="like"
               active={essayLikedStatus[essay.id] || false}
               count={undefined}
               on:click={(e) => {
-                console.log('Like button clicked in list view for:', essay.id);
+                console.log("Like button clicked in list view for:", essay.id);
                 handleLike(essay.id);
               }}
             />
 
             <div class="share-button-container">
-              <InteractionButton 
+              <InteractionButton
                 type="share"
                 active={false}
                 count={undefined}
                 on:click={(e) => {
-                  console.log('Share button clicked in list view for:', essay.id);
+                  console.log(
+                    "Share button clicked in list view for:",
+                    essay.id,
+                  );
                   handleShare(essay);
                 }}
               />
-              
+
               {#if copyFeedback && copyFeedbackEssayId === essay.id}
                 <div class="copy-feedback" transition:fade={{ duration: 150 }}>
                   {copyFeedback}
@@ -379,7 +397,7 @@
     max-width: 600px;
     margin: 40px 0;
   }
-  
+
   .error-state {
     color: var(--dark-pink-100);
   }
@@ -493,6 +511,7 @@
   .essay-buttons {
     display: flex;
     flex-direction: row;
+    gap: 28px;
   }
 
   .essay-counters {
@@ -512,28 +531,17 @@
     text-align: center;
   }
 
-  .debug-actions {
-    margin-top: 20px;
-  }
-
-  .debug-actions button {
-    background-color: #333;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-
-  .debug-actions button:hover {
-    background-color: #555;
-  }
-
   /* Responsive adjustments */
   @media (max-width: 768px) {
     .essays {
       width: 100%;
     }
   }
-</style> 
+
+  @media (max-width: 576px) {
+    /* Hide counters on mobile */
+    .essay-counters {
+      display: none;
+    }
+  }
+</style>

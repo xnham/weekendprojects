@@ -97,7 +97,7 @@
     align-items: center;
     gap: 6px;
     background: none;
-    padding: 6px 28px 6px 0;
+    padding: 6px 0;
     font-size: 14px;
     color: var(--dark-80);
     cursor: pointer;
