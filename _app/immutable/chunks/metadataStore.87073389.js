@@ -1,1 +1,0 @@
-import{w as a}from"./index.5fb28099.js";const o=a({title:"Wendy Ham | Software for One",description:"Building software for one — personalized, useful, playful projects that solve human-sized problems.",canonicalUrl:"https://xnham.com",type:"website",url:""});function s(e){o.update(t=>({...t,...e}))}export{o as m,s as u};
