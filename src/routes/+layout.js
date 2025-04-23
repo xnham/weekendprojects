@@ -2,6 +2,9 @@
  * Root layout load function that runs on both client and server
  */
 
+// Enable prerendering for all routes
+export const prerender = true;
+
 /** @type {import('./$types').LayoutLoad} */
 export function load({ url, params }) {
   // Handle GitHub Pages SPA routing if we detect a search parameter that looks like a path

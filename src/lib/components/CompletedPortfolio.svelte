@@ -14,6 +14,10 @@
   import type { InteractionState } from '$lib/types/interactions';
   import type { Project } from '$lib/types/content';
   
+  // Accept preloaded projects from the server
+  export let preloadedProjects: Project[] = [];
+  export let serverError: string | null = null;
+  
   // Define a type for the project structure
   interface Project {
     id: string;
@@ -49,7 +53,7 @@
       alternativeUses?: string[];
     } | null;
 
-    launchDate?: Date | null;
+    launchDate?: Date | string | null;
     likes?: number;
   }
   
@@ -63,8 +67,8 @@
   
   // State for projects
   let completedProjects: Project[] = [];
-  let loading = true;
-  let error: string | null = null;
+  let loading = !preloadedProjects.length; // Only show loading if no preloaded projects
+  let error: string | null = serverError;
   
   // Replace likedProjects with subscription, using the proper interface
   let projectInteractionState: InteractionState = { 
@@ -80,7 +84,27 @@
     return acc;
   }, {} as Record<string, boolean>);
   
-  // Fetch projects from Supabase
+  // Initialize projects with preloaded data if available
+  $: {
+    if (preloadedProjects.length > 0 && completedProjects.length === 0) {
+      completedProjects = preloadedProjects.map(project => ({
+        ...project,
+        // Convert ISO string dates back to Date objects if needed on client
+        launchDate: typeof project.launchDate === 'string' 
+          ? new Date(project.launchDate) 
+          : project.launchDate
+      }));
+      
+      // Initialize current slides
+      completedProjects.forEach(project => {
+        currentSlides[project.id] = 0;
+      });
+      
+      loading = false;
+    }
+  }
+  
+  // Fetch projects from Supabase (only if needed)
   onMount(() => {
     if (!browser) return;
     
@@ -89,9 +113,17 @@
       projectInteractionState = state;
     });
     
-    // Move the async part into a separate function
+    // Only load projects if we don't have preloaded data
     async function loadProjects() {
+      // Skip loading if we already have projects from preloading
+      if (preloadedProjects.length > 0) {
+        console.log('Using preloaded projects, skipping client-side fetch');
+        return;
+      }
+      
       try {
+        loading = true;
+        
         // Fetch completed projects from Supabase
         const { data, error: fetchError } = await supabase
           .from('projects')
@@ -306,6 +338,10 @@
     <div class="loading-state">Loading projects...</div>
   {:else if error}
     <div class="error-state">Error: {error}</div>
+  {:else if completedProjects.length === 0}
+    <div class="no-projects">
+      <p>No completed projects found.</p>
+    </div>
   {:else}
     {#each completedProjects as project (project.id)}
       <div class="completed-project-card" data-project-id={project.id}>

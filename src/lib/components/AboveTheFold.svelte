@@ -1,14 +1,16 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { browser } from '$app/environment';
 
   // Array of rotating texts (copied from your original implementation)
   const rotatingTexts = ['^Claude', '^Cursor', '^Vapi', '^Replit', '^ChatGPT'];
-  let rotatingText = "";
+  // Set an initial value for server-side rendering
+  let rotatingText = "^AI";
   let currentIndex = 0;
   let rotatingTextElement: HTMLElement | null = null;
   
-  // Variable to store just the dynamic year part
-  let yearPhrase = "a year";
+  // Initialize with a default value for server-side rendering
+  let yearPhrase = calculateYearPhrase();
 
   // Function to get random index different from current one
   function getRandomIndex(currentIndex: number, arrayLength: number): number {
@@ -21,7 +23,7 @@
 
   // Function to update rotating text with fade effect
   function updateRotatingText(): void {
-    if (rotatingTextElement) {
+    if (rotatingTextElement && browser) {
       rotatingTextElement.style.opacity = '0';
       
       setTimeout(() => {
@@ -59,9 +61,6 @@
     
     // Update text every 3 seconds
     const interval = setInterval(updateRotatingText, 3000);
-    
-    // Calculate the year phrase
-    yearPhrase = calculateYearPhrase();
     
     // Clean up interval on component unmount
     return () => clearInterval(interval);
@@ -111,7 +110,7 @@
   .rotating-text {
     color: var(--purple-100);
     position: relative;
-    opacity: 0;
+    opacity: 1; /* Make it visible by default for server rendering */
     transition: opacity 0.5s ease;
   }
 

@@ -12,10 +12,10 @@
   import { initSunnyLinks } from '$lib/utils/sunnyLinkHandler'; // Import Sunny link handler
   import '../app.css';
   
-  // Determine the current page for the navigation
-  $: currentPage = $page.url.pathname === '/' 
-    ? 'home' 
-    : $page.url.pathname.split('/')[1];
+  // Determine the current page for the navigation - make sure this works server-side
+  $: currentPage = browser 
+    ? ($page.url.pathname === '/' ? 'home' : $page.url.pathname.split('/')[1])
+    : 'home'; // Default for server-side rendering
     
   // Create JSON-LD data with a reactive declaration
   $: jsonLd = {
@@ -92,6 +92,7 @@
     ]
   };
   
+  // This executes only on the client, after hydration
   onMount(() => {
     // Initialize FontAwesome
     if (browser) {
@@ -139,7 +140,7 @@
     }
     
     return () => {
-      unsubscribe();
+      unsubscribe && unsubscribe();
     };
   });
 </script>

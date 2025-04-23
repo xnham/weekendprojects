@@ -2,6 +2,7 @@
   import { onMount, createEventDispatcher } from "svelte";
   import { fade } from "svelte/transition";
   import { supabase } from '$lib/supabase';
+  import { browser } from '$app/environment';
   import InteractionButton from "$lib/components/shared/InteractionButton.svelte";
   import { 
     subscribeToInteractions, 
@@ -16,6 +17,10 @@
   // Import EssayMetadata type
   import type { EssayMetadata } from "$lib/utils/essays";
 
+  // Accept preloaded essays from the server
+  export let preloadedEssays: EssayMetadata[] = [];
+  export let serverError: string | null = null;
+
   // Set up event dispatcher for errors
   const dispatch = createEventDispatcher<{
     error: any;
@@ -23,8 +28,8 @@
 
   // Replace essays prop with local state
   let essays: EssayMetadata[] = [];
-  let loading = true;
-  let loadError: string | null = null;
+  let loading = !preloadedEssays.length; // Only show loading if no preloaded data
+  let loadError: string | null = serverError;
 
   // Variables for user feedback
   let copyFeedback = "";
@@ -51,8 +56,22 @@
     return acc;
   }, {}) || {};
 
-  // Function to load essays from Supabase
+  // Initialize essays with preloaded data if available
+  $: {
+    if (preloadedEssays.length > 0 && essays.length === 0) {
+      essays = preloadedEssays;
+      loading = false;
+    }
+  }
+
+  // Function to load essays from Supabase (only if needed)
   async function loadEssays() {
+    // Skip loading if we already have essays from preloading
+    if (preloadedEssays.length > 0) {
+      console.log('Using preloaded essays, skipping client-side fetch');
+      return;
+    }
+
     try {
       console.log("Loading essays from Supabase...");
       
@@ -84,6 +103,8 @@
   }
 
   onMount(() => {
+    if (!browser) return;
+    
     // Initialize interaction system with try/catch to identify issues
     console.log('Initializing interactions on Essays component');
     
@@ -105,7 +126,7 @@
             return;
           }
           
-          // Load essays data
+          // Load essays data if needed
           await loadEssays();
           
           // Subscribe to interaction updates

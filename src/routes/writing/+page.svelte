@@ -3,7 +3,8 @@
   import { metadata } from "$lib/stores/metadataStore";
   import Essays from "$lib/components/Essays.svelte";
 
-  // Remove the data import since Essays now loads its own data
+  // Accept data from server
+  export let data;
   
   // Add state for component error handling
   let essaysError = false;
@@ -29,7 +30,10 @@
     try {
       return {
         component: Essays,
-        props: {}  // No props needed now since Essays loads its own data
+        props: {
+          preloadedEssays: data.essays || [],
+          serverError: data.error
+        }
       };
     } catch (error) {
       console.error('Error while preparing Essays component:', error);
@@ -45,7 +49,7 @@
         "Thoughts about creating software that quietly complements our lives.",
       canonicalUrl: "https://xnham.com/writing",
       type: "website",
-      url: window.location.href,
+      url: typeof window !== 'undefined' ? window.location.href : "https://xnham.com/writing",
     });
     
     // Attach a global error handler for uncaught errors
@@ -108,7 +112,8 @@
       {#await Promise.resolve(handleComponentRender()) then result}
         {#if result}
           <svelte:component 
-            this={result.component} 
+            this={result.component}
+            {...result.props}
             on:error={handleEssaysError}
           />
         {/if}
