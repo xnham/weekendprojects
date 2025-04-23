@@ -547,6 +547,13 @@
   }
 
   /* Styling for headings in essay content */
+
+  .content :global(h2) {
+    font-size: 48px;
+    margin-bottom: 60px;
+    line-height: 1.1;
+  }
+
   .content :global(h3) {
     font-size: 24px;
     line-height: 1.3;
@@ -645,6 +652,10 @@
   }
 
   @media (max-width: 768px) {
+    article {
+      width: 100%;
+    }
+
     .essay-date {
       font-size: 12px;
     }

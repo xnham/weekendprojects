@@ -151,6 +151,12 @@
     <meta name="description" content={$metadata.description} />
   {/if}
   
+  <!-- SEO essentials -->
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Wendy Ham">
+  <meta name="keywords" content="Wendy Ham, building with AI, software for one, vibe coding, coding with AI, AI tools">
+  <link rel="canonical" href={$metadata.canonicalUrl || 'https://xnham.com' + $page.url.pathname}>
+  
   <!-- Favicon -->
   <link rel="icon" href="/favicon.png" type="image/png">
   
