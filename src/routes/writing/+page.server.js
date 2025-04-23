@@ -7,7 +7,8 @@ import matter from 'gray-matter';
 // Get the directory name in ESM (for debugging purposes)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const contentDir = path.join(__dirname, '../../../../src/content/essays');
+// Use the static directory for content
+const contentDir = path.resolve(process.cwd(), 'static/content/essays');
 
 // Helper function to generate proper UUIDs
 function generateUUID() {

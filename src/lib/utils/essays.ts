@@ -45,20 +45,31 @@ export async function loadEssay(slug: string): Promise<EssayLoadResult> {
   try {
     const fs = await import('fs');
     const path = await import('path');
-    const mdPath = path.join(process.cwd(), 'src', 'content', 'essays', `${slug}.md`);
-    console.log(`Checking if file exists at path: ${mdPath}`);
     
-    if (fs.existsSync(mdPath)) {
-      console.log(`File exists at: ${mdPath}`);
+    // Check in the static directory first
+    const staticPath = path.resolve(process.cwd(), 'static', 'content', 'essays', `${slug}.md`);
+    console.log(`Checking if file exists at static path: ${staticPath}`);
+    
+    if (fs.existsSync(staticPath)) {
+      console.log(`File exists at static path: ${staticPath}`);
       // Try to read the file content
       try {
-        const content = fs.readFileSync(mdPath, 'utf-8');
-        console.log(`File content: ${content.substring(0, 100)}...`);
+        const content = fs.readFileSync(staticPath, 'utf-8');
+        console.log(`File content from static path: ${content.substring(0, 100)}...`);
       } catch (readError) {
-        console.error(`Error reading file: ${readError}`);
+        console.error(`Error reading file from static path: ${readError}`);
       }
     } else {
-      console.log(`File does NOT exist at: ${mdPath}`);
+      console.log(`File does NOT exist at static path: ${staticPath}`);
+      
+      // We've removed the files from src/content, so just log this
+      console.log(`Note: Files have been moved from src/content/essays to static/content/essays`);
+      console.log(`All essays should be loaded from static/content/essays`);
+      
+      // Check static path again for confirmation
+      if (!fs.existsSync(staticPath)) {
+        console.error(`ERROR: Essay ${slug} is missing from static/content/essays`);
+      }
     }
   } catch (fsError) {
     console.error(`Error checking file: ${fsError}`);
@@ -67,39 +78,72 @@ export async function loadEssay(slug: string): Promise<EssayLoadResult> {
   
   try {
     console.log(`Trying to load markdown for ${slug}`);
-    // Use a try-catch block to load the markdown directly
-    // Try both possible paths
-    try {
-      // First try the alias path (preferred)
-      console.log(`Attempting to import using alias path: $content/essays/${slug}.md`);
-      mdContent = await import(`$content/essays/${slug}.md`);
-      console.log(`Markdown loaded successfully using alias path for ${slug}, content:`, mdContent);
-    } catch (aliasError) {
-      console.warn(`Failed to load using alias path for ${slug}:`, aliasError);
-      console.warn(`Error name: ${aliasError.name}, message: ${aliasError.message}`);
-      console.warn(`Falling back to relative path for ${slug}`);
-      
+    
+    // Check if we're in the browser or on the server
+    const isBrowser = typeof window !== 'undefined';
+    
+    if (isBrowser) {
+      // In the browser, use fetch to get the content
       try {
-        // Fall back to the relative path
-        console.log(`Attempting to import using relative path: ../../content/essays/${slug}.md`);
-        mdContent = await import(`../../content/essays/${slug}.md`);
-        console.log(`Markdown loaded successfully using relative path for ${slug}, content:`, mdContent);
-      } catch (relativeError) {
-        // Keep track of this error
-        mdError = relativeError;
-        console.error(`Failed to load using relative path for ${slug}:`, relativeError);
-        console.error(`Error name: ${relativeError.name}, message: ${relativeError.message}`);
+        console.log(`Browser detected, using fetch for ${slug}`);
+        const response = await fetch(`/content/essays/${slug}.md`);
         
-        // Try one more approach for debugging
-        try {
-          console.log(`Attempting to import using absolute path...`);
-          const dynamicImport = new Function('slug', 'return import("/Users/wendyham/Desktop/Everything/weekendprojects/src/content/essays/" + slug + ".md")');
-          mdContent = await dynamicImport(slug);
-          console.log(`Markdown loaded successfully using absolute path for ${slug}, content:`, mdContent);
-        } catch (absoluteError) {
-          console.error(`Failed to load using absolute path for ${slug}:`, absoluteError);
-          throw relativeError;
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
         }
+        
+        const text = await response.text();
+        console.log(`Successfully fetched markdown for ${slug}, length: ${text.length}`);
+        
+        // Parse markdown with gray-matter if available
+        try {
+          const matter = await import('gray-matter');
+          const { data, content } = matter.default(text);
+          
+          mdContent = {
+            default: content,
+            metadata: data
+          };
+        } catch (matterError) {
+          // Fall back to plain text if gray-matter not available
+          mdContent = {
+            default: text,
+            metadata: {}
+          };
+        }
+      } catch (fetchError) {
+        mdError = fetchError;
+        console.error(`Failed to fetch markdown for ${slug}:`, fetchError);
+        throw fetchError;
+      }
+    } else {
+      // On the server, use fs to read the file directly
+      try {
+        console.log(`Server detected, using fs for ${slug}`);
+        const fs = await import('fs');
+        const path = await import('path');
+        const matter = await import('gray-matter');
+        
+        const staticPath = path.resolve(process.cwd(), 'static', 'content', 'essays', `${slug}.md`);
+        console.log(`Looking for file at: ${staticPath}`);
+        
+        if (!fs.existsSync(staticPath)) {
+          throw new Error(`File not found: ${staticPath}`);
+        }
+        
+        const text = fs.readFileSync(staticPath, 'utf-8');
+        console.log(`Successfully read markdown for ${slug}, length: ${text.length}`);
+        
+        const { data, content } = matter.default(text);
+        
+        mdContent = {
+          default: content,
+          metadata: data
+        };
+      } catch (fsError) {
+        mdError = fsError;
+        console.error(`Failed to read markdown for ${slug}:`, fsError);
+        throw fsError;
       }
     }
   } catch (error) {
@@ -222,8 +266,8 @@ export async function loadEssays(): Promise<EssayMetadata[]> {
 // Sync essays from markdown files to Supabase
 export async function syncEssaysToSupabase() {
   try {
-    // Import all markdown files from the essays directory
-    const essayFiles = import.meta.glob('../../content/essays/*.md');
+    // Import all markdown files from the static essays directory
+    const essayFiles = import.meta.glob('../../../static/content/essays/*.md');
     let updatedCount = 0;
     let insertedCount = 0;
     

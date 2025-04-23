@@ -13,6 +13,7 @@ const isCI = process.env.CI === 'true';
 
 async function prerender() {
   console.log('Starting prerendering process...');
+  console.log(`Total routes to prerender: ${allRoutes.length}`);
   
   // Start the dev server
   const { createServer } = await import('vite');

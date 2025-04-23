@@ -300,7 +300,7 @@
     {:else}
       {#each data.essays as essay}
         <div class="essay-card">
-          <a href="/writing/{essay.slug}" class="essay-card-link">
+          <a href="/writing/{essay.slug}" class="essay-card-link" data-sveltekit-preload-data="off">
             <div class="essay-content">
               <p class="essay-date">{formatDate(essay.date)}</p>
               <h3 class="essay-title">{essay.title}</h3>

@@ -4,12 +4,13 @@ import { join, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import matter from 'gray-matter';
 import dotenv from 'dotenv';
+import { marked } from 'marked';
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const contentDir = resolve(__dirname, '../src/content/essays');
+const contentDir = resolve(__dirname, '../static/content/essays');
 
 // Create Supabase client
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
@@ -49,10 +50,28 @@ async function syncEssaysToSupabase() {
       // Read and parse the markdown file
       console.log(`Processing: ${file}`);
       const fileContent = readFileSync(filePath, 'utf8');
-      const { data: metadata } = matter(fileContent);
+      const { data: metadata, content: mdContent } = matter(fileContent);
+      
+      // Convert markdown to HTML for storage in Supabase
+      const htmlContent = marked(mdContent);
+      console.log(`Converted markdown to HTML, length: ${htmlContent.length} chars`);
       
       // Extract excerpt or create one from content
       let excerpt = metadata.excerpt || null;
+      
+      // If no excerpt is provided, create one from the content
+      if (!excerpt) {
+        // Create a plain text excerpt by stripping HTML tags
+        const plainText = mdContent.replace(/#+\s(.*)/g, '$1 ') // Convert headings to plain text
+                         .replace(/\n/g, ' ')                 // Replace newlines with spaces
+                         .replace(/\s+/g, ' ')               // Normalize whitespace
+                         .trim();
+                         
+        excerpt = plainText.slice(0, 150);
+        if (plainText.length > 150) excerpt += '...';
+        
+        console.log(`Generated excerpt: ${excerpt}`);
+      }
       
       // Check if essay already exists in Supabase
       const { data: existingEssay, error: fetchError } = await supabase
@@ -68,7 +87,7 @@ async function syncEssaysToSupabase() {
       
       const now = new Date().toISOString();
       
-      // Prepare essay data
+      // Prepare essay data including content
       const essayData = {
         title: metadata.title || slug,
         description: metadata.description || "",
@@ -76,6 +95,7 @@ async function syncEssaysToSupabase() {
         published: metadata.published !== undefined ? metadata.published : false,
         excerpt: excerpt || "",
         slug,
+        content: htmlContent, // Store the HTML content
         updated_at: now
       };
       

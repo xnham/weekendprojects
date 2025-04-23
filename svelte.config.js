@@ -28,6 +28,18 @@ const config = {
 			fallback: '404.html',
 			precompress: false
 		}),
+		
+		// Enable prerendering for all routes
+		prerender: {
+			// The entries will be set at build time via the prerender.js script
+			crawl: true,
+			handleMissingId: 'warn',
+			handleHttpError: ({ path, referrer, message }) => {
+				// Log the error but don't fail the build for missing content
+				console.warn(`[prerender] Warning: ${message} at ${path}${referrer ? ` (referrer: ${referrer})` : ''}`);
+				return;
+			}
+		},
 		// Set this to your repo name if you're not using a custom domain
 		// Example: paths: { base: '/my-repo-name' }
 		paths: {

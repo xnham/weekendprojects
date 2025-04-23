@@ -15,7 +15,10 @@ export default defineConfig({
 	},
 	resolve: {
 		alias: {
-			$content: normalizePath(path.resolve(__dirname, './src/content'))
+			// Update to use static/content for all content
+			$content: normalizePath(path.resolve(__dirname, './static/content')),
+			// Additional alias to handle both client and server contexts
+			'$essays': normalizePath(path.resolve(__dirname, './static/content/essays'))
 		}
 	},
 	// Allow importing .md files directly
