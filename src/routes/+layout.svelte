@@ -70,21 +70,19 @@
             "url": "https://xnham.com/projects/expeditr"
           },
           {
-            "@type": "SoftwareApplication",
+            "@type": "CreativeWork",
             "position": 2,
             "name": "Miss Penny",
             "description": "Daily text notification system to track expenses against budget, reducing monthly spending by $334 on average.",
             "author": {"@id": "#wendyham"},
-            "applicationCategory": "FinanceApplication",
             "url": "https://xnham.com/projects/miss-penny"
           },
           {
-            "@type": "SoftwareApplication",
+            "@type": "CreativeWork",
             "position": 3,
             "name": "Custom Google Calendar Integration",
             "description": "Automated system that extracts lesson schedules from a club's web app and posts them to Google Calendar for easy access.",
             "author": {"@id": "#wendyham"},
-            "applicationCategory": "ProductivityApplication",
             "url": "https://xnham.com/projects/calendar-integration"
           }
         ]
