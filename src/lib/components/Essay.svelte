@@ -20,14 +20,16 @@
     error: any;
   }>();
 
-  // Instead of receiving essay and content as props, we'll load them directly
+  // Accept both slug from params and preloaded essay data
   export let slug: string = "";
+  export let preloadedEssay: any = null;
+  export let serverError: string | null = null;
 
   // Local state for essay data
-  let essay: any = null;
-  let content: any = null;
-  let loading = true;
-  let error: string | null = null;
+  let essay: any = preloadedEssay;
+  let content: any = preloadedEssay?.content || null;
+  let loading = !preloadedEssay; // Only show loading if no preloaded data
+  let error: string | null = serverError;
 
   // Interaction state
   let interactionState = { likes: {}, shares: {}, views: {} };
@@ -52,9 +54,17 @@
     hasInitialisedCounts = true;
   }
 
-  // Only reload the essay when the slug changes, not when loading state changes
-  // This prevents the infinite loop
-  $: if (slug) {
+  // Initialize with preloaded data if available
+  $: {
+    if (preloadedEssay && !essay) {
+      essay = preloadedEssay;
+      content = preloadedEssay.content;
+      loading = false;
+    }
+  }
+
+  // Only reload the essay when the slug changes and there's no preloaded data
+  $: if (slug && !preloadedEssay) {
     // Use a separate flag to prevent reloading in infinite loop
     if (!essay?.slug || essay.slug !== slug) {
       console.log(`Slug changed to ${slug}, loading essay data`);
@@ -109,6 +119,12 @@
 
   // Function to load essay data from Supabase
   async function loadEssayData(essaySlug: string) {
+    // Skip loading if we already have essay data from preloading
+    if (preloadedEssay) {
+      console.log('Using preloaded essay data, skipping client-side fetch');
+      return;
+    }
+    
     if (!essaySlug) return;
 
     try {
@@ -218,9 +234,12 @@
       const essaySlug = slug || $page?.params?.slug;
       console.log(`Essay component mounted with slug: ${essaySlug}`);
 
-      // Only load if slug is provided and essay isn't already loaded with this slug
-      if (essaySlug && (!essay || essay.slug !== essaySlug)) {
+      // Only load if slug is provided, no preloaded data, and essay isn't already loaded
+      if (essaySlug && !preloadedEssay && (!essay || essay.slug !== essaySlug)) {
         loadEssayData(essaySlug);
+      } else if (preloadedEssay) {
+        // If we have preloaded data, initialize the page with it
+        initializePage();
       }
 
       // Add a small delay before initializing interactions to allow SPA routing to complete

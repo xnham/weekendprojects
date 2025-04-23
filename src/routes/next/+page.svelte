@@ -3,6 +3,9 @@
   import { onMount } from 'svelte';
   import { updateMetadata } from '$lib/stores/metadataStore';
   
+  // Accept preloaded data from server
+  export let data;
+  
   onMount(() => {
     updateMetadata({
       title: "Next | Wendy Ham's Weekend Projects",
@@ -21,7 +24,7 @@
     <p>If you're looking for a project inspiration, how about having a chat with <a href="/sunny?from=/next" data-sunny-link>Sunny</a>, my helpful robot? It will help you figure out where to start.</p>
   </div>
   
-  <FuturePortfolio />
+  <FuturePortfolio preloadedProjects={data.futureProjects} serverError={data.error} />
 </div>
 
 <style>

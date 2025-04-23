@@ -26,6 +26,10 @@
     beneficiary: string;
   }
   
+  // Accept preloaded projects from the server
+  export let preloadedProjects: Project[] = [];
+  export let serverError: string | null = null;
+  
   // Add interface for notifications
   interface Notification {
     projectId: string;
@@ -35,8 +39,8 @@
   
   // Projects state
   let displayProjects: Project[] = [];
-  let loading = true;
-  let error: string | null = null;
+  let loading = !preloadedProjects.length; // Only show loading if no preloaded data
+  let error: string | null = serverError;
   
   // Add notification state
   let activeNotifications: Record<string, Notification> = {};
@@ -74,6 +78,14 @@
     return acc;
   }, {} as Record<string, boolean>);
   
+  // Initialize with preloaded data if available
+  $: {
+    if (preloadedProjects.length > 0 && displayProjects.length === 0) {
+      displayProjects = preloadedProjects;
+      loading = false;
+    }
+  }
+  
   // Add debug logging for interaction state
   afterUpdate(() => {
     if (projectInteractionState.initialized) {
@@ -90,6 +102,12 @@
   onMount(() => {
     // Move async part to a separate function
     async function loadProjects() {
+      // Skip loading if we already have projects from preloading
+      if (preloadedProjects.length > 0) {
+        console.log('Using preloaded future projects, skipping client-side fetch');
+        return;
+      }
+      
       try {
         console.log("Starting to fetch projects from Supabase...");
         // Fetch future projects from Supabase with corrected query parameters

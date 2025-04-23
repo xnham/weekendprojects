@@ -9,14 +9,18 @@
     currentPath?: string;
     slug?: string;
     essay?: {
+      id: string;
       slug: string;
       title: string;
       description?: string;
       excerpt?: string;
       date: string;
       content?: string;
+      like_count?: number;
+      share_count?: number;
+      view_count?: number;
     };
-    content?: string;
+    error?: string | null;
   }
   
   // Access the essay data loaded by the page.server.js file
@@ -91,7 +95,7 @@
     }
   }
   
-  // Create a reactive combined description
+  // Create a reactive combined description from preloaded data
   $: combinedDescription = data?.essay?.description && data?.essay?.excerpt
     ? `${data.essay.description} ${data.essay.excerpt}`
     : data?.essay?.description || data?.essay?.excerpt || "";
@@ -150,14 +154,25 @@
   }
 
   onMount(() => {
-    // Reset metadata to generic values (Essay will set specific values when loaded)
-    metadata.set({
-      title: "Essay | Wendy Ham's Weekend Projects",
-      description: "Essays about design, coding, and more.",
-      canonicalUrl: `https://xnham.com/writing/${$page.params.slug}`,
-      type: "article",
-      url: typeof window !== 'undefined' ? window.location.href : `https://xnham.com/writing/${$page.params.slug}`
-    });
+    // Update metadata with essay-specific values from preloaded data
+    if (data.essay) {
+      metadata.set({
+        title: `${data.essay.title} | Wendy Ham's Weekend Projects`,
+        description: combinedDescription,
+        canonicalUrl: `https://xnham.com/writing/${$page.params.slug}`,
+        type: "article",
+        url: typeof window !== 'undefined' ? window.location.href : `https://xnham.com/writing/${$page.params.slug}`
+      });
+    } else {
+      // Fallback metadata if no essay data
+      metadata.set({
+        title: "Essay | Wendy Ham's Weekend Projects",
+        description: "Essays about design, coding, and more.",
+        canonicalUrl: `https://xnham.com/writing/${$page.params.slug}`,
+        type: "article",
+        url: typeof window !== 'undefined' ? window.location.href : `https://xnham.com/writing/${$page.params.slug}`
+      });
+    }
     
     // Listen for scroll events
     window.addEventListener('scroll', handleScroll);
@@ -239,9 +254,16 @@
         {/if}
       </p>
     </div>
+  {:else if data.error}
+    <div class="error-message">
+      <p>{data.error || "There was a problem loading this essay."}</p>
+      <p><a href="/writing">Return to essays</a></p>
+    </div>
   {:else}
     <Essay 
       slug={$page.params.slug}
+      preloadedEssay={data.essay}
+      serverError={data.error}
       on:error={handleEssayError}
     />
   {/if}
