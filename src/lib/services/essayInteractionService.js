@@ -17,16 +17,78 @@ const interactionState = writable({
 const DEVICE_ID_KEY = 'device_id';
 
 /**
+ * Generate a UUID for device tracking
+ * Cross-browser implementation that doesn't rely on crypto.randomUUID()
+ */
+function generateUUID() {
+  try {
+    // Check if native crypto.randomUUID is available
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+    
+    // Check if we're in a browser that supports crypto.getRandomValues
+    const hasCryptoValues = typeof crypto !== 'undefined' && 
+                          typeof crypto.getRandomValues === 'function';
+    
+    // Fallback implementation that works across browsers
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      let r;
+      
+      // Use crypto.getRandomValues if available for better randomness
+      if (hasCryptoValues) {
+        const arr = new Uint8Array(1);
+        crypto.getRandomValues(arr);
+        r = arr[0] % 16;
+      } else {
+        // Last resort fallback to Math.random
+        r = Math.random() * 16 | 0;
+      }
+      
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  } catch (error) {
+    // Final fallback if any errors occur
+    console.error('Error generating UUID:', error);
+    const timestamp = new Date().getTime();
+    const randomSuffix = Math.floor(Math.random() * 10000000);
+    return `fallback-${timestamp}-${randomSuffix}`;
+  }
+}
+
+/**
+ * Check if localStorage is available
+ */
+function isLocalStorageAvailable() {
+  try {
+    const testKey = '__test__';
+    localStorage.setItem(testKey, testKey);
+    const result = localStorage.getItem(testKey) === testKey;
+    localStorage.removeItem(testKey);
+    return result;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
  * Get or create a device ID for tracking interactions
  */
 export async function getOrCreateDeviceId() {
   try {
-    // Check local storage first
+    // Check if localStorage is available
+    if (!isLocalStorageAvailable()) {
+      console.warn('localStorage is not available, using temporary device ID');
+      return 'temp-' + generateUUID();
+    }
+    
+    // Check localStorage for existing device ID
     let deviceId = localStorage.getItem(DEVICE_ID_KEY);
     
     // If no device ID exists, create one and store it
     if (!deviceId) {
-      deviceId = crypto.randomUUID(); // Modern API replacement for uuid package
+      deviceId = generateUUID();
       localStorage.setItem(DEVICE_ID_KEY, deviceId);
       console.log('Created new device ID:', deviceId);
     } else {
@@ -36,7 +98,7 @@ export async function getOrCreateDeviceId() {
     return deviceId;
   } catch (error) {
     console.error('Error in getOrCreateDeviceId:', error);
-    // Fallback to a temporary ID if localStorage fails
+    // Fallback to a temporary ID if everything fails
     return 'temp-' + Math.random().toString(36).substring(2, 15);
   }
 }
@@ -106,325 +168,411 @@ export function isLiked(essayId) {
   return !!state.likes[key];
 }
 
+// Track in-flight requests to prevent duplicates
+const pendingLikeRequests = new Map();
+
 /**
  * Toggle like status for an essay
  */
 export async function toggleLike(essayId) {
+  // Prevent duplicate requests for the same essay
+  if (pendingLikeRequests.has(essayId)) {
+    console.log(`Ignoring duplicate like request for essay ${essayId}`);
+    return pendingLikeRequests.get(essayId);
+  }
+  
   const deviceId = await getOrCreateDeviceId();
   const key = `${ContentType.ESSAY}:${essayId}`;
   const currentState = get(interactionState);
   const currentlyLiked = !!currentState.likes[key];
   
-  // Optimistically update UI
-  interactionState.update(state => {
-    return {
-      ...state,
-      likes: {
-        ...state.likes,
-        [key]: !currentlyLiked
-      }
-    };
-  });
-  
-  try {
-    // First, check if an interaction record exists
-    const { data: existingData, error: fetchError } = await supabase
-      .from('essay_interactions')
-      .select('id, has_liked')
-      .eq('device_id', deviceId)
-      .eq('essay_id', essayId)
-      .single();
-    
-    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "no rows returned" error
-      throw fetchError;
-    }
-    
-    const newLikedState = !currentlyLiked;
-    
-    if (existingData) {
-      // Update existing record
-      const { error: updateError } = await supabase
-        .from('essay_interactions')
-        .update({
-          has_liked: newLikedState,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', existingData.id);
-        
-      if (updateError) throw updateError;
-    } else {
-      // Create new interaction record
-      const { error: insertError } = await supabase
-        .from('essay_interactions')
-        .insert({
-          device_id: deviceId,
-          essay_id: essayId,
-          has_liked: newLikedState,
-          share_count: 0,
-          has_viewed: true, // If they're liking, they've viewed
-        });
-        
-      if (insertError) throw insertError;
-    }
-    
-    // Update the essay's like count
-    const increment = newLikedState ? 1 : -1;
-    const { error: essayUpdateError } = await supabase.rpc(
-      'increment_essay_like_count',
-      { essay_id: essayId, increment_by: increment }
-    );
-    
-    // Fallback if RPC isn't set up
-    if (essayUpdateError) {
-      console.warn('RPC failed, using fallback method for updating like count:', essayUpdateError);
-      const { data: currentEssay, error: fetchEssayError } = await supabase
-        .from('essays')
-        .select('like_count')
-        .eq('id', essayId)
-        .single();
-        
-      if (fetchEssayError) throw fetchEssayError;
-      
-      const newCount = Math.max(0, (currentEssay.like_count || 0) + increment);
-      
-      const { error: updateEssayError } = await supabase
-        .from('essays')
-        .update({ like_count: newCount })
-        .eq('id', essayId);
-        
-      if (updateEssayError) throw updateEssayError;
-    }
-    
-    // Refresh state to ensure consistency
-    await refreshInteractionState(deviceId);
-    
-    // Return the new status 
-    return newLikedState;
-    
-  } catch (error) {
-    console.error('Error toggling like:', error);
-    
-    // Revert the optimistic update if there was an error
+  // Create a promise for this request
+  const requestPromise = (async () => {
+    // Optimistically update UI
     interactionState.update(state => {
       return {
         ...state,
         likes: {
           ...state.likes,
-          [key]: currentlyLiked
+          [key]: !currentlyLiked
         }
       };
     });
     
-    // Return the original status on error
-    return currentlyLiked;
-  }
+    try {
+      // First, check if an interaction record exists
+      const { data: existingData, error: fetchError } = await supabase
+        .from('essay_interactions')
+        .select('id, has_liked')
+        .eq('device_id', deviceId)
+        .eq('essay_id', essayId)
+        .single();
+      
+      if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "no rows returned" error
+        throw fetchError;
+      }
+      
+      const newLikedState = !currentlyLiked;
+      
+      if (existingData) {
+        // Update existing record
+        const { error: updateError } = await supabase
+          .from('essay_interactions')
+          .update({
+            has_liked: newLikedState,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingData.id);
+          
+        if (updateError) throw updateError;
+      } else {
+        // Create new interaction record
+        const { error: insertError } = await supabase
+          .from('essay_interactions')
+          .insert({
+            device_id: deviceId,
+            essay_id: essayId,
+            has_liked: newLikedState,
+            share_count: 0,
+            has_viewed: true, // If they're liking, they've viewed
+          });
+          
+        if (insertError) throw insertError;
+      }
+      
+      // Update the essay's like count using RPC (which should use a database transaction)
+      const increment = newLikedState ? 1 : -1;
+      const { error: essayUpdateError } = await supabase.rpc(
+        'increment_essay_like_count',
+        { essay_id: essayId, increment_by: increment }
+      );
+      
+      // Fallback if RPC isn't set up
+      if (essayUpdateError) {
+        console.warn('RPC failed, using fallback method for updating like count:', essayUpdateError);
+        
+        // Use a transaction if possible for the fallback to prevent race conditions
+        const { data: currentEssay, error: fetchEssayError } = await supabase
+          .from('essays')
+          .select('like_count')
+          .eq('id', essayId)
+          .single();
+          
+        if (fetchEssayError) throw fetchEssayError;
+        
+        const newCount = Math.max(0, (currentEssay.like_count || 0) + increment);
+        
+        const { error: updateEssayError } = await supabase
+          .from('essays')
+          .update({ like_count: newCount })
+          .eq('id', essayId);
+          
+        if (updateEssayError) throw updateEssayError;
+      }
+      
+      // Refresh state to ensure consistency
+      await refreshInteractionState(deviceId);
+      
+      // Return the new status 
+      return newLikedState;
+      
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      
+      // Revert the optimistic update if there was an error
+      interactionState.update(state => {
+        return {
+          ...state,
+          likes: {
+            ...state.likes,
+            [key]: currentlyLiked
+          }
+        };
+      });
+      
+      // Return the original status on error
+      return currentlyLiked;
+    } finally {
+      // Remove this request from the pending map once completed
+      pendingLikeRequests.delete(essayId);
+    }
+  })();
+  
+  // Store the promise in the pending requests map
+  pendingLikeRequests.set(essayId, requestPromise);
+  
+  // Return the promise
+  return requestPromise;
 }
+
+// Track in-flight share requests to prevent duplicates
+const pendingShareRequests = new Map();
 
 /**
  * Record a share event
  */
 export async function recordShare(essayId) {
+  // Prevent duplicate requests for the same essay within a short time period
+  if (pendingShareRequests.has(essayId)) {
+    console.log(`Ignoring duplicate share request for essay ${essayId}`);
+    return pendingShareRequests.get(essayId);
+  }
+  
   const deviceId = await getOrCreateDeviceId();
   const key = `${ContentType.ESSAY}:${essayId}`;
   
-  // Optimistically update UI
-  interactionState.update(state => {
-    const currentShares = state.shares[key] || 0;
-    return {
-      ...state,
-      shares: {
-        ...state.shares,
-        [key]: currentShares + 1
-      }
-    };
-  });
-  
-  try {
-    // Check if interaction record exists
-    const { data: existingData, error: fetchError } = await supabase
-      .from('essay_interactions')
-      .select('id, share_count')
-      .eq('device_id', deviceId)
-      .eq('essay_id', essayId)
-      .single();
-    
-    if (fetchError && fetchError.code !== 'PGRST116') {
-      throw fetchError;
-    }
-    
-    if (existingData) {
-      // Update existing record
-      const newShareCount = (existingData.share_count || 0) + 1;
-      const { error: updateError } = await supabase
-        .from('essay_interactions')
-        .update({
-          share_count: newShareCount,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', existingData.id);
-        
-      if (updateError) throw updateError;
-    } else {
-      // Create new interaction record
-      const { error: insertError } = await supabase
-        .from('essay_interactions')
-        .insert({
-          device_id: deviceId,
-          essay_id: essayId,
-          has_liked: false,
-          share_count: 1,
-          has_viewed: true, // If they're sharing, they've viewed
-        });
-        
-      if (insertError) throw insertError;
-    }
-    
-    // Update essay's share count
-    const { error: essayUpdateError } = await supabase.rpc(
-      'increment_essay_share_count',
-      { essay_id: essayId, increment_by: 1 }
-    );
-    
-    // Fallback if RPC isn't set up
-    if (essayUpdateError) {
-      console.warn('RPC failed, using fallback method for updating share count:', essayUpdateError);
-      const { data: currentEssay, error: fetchEssayError } = await supabase
-        .from('essays')
-        .select('share_count')
-        .eq('id', essayId)
-        .single();
-        
-      if (fetchEssayError) throw fetchEssayError;
-      
-      const newCount = (currentEssay.share_count || 0) + 1;
-      
-      const { error: updateEssayError } = await supabase
-        .from('essays')
-        .update({ share_count: newCount })
-        .eq('id', essayId);
-        
-      if (updateEssayError) throw updateEssayError;
-    }
-    
-    // Refresh state to ensure consistency
-    await refreshInteractionState(deviceId);
-    
-  } catch (error) {
-    console.error('Error recording share:', error);
-    
-    // Revert the optimistic update on error
+  // Create a promise for this request
+  const requestPromise = (async () => {
+    // Optimistically update UI
     interactionState.update(state => {
       const currentShares = state.shares[key] || 0;
       return {
         ...state,
         shares: {
           ...state.shares,
-          [key]: Math.max(0, currentShares - 1)
+          [key]: currentShares + 1
         }
       };
     });
     
-    throw error;
-  }
-}
-
-/**
- * Record a view event
- */
-export async function recordView(essayId) {
-  const deviceId = await getOrCreateDeviceId();
-  const key = `${ContentType.ESSAY}:${essayId}`;
-  
-  // Optimistically update UI
-  interactionState.update(state => {
-    return {
-      ...state,
-      views: {
-        ...state.views,
-        [key]: true
+    try {
+      // Check if interaction record exists
+      const { data: existingData, error: fetchError } = await supabase
+        .from('essay_interactions')
+        .select('id, share_count')
+        .eq('device_id', deviceId)
+        .eq('essay_id', essayId)
+        .single();
+      
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        throw fetchError;
       }
-    };
-  });
-  
-  try {
-    // Check if interaction record exists for this device and essay
-    const { data: existingData, error: fetchError } = await supabase
-      .from('essay_interactions')
-      .select('id, has_viewed')
-      .eq('device_id', deviceId)
-      .eq('essay_id', essayId)
-      .single();
-    
-    if (fetchError && fetchError.code !== 'PGRST116') {
-      throw fetchError;
-    }
-    
-    // Check if this device has already viewed the essay (prevent duplicate view counts)
-    const hasViewedBefore = existingData?.has_viewed || false;
-    
-    if (existingData) {
-      // Just update has_viewed to true if not already
-      if (!hasViewedBefore) {
+      
+      if (existingData) {
+        // Update existing record
+        const newShareCount = (existingData.share_count || 0) + 1;
         const { error: updateError } = await supabase
           .from('essay_interactions')
           .update({
-            has_viewed: true,
+            share_count: newShareCount,
             updated_at: new Date().toISOString()
           })
           .eq('id', existingData.id);
           
         if (updateError) throw updateError;
+      } else {
+        // Create new interaction record
+        const { error: insertError } = await supabase
+          .from('essay_interactions')
+          .insert({
+            device_id: deviceId,
+            essay_id: essayId,
+            has_liked: false,
+            share_count: 1,
+            has_viewed: true, // If they're sharing, they've viewed
+          });
+          
+        if (insertError) throw insertError;
       }
-    } else {
-      // Create new interaction record
-      const { error: insertError } = await supabase
-        .from('essay_interactions')
-        .insert({
-          device_id: deviceId,
-          essay_id: essayId,
-          has_liked: false,
-          share_count: 0,
-          has_viewed: true,
-        });
-        
-      if (insertError) throw insertError;
-    }
-    
-    // Always increment essay view count if they haven't viewed before
-    if (!hasViewedBefore) {
+      
+      // Update essay's share count using RPC
       const { error: essayUpdateError } = await supabase.rpc(
-        'increment_essay_view_count',
+        'increment_essay_share_count',
         { essay_id: essayId, increment_by: 1 }
       );
       
       // Fallback if RPC isn't set up
       if (essayUpdateError) {
-        console.warn('RPC failed, using fallback method for updating view count:', essayUpdateError);
+        console.warn('RPC failed, using fallback method for updating share count:', essayUpdateError);
+        
+        // Use a more robust fallback approach
         const { data: currentEssay, error: fetchEssayError } = await supabase
           .from('essays')
-          .select('view_count')
+          .select('share_count')
           .eq('id', essayId)
           .single();
           
         if (fetchEssayError) throw fetchEssayError;
         
-        const newCount = (currentEssay.view_count || 0) + 1;
+        const newCount = (currentEssay.share_count || 0) + 1;
         
         const { error: updateEssayError } = await supabase
           .from('essays')
-          .update({ view_count: newCount })
+          .update({ share_count: newCount })
           .eq('id', essayId);
           
         if (updateEssayError) throw updateEssayError;
       }
+      
+      // Refresh state to ensure consistency
+      await refreshInteractionState(deviceId);
+      
+      // Return success
+      return true;
+      
+    } catch (error) {
+      console.error('Error recording share:', error);
+      
+      // Revert the optimistic update on error
+      interactionState.update(state => {
+        const currentShares = state.shares[key] || 0;
+        return {
+          ...state,
+          shares: {
+            ...state.shares,
+            [key]: Math.max(0, currentShares - 1)
+          }
+        };
+      });
+      
+      throw error;
+    } finally {
+      // Clear this request from pending after a short delay
+      // This prevents rapid duplicate clicks but allows sharing again after a delay
+      setTimeout(() => {
+        pendingShareRequests.delete(essayId);
+      }, 500);
     }
-    
-    // Refresh state to ensure consistency
-    await refreshInteractionState(deviceId);
-    
-  } catch (error) {
-    console.error('Error recording view:', error);
+  })();
+  
+  // Store the promise in the pending requests map
+  pendingShareRequests.set(essayId, requestPromise);
+  
+  // Return the promise
+  return requestPromise;
+}
+
+// Track in-flight view requests to prevent duplicates
+const pendingViewRequests = new Map();
+
+/**
+ * Record a view event
+ */
+export async function recordView(essayId) {
+  // Prevent duplicate requests for the same essay within a short time period
+  if (pendingViewRequests.has(essayId)) {
+    console.log(`Ignoring duplicate view request for essay ${essayId}`);
+    return pendingViewRequests.get(essayId);
   }
+  
+  const deviceId = await getOrCreateDeviceId();
+  const key = `${ContentType.ESSAY}:${essayId}`;
+  
+  // Create a promise for this request
+  const requestPromise = (async () => {
+    // Optimistically update UI
+    interactionState.update(state => {
+      return {
+        ...state,
+        views: {
+          ...state.views,
+          [key]: true
+        }
+      };
+    });
+    
+    try {
+      // Check if interaction record exists for this device and essay
+      const { data: existingData, error: fetchError } = await supabase
+        .from('essay_interactions')
+        .select('id, has_viewed')
+        .eq('device_id', deviceId)
+        .eq('essay_id', essayId)
+        .single();
+      
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        throw fetchError;
+      }
+      
+      // Check if this device has already viewed the essay (prevent duplicate view counts)
+      const hasViewedBefore = existingData?.has_viewed || false;
+      
+      if (existingData) {
+        // Just update has_viewed to true if not already
+        if (!hasViewedBefore) {
+          const { error: updateError } = await supabase
+            .from('essay_interactions')
+            .update({
+              has_viewed: true,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', existingData.id);
+            
+          if (updateError) throw updateError;
+        }
+      } else {
+        // Create new interaction record
+        const { error: insertError } = await supabase
+          .from('essay_interactions')
+          .insert({
+            device_id: deviceId,
+            essay_id: essayId,
+            has_liked: false,
+            share_count: 0,
+            has_viewed: true,
+          });
+          
+        if (insertError) throw insertError;
+      }
+      
+      // Increment essay view count if they haven't viewed before
+      if (!hasViewedBefore) {
+        const { error: essayUpdateError } = await supabase.rpc(
+          'increment_essay_view_count',
+          { essay_id: essayId, increment_by: 1 }
+        );
+        
+        // Fallback if RPC isn't set up
+        if (essayUpdateError) {
+          console.warn('RPC failed, using fallback method for updating view count:', essayUpdateError);
+          
+          // Use a more robust fallback approach
+          const { data: currentEssay, error: fetchEssayError } = await supabase
+            .from('essays')
+            .select('view_count')
+            .eq('id', essayId)
+            .single();
+            
+          if (fetchEssayError) throw fetchEssayError;
+          
+          const newCount = (currentEssay.view_count || 0) + 1;
+          
+          const { error: updateEssayError } = await supabase
+            .from('essays')
+            .update({ view_count: newCount })
+            .eq('id', essayId);
+            
+          if (updateEssayError) throw updateEssayError;
+        }
+      }
+      
+      // Refresh state to ensure consistency
+      await refreshInteractionState(deviceId);
+      
+      // Return view status
+      return true;
+      
+    } catch (error) {
+      console.error('Error recording view:', error);
+      
+      // For views, we don't revert the UI state since it doesn't affect the user experience much
+      // and they definitely did view the essay
+      
+      return false;
+    } finally {
+      // Clear this request from pending after a short delay
+      // Views shouldn't really be repeated, but just in case
+      setTimeout(() => {
+        pendingViewRequests.delete(essayId);
+      }, 1000);
+    }
+  })();
+  
+  // Store the promise in the pending requests map
+  pendingViewRequests.set(essayId, requestPromise);
+  
+  // Return the promise
+  return requestPromise;
 }
 
 /**
