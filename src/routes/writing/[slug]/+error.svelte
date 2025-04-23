@@ -1,14 +1,22 @@
-<script>
+<script lang="ts">
   import { page } from '$app/stores';
+  
+  // Add type definition to handle custom error properties
+  interface CustomError extends Error {
+    details?: string;
+  }
+  
+  // Create a typed reference to the error
+  $: typedError = $page.error as CustomError;
 </script>
 
 <div class="error-container">
   <h1>{$page.status}</h1>
   <h2>Essay not found</h2>
   
-  {#if $page.error?.details}
+  {#if typedError?.details}
     <div class="error-details">
-      <p>{$page.error.details}</p>
+      <p>{typedError.details}</p>
     </div>
   {/if}
   

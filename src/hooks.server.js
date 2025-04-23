@@ -6,9 +6,8 @@
 export function handleError({ error, event }) {
   console.error('Server-side error:', error);
   
-  // Return a structured error response
+  // Return a structured error response with only valid properties
   return {
-    message: 'An unexpected error occurred on the server',
-    code: error?.code || 'UNKNOWN'
+    message: 'An unexpected error occurred on the server'
   };
 } 

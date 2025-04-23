@@ -4,8 +4,23 @@
   import { metadata } from '$lib/stores/metadataStore';
   import Essay from '$lib/components/Essay.svelte';
   
+  // Define proper interface for the data object
+  interface EssayData {
+    currentPath?: string;
+    slug?: string;
+    essay?: {
+      slug: string;
+      title: string;
+      description?: string;
+      excerpt?: string;
+      date: string;
+      content?: string;
+    };
+    content?: string;
+  }
+  
   // Access the essay data loaded by the page.server.js file
-  export let data;
+  export let data: EssayData;
   
   // Error handling state
   let essayError = false;
@@ -135,24 +150,14 @@
   }
 
   onMount(() => {
-    // Set metadata for the essay
-    if (data.essay) {
-      metadata.set({
-        title: `${data.essay.title} | Wendy Ham's Weekend Projects`,
-        description: combinedDescription,
-        canonicalUrl: `https://xnham.com/writing/${$page.params.slug}`,
-        type: "article",
-        url: essayUrl
-      });
-      
-      // If content is null, check if we should load it on the client side
-      if (data.content === null) {
-        // Add a short delay to ensure everything is properly mounted
-        setTimeout(() => {
-          loadContentClientSide();
-        }, 100);
-      }
-    }
+    // Reset metadata to generic values (Essay will set specific values when loaded)
+    metadata.set({
+      title: "Essay | Wendy Ham's Weekend Projects",
+      description: "Essays about design, coding, and more.",
+      canonicalUrl: `https://xnham.com/writing/${$page.params.slug}`,
+      type: "article",
+      url: typeof window !== 'undefined' ? window.location.href : `https://xnham.com/writing/${$page.params.slug}`
+    });
     
     // Listen for scroll events
     window.addEventListener('scroll', handleScroll);
@@ -224,54 +229,25 @@
     <span class="floating-link-text">Back</span>
   </a>
 
-  <article>
-    {#if !data.essay}
-      <div class="error">Essay not found</div>
-    {:else if essayError}
-      <div class="error-message">
-        <p>There was an error loading the essay. 
-          {#if retryCount >= MAX_RETRIES}
-            Please try refreshing the page.
-          {:else}
-            Retrying...
-          {/if}
-        </p>
-      </div>
-    {:else}
-      <Essay 
-        essay={data.essay} 
-        content={data.content}
-        on:error={handleEssayError}
-      >
-        <div slot="content-actions">
-          {#if isLoadingContent}
-            <p>Loading essay content...</p>
-          {:else}
-            <button class="load-button" on:click={loadContentClientSide}>
-              Load Content
-            </button>
-          {/if}
-          
-          {#if contentLoadError}
-            <p class="error-message">Error: {contentLoadError}</p>
-            <button class="load-button" on:click={loadContentClientSide}>
-              Try Again
-            </button>
-          {/if}
-        </div>
-      </Essay>
-    {/if}
-  </article>
+  {#if essayError}
+    <div class="error-message">
+      <p>There was an error loading the essay. 
+        {#if retryCount >= MAX_RETRIES}
+          Please try refreshing the page.
+        {:else}
+          Retrying...
+        {/if}
+      </p>
+    </div>
+  {:else}
+    <Essay 
+      slug={$page.params.slug}
+      on:error={handleEssayError}
+    />
+  {/if}
 </div>
 
 <style>
-  /* Layout & Container Elements */  
-  article {
-    width: 75%;
-    margin: 0;
-    padding: 0;
-  }
-  
   /* Navigation Elements */
   .back-button {
     display: inline-block;
@@ -339,13 +315,6 @@
     text-decoration: underline;
   }
   
-  /* Status Elements */
-  .error {
-    text-align: center;
-    padding: 1rem;
-    color: #d32f2f;
-  }
-  
   .error-message {
     padding: 20px;
     background-color: #fff8f8;
@@ -353,22 +322,6 @@
     color: #333;
   }
   
-  /* Button styling */
-  .load-button {
-    background-color: var(--dark-90);
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.2s;
-  }
-  
-  .load-button:hover {
-    background-color: var(--dark-100);
-  }
-
   /* Responsive Styles */
   @media (max-width: 1150px) {
     .floating-back-button {
@@ -377,8 +330,8 @@
   }
   
   @media (max-width: 768px) {
-    article {
-      width: 100%;
+    .container {
+      padding: 0 15px;
     }
 
     .back-button {

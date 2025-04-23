@@ -6,14 +6,18 @@
 /** @type {import('@sveltejs/kit').HandleClientError} */
 export function handleError({ error, event }) {
   console.error('Client-side error:', error);
+  
+  // Only return properties that exist on the Error type
   return {
-    message: 'An unexpected error occurred',
-    code: error?.code || 'UNKNOWN'
+    message: 'An unexpected error occurred'
   };
 }
 
-// This runs before SvelteKit kicks in on the client
-/** @type {import('@sveltejs/kit').HandleClientLoad} */
+/**
+ * Runs before SvelteKit initializes on the client
+ * @param {{ url: URL; fetch: Function }} params
+ * @returns {Promise<{ url: URL }>}
+ */
 export async function load({ url, fetch }) {
   console.log('Client-side load hook running');
   console.log('URL before processing:', url.toString());
