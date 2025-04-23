@@ -550,13 +550,12 @@
   
   /* Add these styles to ensure the button is properly aligned */
   :global(.completed-project-icon .interaction-btn) {
-    padding: 0;
+    padding: 6px 0 !important;
     background: transparent;
     margin-left: auto;
     width: fit-content;
     display: flex;
     justify-content: flex-end;
-    padding-right: 0 !important;
   }
 
   .completed-project-icon::after {
