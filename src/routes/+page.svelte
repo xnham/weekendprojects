@@ -27,9 +27,5 @@
 <!-- Additional home page content would go here -->
 
 <style>
-  .home-layout {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
+  
 </style>

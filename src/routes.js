@@ -1,4 +1,3 @@
-import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -12,28 +11,17 @@ const baseRoutes = [
   '/writing'
 ];
 
-// Get essay routes automatically from content folder
+// Get essay routes - hardcoded since we now store content in Supabase
 function getEssayRoutes() {
-  try {
-    // Look in the static/content/essays directory
-    const contentFolder = path.resolve(process.cwd(), 'static/content/essays');
-    console.log(`Looking for essays in: ${contentFolder}`);
-    
-    if (!fs.existsSync(contentFolder)) {
-      console.warn(`Essays directory not found: ${contentFolder}`);
-      return [];
-    }
-    
-    const essays = fs.readdirSync(contentFolder)
-      .filter(file => file.endsWith('.md'))
-      .map(file => file.replace('.md', ''));
-      
-    console.log(`Found ${essays.length} essays`);
-    return essays.map(slug => `/writing/${slug}`);
-  } catch (err) {
-    console.warn('Error reading essay directory:', err);
-    return [];
-  }
+  // List of essay slugs to prerender
+  const essaySlugs = [
+    'the-last-mile',
+    'software-for-one'
+    // Add any other essay slugs here when you add more essays
+  ];
+  
+  console.log(`Using ${essaySlugs.length} hardcoded essay slugs for routes`);
+  return essaySlugs.map(slug => `/writing/${slug}`);
 }
 
 // All routes combined

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount } from "svelte";
   import { metadata } from "$lib/stores/metadataStore";
   import { fade } from "svelte/transition";
@@ -13,20 +13,30 @@
     getEssayInteractionCounts
   } from "$lib/services/essayInteractionService";
 
+  // Import EssayMetadata type
+  import type { EssayMetadata } from "$lib/utils/essays";
+
   // Essays data loaded from +page.server.js
-  export let data;
+  export let data: { essays: EssayMetadata[] };
 
   // Variables for user feedback
   let copyFeedback = "";
   let copyFeedbackEssayId = "";
-  let feedbackTimeout;
+  let feedbackTimeout: ReturnType<typeof setTimeout> | null = null;
+  
+  // Define interface for interaction state
+  interface InteractionState {
+    likes: Record<string, boolean>;
+    shares: Record<string, number>;
+    views: Record<string, boolean>;
+  }
   
   // Interaction state
-  let interactionState = { likes: {}, shares: {}, views: {} };
-  let essayLikedStatus = {};
+  let interactionState: InteractionState = { likes: {}, shares: {}, views: {} };
+  let essayLikedStatus: Record<string, boolean> = {};
   
   // Derived value to compute liked status for each essay
-  $: essayLikedStatus = data.essays?.reduce((acc, essay) => {
+  $: essayLikedStatus = data.essays?.reduce((acc: Record<string, boolean>, essay: EssayMetadata) => {
     if (essay.id) {
       const key = `${ContentType.ESSAY}:${essay.id}`;
       acc[essay.id] = interactionState?.likes[key] || false;
@@ -34,7 +44,7 @@
     return acc;
   }, {}) || {};
 
-  onMount(async () => {
+  onMount(() => {
     metadata.set({
       title: "Writing | Wendy Ham's Weekend Projects",
       description:
@@ -47,41 +57,53 @@
     // Initialize interaction system with try/catch to identify issues
     try {
       console.log('Initializing interactions on writing list page');
-      const deviceId = await initializeInteractions();
-      console.log('Interactions initialized with device ID:', deviceId);
+      initializeInteractions().then(deviceId => {
+        console.log('Interactions initialized with device ID:', deviceId);
+        
+        if (!deviceId) {
+          console.error('Failed to initialize interactions - no device ID returned');
+        }
+      });
       
-      if (!deviceId) {
-        console.error('Failed to initialize interactions - no device ID returned');
+      // Create a reference to hold the unsubscribe function
+      let unsubscribe: () => void = () => {};
+      
+      try {
+        unsubscribe = subscribeToInteractions((state: InteractionState) => {
+          console.log('Interaction state updated', state);
+          interactionState = state;
+        });
+      } catch (error) {
+        console.error('Error subscribing to interactions:', error);
       }
       
-      // Subscribe to interaction state changes
-      const unsubscribe = subscribeToInteractions((state) => {
-        console.log('Interaction state updated', state);
-        interactionState = state;
-      });
+      // Add global ESC key handler for feedback dialog
+      const handleKeydown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+          copyFeedback = "";
+          copyFeedbackEssayId = "";
+        }
+      };
+      
+      window.addEventListener("keydown", handleKeydown);
+      
+      // Return the cleanup function directly (not wrapped in a promise)
+      return () => {
+        unsubscribe();
+        window.removeEventListener("keydown", handleKeydown);
+        if (feedbackTimeout) clearTimeout(feedbackTimeout);
+      };
     } catch (error) {
       console.error('Error during interaction initialization:', error);
+      return () => {
+        // Still need a cleanup function even if initialization failed
+        if (feedbackTimeout) clearTimeout(feedbackTimeout);
+      };
     }
-    
-    // Add global ESC key handler for feedback dialog
-    const handleKeydown = (e) => {
-      if (e.key === "Escape") {
-        copyFeedback = "";
-        copyFeedbackEssayId = "";
-      }
-    };
-    
-    window.addEventListener("keydown", handleKeydown);
-    
-    return () => {
-      unsubscribe();
-      window.removeEventListener("keydown", handleKeydown);
-      if (feedbackTimeout) clearTimeout(feedbackTimeout);
-    };
   });
 
   // Handle like button clicks
-  async function handleLike(essayId) {
+  async function handleLike(essayId: string) {
     console.log('handleLike called with essayId:', essayId);
     try {
       // Find the essay
@@ -139,7 +161,7 @@
   }
 
   // Handle share button clicks
-  async function handleShare(essay) {
+  async function handleShare(essay: EssayMetadata) {
     try {
       if (!essay.id) return;
       
@@ -207,7 +229,7 @@
   }
 
   // Format date helper - copied from original Essays.svelte
-  function formatDate(dateString) {
+  function formatDate(dateString: string) {
     // Simple date formatter that doesn't use the Date object at all
     // This prevents any timezone conversions
     const [year, month, day] = dateString.split("-");
@@ -240,7 +262,7 @@
   }
   
   // Helper to format the counters string
-  function formatCounters(essay) {
+  function formatCounters(essay: EssayMetadata) {
     const likes = essay.like_count || 0;
     const shares = essay.share_count || 0;
     

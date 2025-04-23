@@ -535,22 +535,17 @@ export async function recordView(essayId) {
         throw fetchError;
       }
       
-      // Check if this device has already viewed the essay (prevent duplicate view counts)
-      const hasViewedBefore = existingData?.has_viewed || false;
-      
       if (existingData) {
-        // Just update has_viewed to true if not already
-        if (!hasViewedBefore) {
-          const { error: updateError } = await supabase
-            .from('essay_interactions')
-            .update({
-              has_viewed: true,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', existingData.id);
-            
-          if (updateError) throw updateError;
-        }
+        // Always update the record when a new view happens
+        const { error: updateError } = await supabase
+          .from('essay_interactions')
+          .update({
+            has_viewed: true,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingData.id);
+          
+        if (updateError) throw updateError;
       } else {
         // Create new interaction record
         const { error: insertError } = await supabase
@@ -566,8 +561,8 @@ export async function recordView(essayId) {
         if (insertError) throw insertError;
       }
       
-      // Increment essay view count if they haven't viewed before
-      if (!hasViewedBefore) {
+      // Always increment the view count for each page view
+      {
         const { error: essayUpdateError } = await supabase.rpc(
           'increment_essay_view_count',
           { essay_id: essayId, increment_by: 1 }
@@ -631,6 +626,8 @@ export async function recordView(essayId) {
  */
 export async function getEssayInteractionCounts(essayId) {
   try {
+    console.log(`Getting interaction counts for essay ID: ${essayId}`);
+    
     const { data, error } = await supabase
       .from('essays')
       .select('like_count, share_count, view_count')
@@ -638,6 +635,12 @@ export async function getEssayInteractionCounts(essayId) {
       .single();
       
     if (error) throw error;
+    
+    console.log(`Retrieved counts for essay ${essayId}:`, {
+      likeCount: data.like_count || 0,
+      shareCount: data.share_count || 0,
+      viewCount: data.view_count || 0
+    });
     
     return {
       likeCount: data.like_count || 0,

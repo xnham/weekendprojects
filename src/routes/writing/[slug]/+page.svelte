@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
   import { fade } from 'svelte/transition';
@@ -21,30 +21,33 @@
   let interactionState = { likes: {}, shares: {}, views: {} };
   let likedByUser = false;
   let copyFeedback = "";
-  let copyFeedbackTimeout;
+  let copyFeedbackTimeout: ReturnType<typeof setTimeout> | null = null;
   
   // State for client-side content loading
   let isLoadingContent = false;
-  let contentLoadError = null;
+  let contentLoadError: string | null = null;
   
   // Optimistic count tracking
   let optimisticLikeCount = 0;
   let optimisticShareCount = 0;
   let optimisticViewCount = 0;
   let isOptimistic = false;
+  let hasInitialisedCounts = false;
   
   // Update when essay data changes
-  $: if (data?.essay) {
+  $: if (data?.essay && !hasInitialisedCounts) {
     optimisticLikeCount = data.essay.like_count || 0;
     optimisticShareCount = data.essay.share_count || 0;
-    optimisticViewCount = data.essay.view_count || 0;
-    isOptimistic = false;
+    // For view count, we'll add 1 since we're viewing it now
+    optimisticViewCount = (data.essay.view_count || 0) + 1;
+    isOptimistic = true;
+    hasInitialisedCounts = true;
   }
   
   // Scroll UI variables
   let showFloatingButton = false;
   let buttonVisible = false;
-  let hideTimeout = null;
+  let hideTimeout: ReturnType<typeof setTimeout> | null = null;
   let isScrolling = false;
   
   // Create a reactive combined description
@@ -114,15 +117,16 @@
         ...data,
         content: essayData.content
       };
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error loading content on client side:', err);
-      contentLoadError = err.message;
+      contentLoadError = err instanceof Error ? err.message : 'Unknown error occurred';
     } finally {
       isLoadingContent = false;
     }
   }
   
-  onMount(async () => {
+  // Separate async function for initializing the page
+  async function initializePage() {
     try {
       // Initialize interaction system first
       console.log('Initializing interactions on single essay page');
@@ -149,8 +153,7 @@
           description: combinedDescription,
           canonicalUrl: `https://xnham.com/writing/${$page.params.slug}`,
           type: "article",
-          url: essayUrl,
-          image: "/images/og-image.png"
+          url: essayUrl
         });
         
         // Check if essay is already liked
@@ -159,21 +162,31 @@
           console.log(`Essay ${data.essay.id} already liked:`, isAlreadyLiked);
           likedByUser = isAlreadyLiked;
           
-          // Record view
+          // Record view with optimistic UI update
           try {
             await recordView(data.essay.id);
             console.log(`View recorded for essay ${data.essay.id}`);
+            
+            // We're already using optimistic view count from the reactive statement
+            // that runs when data.essay changes, so no need to update here
           } catch (viewError) {
             console.error(`Error recording view for essay ${data.essay.id}:`, viewError);
+            // Even if there's an error, we'll keep the optimistic view count
+            // since the user did view the essay
           }
         }
       }
     } catch (error) {
       console.error('Error during single essay interaction initialization:', error);
     }
+  }
+  
+  onMount(() => {
+    // Call the async initialization function
+    initializePage();
     
     // Subscribe to interaction state changes
-    const unsubscribe = subscribeToInteractions((state) => {
+    const unsubscribe = subscribeToInteractions((state: { likes: Record<string, boolean>; shares: Record<string, boolean>; views: Record<string, boolean> }) => {
       interactionState = state;
       
       // Update liked status whenever the interaction state changes
@@ -196,7 +209,7 @@
   });
   
   // Format date helper
-  function formatDate(dateString) {
+  function formatDate(dateString: string) {
     // Simple date formatter that doesn't use the Date object at all
     // This prevents any timezone conversions
     const [year, month, day] = dateString.split("-");
@@ -218,11 +231,8 @@
     return `${monthName} ${dayFormatted}, ${year}`;
   }
   
-  // Go back function for the back button
-  function goBack(e) {
-    e.preventDefault();
-    window.history.back();
-  }
+  // This function is no longer needed since we'll directly use href navigation
+  // without preventing the default behavior
   
   // Scroll handling logic
   function handleScroll() {
@@ -269,18 +279,19 @@
       const newLikedState = !likedByUser;
       const increment = newLikedState ? 1 : -1;
       
-      // Update optimistic counts
+      // Directly update the optimistic count variable to trigger reactivity
       optimisticLikeCount = Math.max(0, optimisticLikeCount + increment);
       isOptimistic = true;
       
       // Also update the UI state optimistically
       likedByUser = newLikedState;
       
+      // Force a Svelte update
+      optimisticLikeCount = optimisticLikeCount;
+      
       // Toggle the like in the database
       const result = await toggleLike(data.essay.id);
       console.log(`Toggle like result: ${result}`);
-      
-      // Database will update via subscription
     } catch (error) {
       console.error("Error toggling like:", error);
       
@@ -305,12 +316,14 @@
       // Create the share URL (this only runs on client side so window is safe to use here)
       const shareUrl = `${window.location.origin}/writing/${data.essay.slug}`;
       
-      // Copy to clipboard
-      await navigator.clipboard.writeText(shareUrl);
-      
-      // Apply optimistic update to count
+      // Apply optimistic update to count BEFORE we attempt to access the clipboard
       optimisticShareCount += 1;
       isOptimistic = true;
+      // Force a Svelte update
+      optimisticShareCount = optimisticShareCount;
+      
+      // Copy to clipboard
+      await navigator.clipboard.writeText(shareUrl);
       
       // Show feedback
       copyFeedback = "URL copied to clipboard!";
@@ -323,8 +336,6 @@
       // Record the share in the database
       const result = await recordShare(data.essay.id);
       console.log(`Share recorded: ${result}`);
-      
-      // The database update will trigger the subscription which will update the UI
     } catch (error) {
       console.error("Error sharing essay:", error);
       copyFeedback = "Failed to copy URL";
@@ -348,7 +359,10 @@
   }
   
   function getEssayViews() {
-    return isOptimistic ? optimisticViewCount : (data?.essay?.view_count || 0);
+    // For views, increment the initial count by 1 to show the current view
+    const baseViewCount = data?.essay?.view_count || 0;
+    // Use optimistic count if it's been updated, otherwise use base count + 1
+    return isOptimistic ? optimisticViewCount : (baseViewCount + 1);
   }
 </script>
 
@@ -380,15 +394,15 @@
 <div class="container">
   <!-- Back link -->
   <div class="back-button">&lt; 
-    <a href="/writing" on:click={goBack}>
-      <span class="link-text">Back</span>
+    <a href="/writing">
+      <span class="link-text">Back to essays
+      </span>
     </a>
   </div>
 
   <!-- Floating back button when scrolled -->
   <a 
     href="/writing"
-    on:click={goBack}
     class="floating-back-button {buttonVisible ? 'visible' : 'hidden'} {!showFloatingButton ? 'instant-hide' : ''}"
     aria-hidden={!buttonVisible}
   >
@@ -474,11 +488,11 @@
         </div>
       </div>
       
-      <!-- Essay stats -->
+      <!-- Essay stats with reactive counts -->
       <div class="essay-stats">
-        <span class="essay-stat">{getEssayLikes()} {getEssayLikes() === 1 ? 'like' : 'likes'}</span>
-        <span class="essay-stat">{getEssayShares()} {getEssayShares() === 1 ? 'share' : 'shares'}</span>
-        <span class="essay-stat">{getEssayViews()} {getEssayViews() === 1 ? 'view' : 'views'}</span>
+        <span class="essay-stat">{optimisticLikeCount} {optimisticLikeCount === 1 ? 'like' : 'likes'}</span>
+        <span class="essay-stat">{optimisticShareCount} {optimisticShareCount === 1 ? 'share' : 'shares'}</span>
+        <span class="essay-stat">{optimisticViewCount} {optimisticViewCount === 1 ? 'view' : 'views'}</span>
       </div>
     {/if}
   </article>

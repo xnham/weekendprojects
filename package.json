@@ -10,9 +10,7 @@
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
     "generate-routes": "node scripts/generate-routes.js",
     "prerender": "node scripts/prerender.js",
-    "deploy": "npm run build && touch build/.nojekyll && gh-pages -d build",
-    "sync-essays": "node scripts/sync-essays.js",
-    "migrate-content": "node scripts/add-content-column.js"
+    "deploy": "npm run build && touch build/.nojekyll && gh-pages -d build"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^2.0.0",
