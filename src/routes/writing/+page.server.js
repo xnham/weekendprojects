@@ -49,7 +49,7 @@ export async function load() {
       console.error(`Error fetching essays from Supabase: ${error.message}`);
       return {
         essays: [],
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
     
@@ -104,7 +104,7 @@ export async function load() {
       }
       
       // Re-sort the combined list by date
-      essays.sort((a, b) => new Date(b.date) - new Date(a.date));
+      essays.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }
     
     console.log(`Loaded ${essays.length} essays with proper UUIDs`);
@@ -117,7 +117,7 @@ export async function load() {
     console.error('Error loading essays:', error);
     return {
       essays: [],
-      error: error.message
+      error: error instanceof Error ? error.message : String(error)
     };
   }
 }

@@ -53,16 +53,19 @@ function processSunnyLinks() {
   
   sunnyLinks.forEach(link => {
     // Skip if we've already processed this link
-    if (link.dataset.sunnyHandled) return;
+    if (/** @type {HTMLAnchorElement} */(link).dataset.sunnyHandled) return;
     
     // Mark as handled to avoid double-binding
-    link.dataset.sunnyHandled = 'true';
+    /** @type {HTMLAnchorElement} */(link).dataset.sunnyHandled = 'true';
     
     // Add click handler
     link.addEventListener('click', handleSunnyLinkClick);
   });
 }
 
+/**
+ * @param {Event} event - The click event
+ */
 function handleSunnyLinkClick(event) {
   // Prevent default navigation
   event.preventDefault();

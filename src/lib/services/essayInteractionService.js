@@ -1,3 +1,4 @@
+// @ts-check
 import { supabase } from '../supabase';
 import { writable, get } from 'svelte/store';
 
@@ -6,7 +7,15 @@ export const ContentType = {
   ESSAY: 'essay'
 };
 
+/**
+ * @typedef {Object} InteractionState
+ * @property {Record<string, boolean>} likes
+ * @property {Record<string, number>} shares
+ * @property {Record<string, boolean>} views
+ */
+
 // Define the structure of our interaction state
+/** @type {import('svelte/store').Writable<InteractionState>} */
 const interactionState = writable({
   likes: {},
   shares: {},
@@ -19,6 +28,7 @@ const DEVICE_ID_KEY = 'device_id';
 /**
  * Generate a UUID for device tracking
  * Cross-browser implementation that doesn't rely on crypto.randomUUID()
+ * @returns {string}
  */
 function generateUUID() {
   try {
@@ -59,6 +69,7 @@ function generateUUID() {
 
 /**
  * Check if localStorage is available
+ * @returns {boolean}
  */
 function isLocalStorageAvailable() {
   try {
@@ -74,6 +85,7 @@ function isLocalStorageAvailable() {
 
 /**
  * Get or create a device ID for tracking interactions
+ * @returns {Promise<string>}
  */
 export async function getOrCreateDeviceId() {
   try {
@@ -105,6 +117,7 @@ export async function getOrCreateDeviceId() {
 
 /**
  * Initialize interaction service
+ * @returns {Promise<string|null>}
  */
 export async function initializeInteractions() {
   console.log('Initializing interaction service');
@@ -158,6 +171,8 @@ export async function initializeInteractions() {
 
 /**
  * Refresh interaction state from Supabase
+ * @param {string} deviceId
+ * @returns {Promise<void>}
  */
 async function refreshInteractionState(deviceId) {
   try {
@@ -170,6 +185,7 @@ async function refreshInteractionState(deviceId) {
     if (error) throw error;
     
     // Create a new state object
+    /** @type {InteractionState} */
     const newState = {
       likes: {},
       shares: {},
@@ -180,9 +196,9 @@ async function refreshInteractionState(deviceId) {
     if (data) {
       data.forEach(interaction => {
         const key = `${ContentType.ESSAY}:${interaction.essay_id}`;
-        newState.likes[key] = interaction.has_liked;
+        newState.likes[key] = interaction.has_liked || false;
         newState.shares[key] = interaction.share_count || 0;
-        newState.views[key] = interaction.has_viewed;
+        newState.views[key] = interaction.has_viewed || false;
       });
     }
     
@@ -196,6 +212,8 @@ async function refreshInteractionState(deviceId) {
 
 /**
  * Subscribe to interaction state changes
+ * @param {(state: InteractionState) => void} callback
+ * @returns {() => void}
  */
 export function subscribeToInteractions(callback) {
   const unsubscribe = interactionState.subscribe(callback);
@@ -204,6 +222,8 @@ export function subscribeToInteractions(callback) {
 
 /**
  * Check if essay is liked by the current device
+ * @param {string|number} essayId
+ * @returns {boolean}
  */
 export function isLiked(essayId) {
   if (!essayId) {
@@ -220,16 +240,20 @@ export function isLiked(essayId) {
 }
 
 // Track in-flight requests to prevent duplicates
+/** @type {Map<string|number, Promise<boolean>>} */
 const pendingLikeRequests = new Map();
 
 /**
  * Toggle like status for an essay
+ * @param {string|number} essayId
+ * @returns {Promise<boolean>}
  */
 export async function toggleLike(essayId) {
   // Prevent duplicate requests for the same essay
   if (pendingLikeRequests.has(essayId)) {
     console.log(`Ignoring duplicate like request for essay ${essayId}`);
-    return pendingLikeRequests.get(essayId);
+    const pendingRequest = pendingLikeRequests.get(essayId);
+    return pendingRequest || Promise.resolve(false);
   }
   
   const deviceId = await getOrCreateDeviceId();
@@ -357,16 +381,20 @@ export async function toggleLike(essayId) {
 }
 
 // Track in-flight share requests to prevent duplicates
+/** @type {Map<string|number, Promise<boolean>>} */
 const pendingShareRequests = new Map();
 
 /**
  * Record a share event
+ * @param {string|number} essayId
+ * @returns {Promise<boolean>}
  */
 export async function recordShare(essayId) {
   // Prevent duplicate requests for the same essay within a short time period
   if (pendingShareRequests.has(essayId)) {
     console.log(`Ignoring duplicate share request for essay ${essayId}`);
-    return pendingShareRequests.get(essayId);
+    const pendingRequest = pendingShareRequests.get(essayId);
+    return pendingRequest || Promise.resolve(false);
   }
   
   const deviceId = await getOrCreateDeviceId();
@@ -494,16 +522,20 @@ export async function recordShare(essayId) {
 }
 
 // Track in-flight view requests to prevent duplicates
+/** @type {Map<string|number, Promise<boolean>>} */
 const pendingViewRequests = new Map();
 
 /**
  * Record a view event
+ * @param {string|number} essayId
+ * @returns {Promise<boolean>}
  */
 export async function recordView(essayId) {
   // Prevent duplicate requests for the same essay within a short time period
   if (pendingViewRequests.has(essayId)) {
     console.log(`Ignoring duplicate view request for essay ${essayId}`);
-    return pendingViewRequests.get(essayId);
+    const pendingRequest = pendingViewRequests.get(essayId);
+    return pendingRequest || Promise.resolve(false);
   }
   
   const deviceId = await getOrCreateDeviceId();
@@ -623,6 +655,8 @@ export async function recordView(essayId) {
 
 /**
  * Get essay interaction counts from the essays table
+ * @param {string|number} essayId
+ * @returns {Promise<{likeCount: number, shareCount: number, viewCount: number}>}
  */
 export async function getEssayInteractionCounts(essayId) {
   try {

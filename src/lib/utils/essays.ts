@@ -148,7 +148,9 @@ export async function loadEssay(slug: string): Promise<EssayLoadResult> {
     }
   } catch (error) {
     console.error(`Error loading markdown for ${slug}:`, error);
-    console.error(`Error stack: ${error.stack}`);
+    if (error instanceof Error) {
+      console.error(`Error stack: ${error.stack}`);
+    }
     
     // If we can't find the markdown at all, we definitely can't show the essay
     return {

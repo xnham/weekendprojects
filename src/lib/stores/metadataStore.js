@@ -1,5 +1,14 @@
 import { writable } from 'svelte/store';
 
+/**
+ * @typedef {Object} Metadata
+ * @property {string} title
+ * @property {string} description
+ * @property {string} canonicalUrl
+ * @property {string} type
+ * @property {string} url
+ */
+
 // Create a store with default metadata values
 export const metadata = writable({
   title: "Wendy Ham | Software for One",
@@ -9,7 +18,15 @@ export const metadata = writable({
   url: ""
 });
 
-// Helper function to update metadata
+/**
+ * Helper function to update metadata
+ * @param {Object} newMetadata - Partial metadata to update
+ * @param {string} [newMetadata.title]
+ * @param {string} [newMetadata.description]
+ * @param {string} [newMetadata.canonicalUrl]
+ * @param {string} [newMetadata.type]
+ * @param {string} [newMetadata.url]
+ */
 export function updateMetadata(newMetadata) {
   metadata.update(current => ({ ...current, ...newMetadata }));
 }

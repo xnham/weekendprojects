@@ -31,19 +31,13 @@ export async function load({ params }) {
       console.warn(`Error fetching essay from Supabase: ${essayError.message}`);
       
       if (essayError.code === 'PGRST116') {
-        throw error(404, {
-          message: 'Essay not found',
-          details: `No essay found with slug: ${slug}`
-        });
+        throw error(404, `No essay found with slug: ${slug}`);
       }
     }
     
     // If no essay was found
     if (!essay) {
-      throw error(404, {
-        message: 'Essay not found',
-        details: `No essay found with slug: ${slug}`
-      });
+      throw error(404, `No essay found with slug: ${slug}`);
     }
     
     // Extract content from the essay data
@@ -58,10 +52,7 @@ export async function load({ params }) {
     
     // Check if essay is published unless in dev mode
     if (essay.published === false && process.env.NODE_ENV !== 'development') {
-      throw error(404, {
-        message: 'Essay not found',
-        details: 'This essay is not yet published'
-      });
+      throw error(404, 'This essay is not yet published');
     }
     
     // Return both the essay metadata and the content
@@ -71,10 +62,12 @@ export async function load({ params }) {
     };
   } catch (err) {
     // Provide more helpful error details
-    console.error(`Error in load function: ${err.message}`);
-    console.error(err.stack);
+    console.error(`Error in load function: ${err instanceof Error ? err.message : String(err)}`);
+    if (err instanceof Error) {
+      console.error(err.stack);
+    }
     
-    if (err.status && err.body) {
+    if (err && typeof err === 'object' && 'status' in err && 'body' in err) {
       // This is already a SvelteKit error, just rethrow it
       throw err;
     }
@@ -98,7 +91,7 @@ export async function load({ params }) {
     return {
       essay: mockEssay,
       content: null,
-      error: err.message || 'Unknown error occurred'
+      error: err instanceof Error ? err.message : 'Unknown error occurred'
     };
   }
 }
