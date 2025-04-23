@@ -35,10 +35,35 @@ interface MarkdownModule {
 // Load a specific essay by slug
 export async function loadEssay(slug: string): Promise<EssayLoadResult> {
   console.log(`Loading essay with slug: ${slug}`);
+  console.log(`Current working directory: ${process.cwd()}`);
   
   // First try to load the markdown file to ensure it exists
   let mdContent = null;
   let mdError = null;
+  
+  // DEBUG
+  try {
+    const fs = await import('fs');
+    const path = await import('path');
+    const mdPath = path.join(process.cwd(), 'src', 'content', 'essays', `${slug}.md`);
+    console.log(`Checking if file exists at path: ${mdPath}`);
+    
+    if (fs.existsSync(mdPath)) {
+      console.log(`File exists at: ${mdPath}`);
+      // Try to read the file content
+      try {
+        const content = fs.readFileSync(mdPath, 'utf-8');
+        console.log(`File content: ${content.substring(0, 100)}...`);
+      } catch (readError) {
+        console.error(`Error reading file: ${readError}`);
+      }
+    } else {
+      console.log(`File does NOT exist at: ${mdPath}`);
+    }
+  } catch (fsError) {
+    console.error(`Error checking file: ${fsError}`);
+  }
+  // END DEBUG
   
   try {
     console.log(`Trying to load markdown for ${slug}`);
@@ -46,23 +71,40 @@ export async function loadEssay(slug: string): Promise<EssayLoadResult> {
     // Try both possible paths
     try {
       // First try the alias path (preferred)
+      console.log(`Attempting to import using alias path: $content/essays/${slug}.md`);
       mdContent = await import(`$content/essays/${slug}.md`);
-      console.log(`Markdown loaded successfully using alias path for ${slug}`);
+      console.log(`Markdown loaded successfully using alias path for ${slug}, content:`, mdContent);
     } catch (aliasError) {
-      console.warn(`Failed to load using alias path, falling back to relative path for ${slug}`);
+      console.warn(`Failed to load using alias path for ${slug}:`, aliasError);
+      console.warn(`Error name: ${aliasError.name}, message: ${aliasError.message}`);
+      console.warn(`Falling back to relative path for ${slug}`);
+      
       try {
         // Fall back to the relative path
+        console.log(`Attempting to import using relative path: ../../content/essays/${slug}.md`);
         mdContent = await import(`../../content/essays/${slug}.md`);
-        console.log(`Markdown loaded successfully using relative path for ${slug}`);
+        console.log(`Markdown loaded successfully using relative path for ${slug}, content:`, mdContent);
       } catch (relativeError) {
         // Keep track of this error
         mdError = relativeError;
-        console.error(`Failed to load using both alias and relative paths for ${slug}:`, relativeError);
-        throw relativeError;
+        console.error(`Failed to load using relative path for ${slug}:`, relativeError);
+        console.error(`Error name: ${relativeError.name}, message: ${relativeError.message}`);
+        
+        // Try one more approach for debugging
+        try {
+          console.log(`Attempting to import using absolute path...`);
+          const dynamicImport = new Function('slug', 'return import("/Users/wendyham/Desktop/Everything/weekendprojects/src/content/essays/" + slug + ".md")');
+          mdContent = await dynamicImport(slug);
+          console.log(`Markdown loaded successfully using absolute path for ${slug}, content:`, mdContent);
+        } catch (absoluteError) {
+          console.error(`Failed to load using absolute path for ${slug}:`, absoluteError);
+          throw relativeError;
+        }
       }
     }
   } catch (error) {
     console.error(`Error loading markdown for ${slug}:`, error);
+    console.error(`Error stack: ${error.stack}`);
     
     // If we can't find the markdown at all, we definitely can't show the essay
     return {

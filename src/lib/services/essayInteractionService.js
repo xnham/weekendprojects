@@ -107,10 +107,53 @@ export async function getOrCreateDeviceId() {
  * Initialize interaction service
  */
 export async function initializeInteractions() {
-  const deviceId = await getOrCreateDeviceId();
+  console.log('Initializing interaction service');
   
-  // Load existing interactions for this device
-  await refreshInteractionState(deviceId);
+  // Additional detailed logging
+  console.log('Supabase client available:', !!supabase);
+  
+  // Check if Supabase client is properly initialized
+  if (!supabase) {
+    console.error('Supabase client is not initialized');
+    return null;
+  }
+  
+  try {
+    // Test Supabase connection
+    try {
+      const { data, error } = await supabase.from('essays').select('id').limit(1);
+      if (error) {
+        console.error('Supabase connection test failed:', error);
+      } else {
+        console.log('Supabase connection test successful:', data);
+      }
+    } catch (connectionError) {
+      console.error('Error testing Supabase connection:', connectionError);
+    }
+    
+    const deviceId = await getOrCreateDeviceId();
+    console.log('Device ID created/retrieved:', deviceId);
+    
+    // Log the entire interaction state before making any changes
+    console.log('Current interaction state before refresh:', get(interactionState));
+    
+    // Load existing interactions for this device
+    try {
+      await refreshInteractionState(deviceId);
+      console.log('Successfully refreshed interaction state');
+    } catch (refreshError) {
+      console.error('Error refreshing interaction state:', refreshError);
+    }
+    
+    // Log the refreshed state
+    console.log('Interaction state after refresh:', get(interactionState));
+    console.log('Interaction service initialized with device ID:', deviceId);
+    
+    return deviceId;
+  } catch (error) {
+    console.error('Failed to initialize interaction service:', error);
+    return null; 
+  }
 }
 
 /**
@@ -145,7 +188,7 @@ async function refreshInteractionState(deviceId) {
     
     // Update the store
     interactionState.set(newState);
-    console.log('Updated interaction state:', newState);
+    // State updated
   } catch (error) {
     console.error('Failed to refresh interaction state:', error);
   }
@@ -163,9 +206,17 @@ export function subscribeToInteractions(callback) {
  * Check if essay is liked by the current device
  */
 export function isLiked(essayId) {
+  if (!essayId) {
+    console.error('isLiked called without an essayId');
+    return false;
+  }
+  
   const state = get(interactionState);
   const key = `${ContentType.ESSAY}:${essayId}`;
-  return !!state.likes[key];
+  const liked = !!state.likes[key];
+  
+  console.log(`Checking if essay ${essayId} is liked: ${liked}`);
+  return liked;
 }
 
 // Track in-flight requests to prevent duplicates

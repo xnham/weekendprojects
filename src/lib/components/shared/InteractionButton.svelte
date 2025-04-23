@@ -52,6 +52,10 @@
   $: activeClass = active ? `btn-${type === 'follow' ? 'followed' : `${type}d`}` : '';
 </script>
 
+<!-- 
+  IMPORTANT: using on:click without assignment to directly forward 
+  the native click event to the parent component 
+-->
 <button 
   class="interaction-btn {active ? 'active' : ''} {type}-btn {unlikeAnimation ? 'unlike-animation' : ''} {loading ? 'loading' : ''}"
   on:click
@@ -153,4 +157,4 @@
     cursor: wait;
     pointer-events: none;
   }
-</style> 
+</style>

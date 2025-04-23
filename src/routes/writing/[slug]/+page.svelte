@@ -9,6 +9,8 @@
     toggleLike, 
     recordShare, 
     recordView,
+    isLiked,
+    initializeInteractions,
     ContentType
   } from '$lib/services/essayInteractionService';
   
@@ -70,21 +72,44 @@
   } : null;
 
   onMount(async () => {
-    // Set metadata for the essay
-    if (data.essay) {
-      metadata.set({
-        title: `${data.essay.title} | Wendy Ham's Weekend Projects`,
-        description: combinedDescription,
-        canonicalUrl: `https://xnham.com/writing/${$page.params.slug}`,
-        type: "article",
-        url: window.location.href,
-        image: "/images/og-image.png"
-      });
+    try {
+      // Initialize interaction system first
+      console.log('Initializing interactions on single essay page');
+      const deviceId = await initializeInteractions();
+      console.log('Interactions initialized on single essay with device ID:', deviceId);
       
-      // Record view
-      if (data.essay.id) {
-        await recordView(data.essay.id);
+      if (!deviceId) {
+        console.error('Failed to initialize interactions on single essay - no device ID returned');
       }
+      
+      // Set metadata for the essay
+      if (data.essay) {
+        metadata.set({
+          title: `${data.essay.title} | Wendy Ham's Weekend Projects`,
+          description: combinedDescription,
+          canonicalUrl: `https://xnham.com/writing/${$page.params.slug}`,
+          type: "article",
+          url: window.location.href,
+          image: "/images/og-image.png"
+        });
+        
+        // Check if essay is already liked
+        if (data.essay.id) {
+          const isAlreadyLiked = isLiked(data.essay.id);
+          console.log(`Essay ${data.essay.id} already liked:`, isAlreadyLiked);
+          likedByUser = isAlreadyLiked;
+          
+          // Record view
+          try {
+            await recordView(data.essay.id);
+            console.log(`View recorded for essay ${data.essay.id}`);
+          } catch (viewError) {
+            console.error(`Error recording view for essay ${data.essay.id}:`, viewError);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error during single essay interaction initialization:', error);
     }
     
     // Subscribe to interaction state changes
@@ -92,7 +117,7 @@
       interactionState = state;
       
       // Update liked status whenever the interaction state changes
-      if (data.essay) {
+      if (data.essay && data.essay.id) {
         const key = `${ContentType.ESSAY}:${data.essay.id}`;
         likedByUser = !!state.likes[key];
       }
@@ -168,9 +193,15 @@
 
   // Handle like button clicks
   async function handleLike() {
-    if (!data.essay || !data.essay.id) return;
+    console.log('Single essay handleLike called');
+    if (!data.essay || !data.essay.id) {
+      console.error("Cannot like: Missing essay ID");
+      return;
+    }
     
     try {
+      console.log(`Toggling like for essay ID: ${data.essay.id}`);
+      
       // Apply optimistic update to count and UI
       const newLikedState = !likedByUser;
       const increment = newLikedState ? 1 : -1;
@@ -183,9 +214,10 @@
       likedByUser = newLikedState;
       
       // Toggle the like in the database
-      await toggleLike(data.essay.id);
+      const result = await toggleLike(data.essay.id);
+      console.log(`Toggle like result: ${result}`);
       
-      // The database update will trigger the subscription which will update the UI
+      // Database will update via subscription
     } catch (error) {
       console.error("Error toggling like:", error);
       
@@ -200,7 +232,12 @@
   // Handle share button clicks
   async function handleShare() {
     try {
-      if (!data.essay || !data.essay.id) return;
+      if (!data.essay || !data.essay.id) {
+        console.error("Cannot share: Missing essay ID");
+        return;
+      }
+      
+      console.log(`Sharing essay ID: ${data.essay.id}`);
       
       // Create the share URL
       const shareUrl = `${window.location.origin}/writing/${data.essay.slug}`;
@@ -221,7 +258,8 @@
       }, 3000);
       
       // Record the share in the database
-      await recordShare(data.essay.id);
+      const result = await recordShare(data.essay.id);
+      console.log(`Share recorded: ${result}`);
       
       // The database update will trigger the subscription which will update the UI
     } catch (error) {
@@ -305,7 +343,10 @@
             type="like"
             active={likedByUser}
             count={undefined}
-            on:click={handleLike}
+            on:click={(e) => {
+              console.log('Like button clicked in single essay view');
+              handleLike();
+            }}
           />
 
           <div class="share-button-container">
@@ -313,7 +354,10 @@
               type="share"
               active={false}
               count={undefined}
-              on:click={handleShare}
+              on:click={(e) => {
+                console.log('Share button clicked in single essay view');
+                handleShare();
+              }}
             />
             
             {#if copyFeedback}
@@ -333,16 +377,9 @@
           <!-- Handle HTML content from marked -->
           <div class="markdown-content">{@html data.content}</div>
         {:else if data.content}
-          <!-- Handle any other content format -->
-          <div class="content-debug">
-            <p class="warning">
-              Content loaded but couldn't render properly. This might be due to a markdown formatting issue.
-            </p>
-            <details>
-              <summary>Debug info</summary>
-              <pre>Content type: {typeof data.content}</pre>
-              <pre>Raw content data: {JSON.stringify(data.content, null, 2)}</pre>
-            </details>
+          <!-- Handle component-based content format -->
+          <div class="component-content">
+            <svelte:component this={data.content} />
           </div>
         {:else}
           <!-- No content at all -->
@@ -350,7 +387,7 @@
             Essay content could not be loaded. Please try again later.
           </p>
           <details>
-            <summary>Debug info</summary>
+            <summary>View error details</summary>
             <pre>{JSON.stringify(data, null, 2)}</pre>
           </details>
         {/if}

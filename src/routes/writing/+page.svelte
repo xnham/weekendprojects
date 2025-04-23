@@ -26,13 +26,13 @@
   let essayLikedStatus = {};
   
   // Derived value to compute liked status for each essay
-  $: essayLikedStatus = data.essays.reduce((acc, essay) => {
+  $: essayLikedStatus = data.essays?.reduce((acc, essay) => {
     if (essay.id) {
       const key = `${ContentType.ESSAY}:${essay.id}`;
       acc[essay.id] = interactionState?.likes[key] || false;
     }
     return acc;
-  }, {});
+  }, {}) || {};
 
   onMount(async () => {
     metadata.set({
@@ -44,14 +44,24 @@
       url: window.location.href,
     });
 
-    // Initialize interaction system
-    await initializeInteractions();
-    
-    // Subscribe to interaction state changes
-    const unsubscribe = subscribeToInteractions((state) => {
-      console.log("Interaction state updated:", state);
-      interactionState = state;
-    });
+    // Initialize interaction system with try/catch to identify issues
+    try {
+      console.log('Initializing interactions on writing list page');
+      const deviceId = await initializeInteractions();
+      console.log('Interactions initialized with device ID:', deviceId);
+      
+      if (!deviceId) {
+        console.error('Failed to initialize interactions - no device ID returned');
+      }
+      
+      // Subscribe to interaction state changes
+      const unsubscribe = subscribeToInteractions((state) => {
+        console.log('Interaction state updated', state);
+        interactionState = state;
+      });
+    } catch (error) {
+      console.error('Error during interaction initialization:', error);
+    }
     
     // Add global ESC key handler for feedback dialog
     const handleKeydown = (e) => {
@@ -72,6 +82,7 @@
 
   // Handle like button clicks
   async function handleLike(essayId) {
+    console.log('handleLike called with essayId:', essayId);
     try {
       // Find the essay
       const essay = data.essays.find(e => e.id === essayId);
@@ -277,57 +288,74 @@
   </div>
 
   <div class="essays">
-    {#each data.essays as essay}
-      <div class="essay-card">
-        <a href="/writing/{essay.slug}" class="essay-card-link">
-          <div class="essay-content">
-            <p class="essay-date">{formatDate(essay.date)}</p>
-            <h3 class="essay-title">{essay.title}</h3>
-            <p class="essay-description">
-              {#if essay.excerpt}
-                {essay.excerpt}
-              {:else}
-                {essay.description}
-              {/if}
-            </p>
-            <span class="read-more"
-              ><span class="read-more-text">Read more</span> &gt;</span
-            >
-          </div>
-        </a>
-        <div class="essay-interaction-container">
-          <div class="essay-buttons">
-            <InteractionButton 
-              type="like"
-              active={essayLikedStatus[essay.id] || false}
-              count={undefined}
-              on:click={() => handleLike(essay.id)}
-            />
-
-            <div class="share-button-container">
+    {#if !data.essays || data.essays.length === 0}
+      <div class="no-essays">
+        <p>No essays found. Please check your database connection or create some essays.</p>
+        <div class="debug-actions">
+          <button on:click={() => console.log('Essays data:', data?.essays || 'None')}>
+            Debug Essays Data
+          </button>
+        </div>
+      </div>
+    {:else}
+      {#each data.essays as essay}
+        <div class="essay-card">
+          <a href="/writing/{essay.slug}" class="essay-card-link">
+            <div class="essay-content">
+              <p class="essay-date">{formatDate(essay.date)}</p>
+              <h3 class="essay-title">{essay.title}</h3>
+              <p class="essay-description">
+                {#if essay.excerpt}
+                  {essay.excerpt}
+                {:else}
+                  {essay.description}
+                {/if}
+              </p>
+              <span class="read-more"
+                ><span class="read-more-text">Read more</span> &gt;</span
+              >
+            </div>
+          </a>
+          <div class="essay-interaction-container">
+            <div class="essay-buttons">
               <InteractionButton 
-                type="share"
-                active={false}
+                type="like"
+                active={essayLikedStatus[essay.id] || false}
                 count={undefined}
-                on:click={() => handleShare(essay)}
+                on:click={(e) => {
+                  console.log('Like button clicked in list view for:', essay.id);
+                  handleLike(essay.id);
+                }}
               />
-              
-              {#if copyFeedback && copyFeedbackEssayId === essay.id}
-                <div class="copy-feedback" transition:fade={{ duration: 150 }}>
-                  {copyFeedback}
-                </div>
+
+              <div class="share-button-container">
+                <InteractionButton 
+                  type="share"
+                  active={false}
+                  count={undefined}
+                  on:click={(e) => {
+                    console.log('Share button clicked in list view for:', essay.id);
+                    handleShare(essay);
+                  }}
+                />
+                
+                {#if copyFeedback && copyFeedbackEssayId === essay.id}
+                  <div class="copy-feedback" transition:fade={{ duration: 150 }}>
+                    {copyFeedback}
+                  </div>
+                {/if}
+              </div>
+            </div>
+
+            <div class="essay-counters">
+              {#if essay.id}
+                {formatCounters(essay)}
               {/if}
             </div>
           </div>
-
-          <div class="essay-counters">
-            {#if essay.id}
-              {formatCounters(essay)}
-            {/if}
-          </div>
         </div>
-      </div>
-    {/each}
+      {/each}
+    {/if}
   </div>
 </main>
 
@@ -474,6 +502,33 @@
     font-size: 14px;
     color: var(--dark-80);
     margin-left: auto;
+  }
+
+  /* No essays section */
+  .no-essays {
+    width: 100%;
+    padding: 40px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    text-align: center;
+  }
+
+  .debug-actions {
+    margin-top: 20px;
+  }
+
+  .debug-actions button {
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .debug-actions button:hover {
+    background-color: #555;
   }
 
   /* Responsive adjustments */
