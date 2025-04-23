@@ -1,1 +1,0 @@
-import"./index-OKnuRBjv.js";const e={title:"Growth kills experience",description:"Growth messes up quality.",date:"2025-03-11",published:!1,excerpt:null},{title:l,description:s,date:o,published:r,excerpt:a}=e;function p(t){}export{p as default,e as metadata};
