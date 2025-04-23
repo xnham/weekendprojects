@@ -5,8 +5,7 @@
   import { isSunnyModalOpen, closeSunnyModal } from '$lib/stores/sunnyModalStore';
   import { FontAwesomeIcon } from "@fortawesome/svelte-fontawesome";
 
-  // Local state for this specific modal
-  export let isOpen: boolean = false;
+  // Remove local isOpen state and use the store directly
   let email: string = "";
   let submitting = false;
   let modalElement: HTMLDivElement;
@@ -49,7 +48,7 @@
   // Handle escape key
   function handleKeydown(event: KeyboardEvent) {
     if (event.key === "Escape") {
-      isOpen = false;
+      closeModal();
     }
   }
 
@@ -61,8 +60,13 @@
       !modalElement.contains(event.target) &&
       (event.target as Element).classList.contains("sunny-modal-backdrop")
     ) {
-      isOpen = false;
+      closeModal();
     }
+  }
+
+  // Helper function to properly close the modal
+  function closeModal() {
+    closeSunnyModal();
   }
 
   function handleResize() {
@@ -144,9 +148,9 @@
     }
   });
 
-  // This function opens the modal
+  // This function opens the modal - it's now using the store
   export function open() {
-    isOpen = true;
+    $isSunnyModalOpen = true;
   }
 
   // Dummy email submit handler (no actual functionality)
@@ -156,7 +160,7 @@
     // Just simulate a submission with a timeout
     setTimeout(() => {
       submitting = false;
-      isOpen = false;
+      closeModal();
       email = "";
       // This is just a dummy form - no actual submission happens
     }, 1000);
@@ -348,7 +352,7 @@
     }
     
     callActive = false;
-    isOpen = false;
+    closeModal();
   }
 
   // Add a custom focus action
@@ -411,8 +415,8 @@
   }
 </script>
 
-<!-- Only show when isOpen is true -->
-{#if isOpen}
+<!-- Use the store value directly for modal visibility -->
+{#if $isSunnyModalOpen}
   <div class="sunny-modal-backdrop" transition:fade={{ duration: 200 }}>
     <div
       class="sunny-modal-container"
@@ -423,7 +427,7 @@
     >
       <button
         class="close-button"
-        on:click={() => (isOpen = false)}
+        on:click={closeModal}
         aria-label="Close modal"
       >
         &times;
@@ -727,6 +731,7 @@
     background-color: #db0000;
     color: white;
     margin-top: 20px;
+    padding: 0 30px;
   }
 
   .modal-action-btn.end-call-btn:hover {

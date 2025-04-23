@@ -9,6 +9,7 @@
   import { isSunnyModalOpen } from '$lib/stores/sunnyModalStore';
   import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
   import { initFA } from '$lib/fa'; // Import the FA initialization function
+  import { initSunnyLinks } from '$lib/utils/sunnyLinkHandler'; // Import Sunny link handler
   import '../app.css';
   
   // Determine the current page for the navigation
@@ -95,12 +96,17 @@
     // Initialize FontAwesome
     if (browser) {
       initFA();
+      
+      // Initialize the sunny link handler
+      initSunnyLinks();
     }
   
     // Check URL for sunny hash
     if (browser && window.location.hash === '#sunny') {
       isSunnyModalOpen.set(true);
-      window.history.replaceState(null, document.title, window.location.pathname + window.location.search);
+      // Save the current path without the hash
+      const currentPath = window.location.pathname;
+      window.history.replaceState(null, document.title, currentPath + window.location.search);
     }
     
     // Watch for page changes and send to GA
@@ -184,7 +190,7 @@
   <Footer />
   
   <!-- Sunny Modal -->
-  <SunnyModal isOpen={$isSunnyModalOpen} />
+  <SunnyModal />
 </div>
 
 <style>

@@ -18,7 +18,7 @@
   
   <div class="future-project-intro">
     <p>Like the projects that resonate with you. Follow the ones you want access to.</p>
-    <p>If you're looking for a project inspiration, how about having a chat with <a href="/sunny">Sunny</a>, my helpful robot? It will help you figure out where to start.</p>
+    <p>If you're looking for a project inspiration, how about having a chat with <a href="/sunny?from=/next" data-sunny-link>Sunny</a>, my helpful robot? It will help you figure out where to start.</p>
   </div>
   
   <FuturePortfolio />

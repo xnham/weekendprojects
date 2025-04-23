@@ -78,7 +78,7 @@
           I will respond within 24 hours.
       </p>
       <p>
-          Feel like chatting with my robot before sending me a message? Call Sunny <a href="/sunny">here</a>.
+          Feel like chatting with my robot before sending me a message? Call Sunny <a href="/sunny?from=/contact" data-sunny-link>here</a>.
       </p>
   </div>
 
