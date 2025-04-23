@@ -162,9 +162,11 @@
     <meta name="description" content={combinedDescription} />
     <link rel="canonical" href={`https://xnham.com/writing/${$page.params.slug}`} />
     
-    <!-- Structured data - ensure proper serialization -->
+    <!-- Structured data -->
     {#if articleJsonLd}
-      {@html `<script type="application/ld+json">${JSON.stringify(articleJsonLd)}</script>`}
+      <script type="application/ld+json">
+        {JSON.stringify(articleJsonLd)}
+      </script>
     {/if}
     
     <!-- Open Graph -->
