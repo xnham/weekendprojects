@@ -3,6 +3,7 @@
   import { fade } from "svelte/transition";
   import { page } from "$app/stores";
   import { supabase } from "$lib/supabase";
+  import { browser } from '$app/environment';
   import InteractionButton from "$lib/components/shared/InteractionButton.svelte";
   import {
     subscribeToInteractions,
@@ -32,7 +33,7 @@
   let error: string | null = serverError;
 
   // Interaction state
-  let interactionState = { likes: {}, shares: {}, views: {} };
+  let interactionState: Record<string, any> = { likes: {}, shares: {}, views: {} };
   let likedByUser = false;
   let copyFeedback = "";
   let copyFeedbackTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -54,15 +55,6 @@
     hasInitialisedCounts = true;
   }
 
-  // Initialize with preloaded data if available
-  $: {
-    if (preloadedEssay && !essay) {
-      essay = preloadedEssay;
-      content = preloadedEssay.content;
-      loading = false;
-    }
-  }
-
   // Only reload the essay when the slug changes and there's no preloaded data
   $: if (slug && !preloadedEssay) {
     // Use a separate flag to prevent reloading in infinite loop
@@ -72,50 +64,35 @@
     }
   }
 
-  // Scroll UI variables
-  let showFloatingButton = false;
-  let buttonVisible = false;
-  let hideTimeout: ReturnType<typeof setTimeout> | null = null;
-  let isScrolling = false;
+  // Format date helper
+  function formatDate(dateString: string) {
+    if (!dateString) return "";
+    
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch (e) {
+      console.error("Error formatting date:", e);
+      return dateString;
+    }
+  }
 
-  // Get URL for use in metadata
-  $: essayUrl =
-    typeof window !== "undefined"
-      ? window.location.href
-      : essay?.slug
-        ? `https://xnham.com/writing/${essay.slug}`
-        : "";
-
-  // Create a reactive combined description
-  $: combinedDescription =
-    essay?.description && essay?.excerpt
-      ? `${essay.description} ${essay.excerpt}`
-      : essay?.description || essay?.excerpt || "";
-
-  // Generate Article-specific JSON-LD
-  $: articleJsonLd = essay
-    ? {
-        "@context": "https://schema.org",
-        "@type": "Article",
-        headline: essay.title,
-        description: combinedDescription,
-        datePublished: essay.date,
-        author: {
-          "@type": "Person",
-          name: "Wendy Ham",
-          url: "https://xnham.com",
-        },
-        publisher: {
-          "@type": "Person",
-          name: "Wendy Ham",
-          url: "https://xnham.com",
-        },
-        mainEntityOfPage: {
-          "@type": "WebPage",
-          "@id": essayUrl,
-        },
-      }
-    : null;
+  // Helper functions for getting interaction counts
+  function getEssayLikes() {
+    return isOptimistic ? optimisticLikeCount : (essay?.like_count || 0);
+  }
+  
+  function getEssayShares() {
+    return isOptimistic ? optimisticShareCount : (essay?.share_count || 0);
+  }
+  
+  function getEssayViews() {
+    return isOptimistic ? optimisticViewCount : (essay?.view_count || 0);
+  }
 
   // Function to load essay data from Supabase
   async function loadEssayData(essaySlug: string) {
@@ -180,6 +157,8 @@
 
   // Separate async function for initializing the page
   async function initializePage() {
+    if (!browser) return;
+    
     try {
       // Initialize interaction system first
       console.log("Initializing interactions on Essay component");
@@ -225,7 +204,152 @@
     }
   }
 
+  // Handle like button clicks
+  async function handleLike() {
+    if (!browser || !essay?.id) return;
+    
+    try {
+      console.log(`Like button clicked for essay ${essay.id}`);
+      
+      // Get current like state and calculate new optimistic count
+      const currentlyLiked = likedByUser;
+      const oldCount = getEssayLikes();
+      const increment = currentlyLiked ? -1 : 1;
+      optimisticLikeCount = Math.max(0, oldCount + increment);
+      
+      // Update local state immediately for responsive UI
+      likedByUser = !currentlyLiked;
+      
+      // Toggle like in the database
+      const newLikeStatus = await toggleLike(essay.id);
+      console.log(`New like status after toggle: ${newLikeStatus}`);
+      
+      // If there's a mismatch between our prediction and actual state, adjust
+      if (newLikeStatus !== likedByUser) {
+        console.log('Correcting optimistic like status due to mismatch');
+        likedByUser = newLikeStatus;
+        
+        // Adjust count if needed
+        const adjustment = newLikeStatus ? 1 : -1;
+        optimisticLikeCount = Math.max(0, getEssayLikes() + adjustment);
+      }
+    } catch (error) {
+      console.error(`Error toggling like for essay ${essay.id}:`, error);
+      
+      // Revert to original state on error
+      likedByUser = !likedByUser;
+      
+      // Revert count
+      const increment = likedByUser ? 1 : -1;
+      optimisticLikeCount = Math.max(0, getEssayLikes() - increment);
+      
+      dispatch('error', error);
+    }
+  }
+  
+  // Handle share button clicks
+  async function handleShare() {
+    if (!browser || !essay?.id) return;
+    
+    console.log(`Share button clicked for essay ${essay.id}`);
+    
+    // Create URL to share
+    const url = typeof window !== 'undefined' 
+      ? window.location.href 
+      : `https://xnham.com/writing/${essay.slug}`;
+    
+    try {
+      // Try to use the Web Share API if available
+      if (navigator.share) {
+        await navigator.share({
+          title: essay.title,
+          text: essay.description || essay.excerpt || 'Check out this essay',
+          url: url
+        });
+        
+        console.log('Successfully shared via Web Share API');
+        copyFeedback = 'Shared!';
+      } else {
+        // Fall back to clipboard copy
+        await navigator.clipboard.writeText(url);
+        console.log('URL copied to clipboard');
+        copyFeedback = 'Link copied!';
+      }
+      
+      // Update optimistic count
+      optimisticShareCount = getEssayShares() + 1;
+      
+      // Record the share in the database
+      await recordShare(essay.id);
+      
+      // Clear feedback after a delay
+      if (copyFeedbackTimeout) {
+        clearTimeout(copyFeedbackTimeout);
+      }
+      
+      copyFeedbackTimeout = setTimeout(() => {
+        copyFeedback = '';
+      }, 2000);
+    } catch (error) {
+      console.error('Error sharing essay:', error);
+      
+      copyFeedback = 'Error sharing';
+      
+      // Clear feedback after a delay
+      if (copyFeedbackTimeout) {
+        clearTimeout(copyFeedbackTimeout);
+      }
+      
+      copyFeedbackTimeout = setTimeout(() => {
+        copyFeedback = '';
+      }, 2000);
+      
+      dispatch('error', error);
+    }
+  }
+
+  // Get URL for use in metadata
+  $: essayUrl =
+    typeof window !== "undefined"
+      ? window.location.href
+      : essay?.slug
+        ? `https://xnham.com/writing/${essay.slug}`
+        : "";
+
+  // Create a reactive combined description
+  $: combinedDescription =
+    essay?.description && essay?.excerpt
+      ? `${essay.description} ${essay.excerpt}`
+      : essay?.description || essay?.excerpt || "";
+
+  // Generate Article-specific JSON-LD
+  $: articleJsonLd = essay
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: essay.title,
+        description: combinedDescription,
+        datePublished: essay.date,
+        author: {
+          "@type": "Person",
+          name: "Wendy Ham",
+          url: "https://xnham.com",
+        },
+        publisher: {
+          "@type": "Person",
+          name: "Wendy Ham",
+          url: "https://xnham.com",
+        },
+        mainEntityOfPage: {
+          "@type": "WebPage",
+          "@id": essayUrl,
+        },
+      }
+    : null;
+
   onMount(() => {
+    if (!browser) return;
+    
     let unsubscribe: () => void = () => {};
     let initTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -248,209 +372,38 @@
           // Subscribe to interaction state changes
           unsubscribe = subscribeToInteractions((state) => {
             interactionState = state;
-
-            // Update liked status whenever the interaction state changes
-            if (essay && essay.id) {
+            
+            // Update like status when interaction state changes
+            if (essay?.id) {
               const key = `${ContentType.ESSAY}:${essay.id}`;
-              likedByUser = !!state.likes[key];
+              likedByUser = interactionState?.likes[key] || false;
             }
           });
-        } catch (error) {
-          console.error("Error during delayed Essay initialization:", error);
-          dispatch("error", error);
+        } catch (err) {
+          console.error("Error in delayed initialization:", err);
+          dispatch("error", err);
         }
-      }, 300); // 300ms delay to ensure SPA routing is complete
+      }, 300);
 
-      // Listen for scroll events
-      window.addEventListener("scroll", handleScroll);
-
-      // Clean up on component destruction
+      // Return cleanup function
       return () => {
-        if (unsubscribe) unsubscribe();
-        if (initTimer) clearTimeout(initTimer);
-        window.removeEventListener("scroll", handleScroll);
-        if (hideTimeout) clearTimeout(hideTimeout);
-        if (copyFeedbackTimeout) clearTimeout(copyFeedbackTimeout);
+        if (unsubscribe) {
+          unsubscribe();
+        }
+        
+        if (initTimer) {
+          clearTimeout(initTimer);
+        }
+        
+        if (copyFeedbackTimeout) {
+          clearTimeout(copyFeedbackTimeout);
+        }
       };
-    } catch (error) {
-      console.error("Error setting up Essay component:", error);
-      dispatch("error", error);
-      return () => {
-        if (unsubscribe) unsubscribe();
-        if (initTimer) clearTimeout(initTimer);
-        window.removeEventListener("scroll", handleScroll);
-        if (hideTimeout) clearTimeout(hideTimeout);
-        if (copyFeedbackTimeout) clearTimeout(copyFeedbackTimeout);
-      };
+    } catch (err) {
+      console.error("Error in Essay onMount:", err);
+      dispatch("error", err);
     }
   });
-
-  // Format date helper
-  function formatDate(dateString: string) {
-    // Simple date formatter that doesn't use the Date object at all
-    // This prevents any timezone conversions
-    const [year, month, day] = dateString.split("-");
-
-    // Convert month number to name
-    const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-
-    // Parse month as integer and subtract 1 to get the correct index (months are 1-based in the string)
-    const monthIndex = parseInt(month, 10) - 1;
-    const monthName = monthNames[monthIndex];
-
-    // Remove leading zero from day if present
-    const dayFormatted = day.startsWith("0") ? day.substring(1) : day;
-
-    // Return formatted date string
-    return `${monthName} ${dayFormatted}, ${year}`;
-  }
-
-  // Scroll handling logic
-  function handleScroll() {
-    // Only run in browser context
-    if (typeof window === "undefined") return;
-
-    if (!isScrolling) {
-      isScrolling = true;
-      requestAnimationFrame(() => {
-        const scrollPosition = window.scrollY;
-
-        // Show floating back button when scrolled down a bit
-        showFloatingButton = scrollPosition > 300;
-
-        // Make button visible when we need it
-        if (showFloatingButton && !buttonVisible) {
-          buttonVisible = true;
-        } else if (!showFloatingButton && buttonVisible) {
-          // Remove the timeout delay and update immediately when scrolling up
-          buttonVisible = false;
-          if (hideTimeout) {
-            clearTimeout(hideTimeout);
-            hideTimeout = null;
-          }
-        }
-
-        isScrolling = false;
-      });
-    }
-  }
-
-  // Handle like button clicks
-  async function handleLike() {
-    console.log("Essay handleLike called");
-    if (!essay || !essay.id) {
-      console.error("Cannot like: Missing essay ID");
-      return;
-    }
-
-    try {
-      console.log(`Toggling like for essay ID: ${essay.id}`);
-
-      // Apply optimistic update to count and UI
-      const newLikedState = !likedByUser;
-      const increment = newLikedState ? 1 : -1;
-
-      // Directly update the optimistic count variable to trigger reactivity
-      optimisticLikeCount = Math.max(0, optimisticLikeCount + increment);
-      isOptimistic = true;
-
-      // Also update the UI state optimistically
-      likedByUser = newLikedState;
-
-      // Force a Svelte update
-      optimisticLikeCount = optimisticLikeCount;
-
-      // Toggle the like in the database
-      const result = await toggleLike(essay.id);
-      console.log(`Toggle like result: ${result}`);
-    } catch (error) {
-      console.error("Error toggling like:", error);
-      dispatch("error", error);
-
-      // Revert optimistic updates on error
-      const revertIncrement = likedByUser ? -1 : 1;
-      optimisticLikeCount = Math.max(0, optimisticLikeCount + revertIncrement);
-      likedByUser = !likedByUser;
-      isOptimistic = false;
-    }
-  }
-
-  // Handle share button clicks
-  async function handleShare() {
-    try {
-      if (!essay || !essay.id) {
-        console.error("Cannot share: Missing essay ID");
-        return;
-      }
-
-      console.log(`Sharing essay ID: ${essay.id}`);
-
-      // Create the share URL (this only runs on client side so window is safe to use here)
-      const shareUrl = `${window.location.origin}/writing/${essay.slug}`;
-
-      // Apply optimistic update to count BEFORE we attempt to access the clipboard
-      optimisticShareCount += 1;
-      isOptimistic = true;
-      // Force a Svelte update
-      optimisticShareCount = optimisticShareCount;
-
-      // Copy to clipboard
-      await navigator.clipboard.writeText(shareUrl);
-
-      // Show feedback
-      copyFeedback = "URL copied to clipboard!";
-
-      if (copyFeedbackTimeout) clearTimeout(copyFeedbackTimeout);
-      copyFeedbackTimeout = setTimeout(() => {
-        copyFeedback = "";
-      }, 3000);
-
-      // Record the share in the database
-      const result = await recordShare(essay.id);
-      console.log(`Share recorded: ${result}`);
-    } catch (error) {
-      console.error("Error sharing essay:", error);
-      dispatch("error", error);
-
-      copyFeedback = "Failed to copy URL";
-      copyFeedbackTimeout = setTimeout(() => {
-        copyFeedback = "";
-      }, 3000);
-
-      // Revert optimistic update on error
-      optimisticShareCount = Math.max(0, optimisticShareCount - 1);
-      isOptimistic = false;
-    }
-  }
-
-  // Helpers to use optimistic counts when available
-  function getEssayLikes() {
-    return isOptimistic ? optimisticLikeCount : essay?.like_count || 0;
-  }
-
-  function getEssayShares() {
-    return isOptimistic ? optimisticShareCount : essay?.share_count || 0;
-  }
-
-  function getEssayViews() {
-    // For views, increment the initial count by 1 to show the current view
-    const baseViewCount = essay?.view_count || 0;
-    // Use optimistic count if it's been updated, otherwise use base count + 1
-    return isOptimistic ? optimisticViewCount : baseViewCount + 1;
-  }
 </script>
 
 <!-- Add Article-specific structured data -->
@@ -684,3 +637,4 @@
     }
   }
 </style>
+

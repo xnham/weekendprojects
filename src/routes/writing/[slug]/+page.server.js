@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { error } from '@sveltejs/kit';
 
 // Server-side Supabase client for build-time data fetching
 const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://hazfuihckyddmtfvruud.supabase.co';
@@ -18,17 +19,19 @@ export const prerender = true;
 export async function entries() {
   console.log('Generating entries for all essay slugs...');
   try {
-    const { data: essays, error } = await supabase
+    // Fetch all published essays to generate routes
+    const { data: essays, error: fetchError } = await supabase
       .from('essays')
-      .select('slug')
+      .select('slug, title')
       .eq('published', true);
       
-    if (error) {
-      console.error('Error fetching essay slugs for entries:', error);
+    if (fetchError) {
+      console.error('Error fetching essay slugs for entries:', fetchError);
       return [];
     }
     
-    console.log(`Generated ${essays.length} essay entries for prerendering`);
+    console.log(`Generated ${essays.length} essay entries for prerendering:`);
+    essays.forEach(essay => console.log(`- ${essay.slug}: ${essay.title}`));
     
     // Return an array of entry objects with the slug parameter
     return essays.map(essay => ({
@@ -40,12 +43,12 @@ export async function entries() {
   }
 }
 
-/** @type {import('./$types').PageLoad} */
+/** @type {import('./$types').PageServerLoad} */
 export async function load({ params }) {
   console.log(`Server-side loading essay with slug: ${params.slug}`);
   
   try {
-    // Fetch the specific essay by slug
+    // Fetch the specific essay by slug with all necessary data for rendering
     const { data: essay, error: essayError } = await supabase
       .from('essays')
       .select(`
@@ -57,40 +60,38 @@ export async function load({ params }) {
     
     if (essayError) {
       console.error(`Error fetching essay with slug ${params.slug}:`, essayError);
-      return { 
-        essay: null,
-        error: `Failed to load essay: ${essayError.message}`
-      };
+      throw error(500, `Failed to load essay: ${essayError.message}`);
     }
     
     if (!essay) {
       console.error(`No essay found with slug: ${params.slug}`);
-      return {
-        essay: null,
-        error: 'Essay not found'
-      };
+      throw error(404, 'Essay not found');
     }
     
     // Check if essay is published (except in development)
     if (essay.published === false && process.env.NODE_ENV !== 'development') {
       console.warn(`Attempted to access unpublished essay: ${params.slug}`);
-      return {
-        essay: null,
-        error: 'This essay is not yet published'
-      };
+      throw error(403, 'This essay is not yet published');
     }
     
     console.log(`Successfully preloaded essay: ${essay.title}`);
     
+    // Add SEO-friendly metadata for this specific essay
+    const currentPath = `/writing/${params.slug}`;
+    
     return {
       essay,
-      error: null
+      slug: params.slug,
+      currentPath
     };
-  } catch (error) {
-    console.error(`Server-side error loading essay ${params.slug}:`, error);
-    return {
-      essay: null,
-      error: 'Unexpected error during prerendering'
-    };
+  } catch (err) {
+    // If it's already a SvelteKit error, rethrow it
+    if (err && typeof err === 'object' && 'status' in err && 'body' in err) {
+      throw err;
+    }
+    
+    // Otherwise create a generic error
+    console.error(`Server-side error loading essay ${params.slug}:`, err);
+    throw error(500, 'Unexpected error during prerendering');
   }
 } 

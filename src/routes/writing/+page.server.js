@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { error } from '@sveltejs/kit';
 
 // Server-side Supabase client for build-time data fetching
 const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://hazfuihckyddmtfvruud.supabase.co';
@@ -11,8 +12,10 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 export const ssr = true;
 export const prerender = true;
 
-/** @type {import('./$types').PageServerLoad} */
-export async function load() {
+/**
+ * Load data for the writing page
+ */
+export const load = async () => {
   console.log('Server-side loading essays for prerendering...');
   
   try {
@@ -28,22 +31,23 @@ export async function load() {
     
     if (fetchError) {
       console.error('Error fetching essays:', fetchError);
-      return { 
-        essays: [],
-        error: 'Failed to load essays during prerendering'
-      };
+      throw error(500, 'Failed to load essays during prerendering');
     }
     
-    console.log(`Successfully preloaded ${essays.length} essays`);
+    console.log(`Successfully preloaded ${essays.length} essays for /writing page`);
+    essays.forEach(essay => console.log(`- ${essay.title}`));
     
     return {
-      essays
+      essays,
+      currentPath: '/writing'
     };
-  } catch (error) {
-    console.error('Server-side error loading essays:', error);
-    return {
-      essays: [],
-      error: 'Unexpected error during prerendering'
-    };
+  } catch (err) {
+    // If it's already a SvelteKit error, rethrow it
+    if (err && typeof err === 'object' && 'status' in err && 'body' in err) {
+      throw err;
+    }
+    
+    console.error('Server-side error loading essays:', err);
+    throw error(500, 'Unexpected error during prerendering');
   }
 } 

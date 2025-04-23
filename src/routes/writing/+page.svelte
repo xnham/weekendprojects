@@ -24,23 +24,6 @@
       }, 1000);
     }
   }
-  
-  // Add a function to handle JS errors
-  function handleComponentRender() {
-    try {
-      return {
-        component: Essays,
-        props: {
-          preloadedEssays: data.essays || [],
-          serverError: data.error
-        }
-      };
-    } catch (error) {
-      console.error('Error while preparing Essays component:', error);
-      essaysError = true;
-      return null;
-    }
-  }
 
   onMount(() => {
     metadata.set({
@@ -51,26 +34,6 @@
       type: "website",
       url: typeof window !== 'undefined' ? window.location.href : "https://xnham.com/writing",
     });
-    
-    // Attach a global error handler for uncaught errors
-    const errorHandler = (event: ErrorEvent) => {
-      console.error('Global error caught:', event.error || event.message);
-      
-      // Check if the error is related to our Essays component
-      const errorStr = String(event.error || event.message);
-      if (errorStr.includes('Essays') || 
-          errorStr.includes('essay') || 
-          errorStr.includes('interaction')) {
-        essaysError = true;
-        event.preventDefault();
-      }
-    };
-    
-    window.addEventListener('error', errorHandler);
-    
-    return () => {
-      window.removeEventListener('error', errorHandler);
-    };
   });
 </script>
 
@@ -81,6 +44,13 @@
     content="Thoughts about creating software that quietly complements our lives."
   />
   <link rel="canonical" href="https://xnham.com/writing" />
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://xnham.com/writing" />
+  <meta property="og:title" content="Writing | Wendy Ham's Weekend Projects" />
+  <meta property="og:description" content="Thoughts about creating software that quietly complements our lives." />
+  <meta property="og:image" content="https://xnham.com/images/og-image.png" />
 </svelte:head>
 
 <main class="container">
@@ -109,15 +79,10 @@
         </p>
       </div>
     {:else}
-      {#await Promise.resolve(handleComponentRender()) then result}
-        {#if result}
-          <svelte:component 
-            this={result.component}
-            {...result.props}
-            on:error={handleEssaysError}
-          />
-        {/if}
-      {/await}
+      <Essays 
+        preloadedEssays={data.essays || []}
+        on:error={handleEssaysError}
+      />
     {/if}
   </div>
 </main>

@@ -27,7 +27,7 @@
   }>();
 
   // Replace essays prop with local state
-  let essays: EssayMetadata[] = [];
+  let essays: EssayMetadata[] = preloadedEssays || []; // Initialize with preloaded data immediately
   let loading = !preloadedEssays.length; // Only show loading if no preloaded data
   let loadError: string | null = serverError;
 
@@ -56,12 +56,46 @@
     return acc;
   }, {}) || {};
 
-  // Initialize essays with preloaded data if available
-  $: {
-    if (preloadedEssays.length > 0 && essays.length === 0) {
-      essays = preloadedEssays;
-      loading = false;
+  // Function to format date for display
+  function formatDate(dateStr: string) {
+    if (!dateStr) return "";
+    
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch (e) {
+      console.error("Error formatting date:", e);
+      return dateStr;
     }
+  }
+
+  // Format the counters for display
+  function formatCounters(essay: EssayMetadata) {
+    const likes = essay.like_count || 0;
+    const shares = essay.share_count || 0;
+    const views = essay.view_count || 0;
+    
+    let countersText = "";
+    
+    if (likes > 0) {
+      countersText += `${likes} ${likes === 1 ? "like" : "likes"}`;
+    }
+    
+    if (shares > 0) {
+      if (countersText) countersText += " · ";
+      countersText += `${shares} ${shares === 1 ? "share" : "shares"}`;
+    }
+    
+    if (views > 0) {
+      if (countersText) countersText += " · ";
+      countersText += `${views} ${views === 1 ? "view" : "views"}`;
+    }
+    
+    return countersText || "No interactions yet";
   }
 
   // Function to load essays from Supabase (only if needed)
@@ -98,6 +132,83 @@
       console.error('Error loading essays:', error);
       loadError = error instanceof Error ? error.message : 'Failed to load essays';
       loading = false;
+      dispatch('error', error);
+    }
+  }
+
+  // Function to handle the like button
+  async function handleLike(essayId: string) {
+    if (!browser || !essayId) return;
+    
+    console.log(`Like button clicked for essay: ${essayId}`);
+    
+    try {
+      // Toggle the like status in the interaction service
+      const newLikeStatus = await toggleLike(essayId);
+      console.log(`New like status for essay ${essayId}:`, newLikeStatus);
+    } catch (error) {
+      console.error(`Error toggling like for essay ${essayId}:`, error);
+      dispatch('error', error);
+    }
+  }
+
+  // Function to handle the share button and copy the URL
+  async function handleShare(essay: EssayMetadata) {
+    if (!browser || !essay?.id || !essay?.slug) return;
+    
+    console.log(`Share button clicked for essay: ${essay.id}`);
+    
+    // Create the URL to share
+    const url = `https://xnham.com/writing/${essay.slug}`;
+    
+    try {
+      // Try to use the Web Share API if available
+      if (navigator.share) {
+        await navigator.share({
+          title: essay.title,
+          text: essay.description || essay.excerpt || 'Check out this essay',
+          url: url
+        });
+        
+        console.log('Successfully shared via Web Share API');
+        copyFeedback = 'Shared!';
+      } else {
+        // Fall back to clipboard copy
+        await navigator.clipboard.writeText(url);
+        console.log('URL copied to clipboard');
+        copyFeedback = 'Link copied!';
+      }
+      
+      // Store the essay ID we're showing feedback for
+      copyFeedbackEssayId = essay.id;
+      
+      // Record the share in the interaction service
+      await recordShare(essay.id);
+      
+      // Clear the feedback after a delay
+      if (feedbackTimeout) {
+        clearTimeout(feedbackTimeout);
+      }
+      
+      feedbackTimeout = setTimeout(() => {
+        copyFeedback = '';
+        copyFeedbackEssayId = '';
+      }, 2000);
+    } catch (error) {
+      console.error('Error sharing essay:', error);
+      copyFeedback = 'Error sharing';
+      copyFeedbackEssayId = essay.id;
+      
+      // Clear error feedback after a delay
+      if (feedbackTimeout) {
+        clearTimeout(feedbackTimeout);
+      }
+      
+      feedbackTimeout = setTimeout(() => {
+        copyFeedback = '';
+        copyFeedbackEssayId = '';
+      }, 2000);
+      
       dispatch('error', error);
     }
   }
@@ -152,224 +263,39 @@
       
       // Return the cleanup function
       return () => {
-        if (initTimer) clearTimeout(initTimer);
-        unsubscribe();
+        if (unsubscribe) {
+          unsubscribe();
+        }
+        
+        if (initTimer) {
+          clearTimeout(initTimer);
+        }
+        
+        if (feedbackTimeout) {
+          clearTimeout(feedbackTimeout);
+        }
+        
         window.removeEventListener("keydown", handleKeydown);
-        if (feedbackTimeout) clearTimeout(feedbackTimeout);
       };
     } catch (error) {
-      console.error('Error setting up Essays component:', error);
+      console.error('Error in Essays component onMount:', error);
       dispatch('error', error);
-      return () => {
-        if (initTimer) clearTimeout(initTimer);
-        unsubscribe();
-        if (feedbackTimeout) clearTimeout(feedbackTimeout);
-      };
     }
   });
-
-  // Handle like button clicks
-  async function handleLike(essayId: string) {
-    console.log('handleLike called with essayId:', essayId);
-    try {
-      // Find the essay
-      const essay = essays.find(e => e.id === essayId);
-      if (!essay) return;
-      
-      // Determine if it's currently liked
-      const key = `${ContentType.ESSAY}:${essayId}`;
-      const currentlyLiked = interactionState?.likes[key] || false;
-      
-      // Update the count optimistically
-      const increment = !currentlyLiked ? 1 : -1;
-      const oldCount = essay.like_count || 0;
-      const newCount = Math.max(0, oldCount + increment);
-      
-      // Update UI immediately - needs to be forced with assignment
-      essay.like_count = newCount;
-      console.log(`Optimistic update - like count for essay ${essayId}: ${oldCount} → ${newCount}`);
-      
-      // Toggle the like in the database
-      await toggleLike(essayId);
-      
-      // After toggling, we can update the counts from the database
-      // This helps ensure our UI is accurate
-      try {
-        const counts = await getEssayInteractionCounts(essayId);
-        console.log(`Database counts for essay ${essayId}:`, counts);
-        // Force UI update by creating a new object
-        essays = essays.map(e => {
-          if (e.id === essayId) {
-            return {
-              ...e,
-              like_count: counts.likeCount,
-              share_count: counts.shareCount,
-              view_count: counts.viewCount
-            };
-          }
-          return e;
-        });
-      } catch (error) {
-        console.error("Error refreshing essay counts:", error);
-        // Don't dispatch an error for counts refresh failure, just log it
-      }
-    } catch (error) {
-      console.error("Error toggling like:", error);
-      dispatch('error', error);
-      
-      // If there was an error, we can revert the UI
-      const essay = essays.find(e => e.id === essayId);
-      if (essay) {
-        const key = `${ContentType.ESSAY}:${essayId}`;
-        const currentlyLiked = interactionState?.likes[key] || false;
-        const increment = currentlyLiked ? 1 : -1;
-        essay.like_count = Math.max(0, (essay.like_count || 0) - increment);
-      }
-    }
-  }
-
-  // Handle share button clicks
-  async function handleShare(essay: EssayMetadata) {
-    try {
-      if (!essay.id) return;
-      
-      // Create the share URL
-      const shareUrl = `${window.location.origin}/writing/${essay.slug}`;
-      
-      // Copy to clipboard
-      await navigator.clipboard.writeText(shareUrl);
-      
-      // Update count optimistically
-      const oldShareCount = essay.share_count || 0;
-      const newShareCount = oldShareCount + 1;
-      
-      // Update UI immediately
-      essay.share_count = newShareCount;
-      console.log(`Optimistic update - share count for essay ${essay.id}: ${oldShareCount} → ${newShareCount}`);
-      
-      // Show feedback
-      copyFeedback = "URL copied to clipboard!";
-      copyFeedbackEssayId = essay.id;
-      
-      if (feedbackTimeout) clearTimeout(feedbackTimeout);
-      feedbackTimeout = setTimeout(() => {
-        copyFeedback = "";
-        copyFeedbackEssayId = "";
-      }, 3000);
-      
-      // Record the share in the database
-      await recordShare(essay.id);
-      
-      // Refresh the counts
-      try {
-        const counts = await getEssayInteractionCounts(essay.id);
-        console.log(`Database counts for essay ${essay.id}:`, counts);
-        
-        // Force UI update by creating a new object
-        essays = essays.map(e => {
-          if (e.id === essay.id) {
-            return {
-              ...e,
-              like_count: counts.likeCount,
-              share_count: counts.shareCount,
-              view_count: counts.viewCount
-            };
-          }
-          return e;
-        });
-      } catch (error) {
-        console.error("Error refreshing essay counts:", error);
-        // Don't dispatch an error for counts refresh failure, just log it
-      }
-    } catch (error) {
-      console.error("Error sharing essay:", error);
-      dispatch('error', error);
-      
-      copyFeedback = "Failed to copy URL";
-      copyFeedbackEssayId = essay.id;
-      feedbackTimeout = setTimeout(() => {
-        copyFeedback = "";
-        copyFeedbackEssayId = "";
-      }, 3000);
-      
-      // If there was an error, revert the UI
-      if (essay) {
-        essay.share_count = Math.max(0, (essay.share_count || 0) - 1);
-      }
-    }
-  }
-
-  // Format date helper
-  function formatDate(dateString: string) {
-    // Simple date formatter that doesn't use the Date object at all
-    // This prevents any timezone conversions
-    const [year, month, day] = dateString.split("-");
-
-    // Convert month number to name
-    const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-
-    // Parse month as integer and subtract 1 to get the correct index (months are 1-based in the string)
-    const monthIndex = parseInt(month, 10) - 1;
-    const monthName = monthNames[monthIndex];
-
-    // Remove leading zero from day if present
-    const dayFormatted = day.startsWith("0") ? day.substring(1) : day;
-
-    // Return formatted date string
-    return `${monthName} ${dayFormatted}, ${year}`;
-  }
-  
-  // Helper to format the counters string
-  function formatCounters(essay: EssayMetadata) {
-    const likes = essay.like_count || 0;
-    const shares = essay.share_count || 0;
-    
-    // No likes or shares
-    if (likes === 0 && shares === 0) {
-      return "";
-    }
-    
-    // Only likes
-    if (likes > 0 && shares === 0) {
-      return `${likes} ${likes === 1 ? 'like' : 'likes'}`;
-    }
-    
-    // Only shares
-    if (likes === 0 && shares > 0) {
-      return `${shares} ${shares === 1 ? 'share' : 'shares'}`;
-    }
-    
-    // Both likes and shares
-    return `${likes} ${likes === 1 ? 'like' : 'likes'} & ${shares} ${shares === 1 ? 'share' : 'shares'}`;
-  }
 </script>
 
 <div class="essays">
   {#if loading}
-    <div class="loading-state">Loading essays...</div>
+    <div class="loading-state">
+      <p>Loading essays...</p>
+    </div>
   {:else if loadError}
-    <div class="error-state">Error: {loadError}</div>
-  {:else if !essays || essays.length === 0}
+    <div class="error-state">
+      <p>Error: {loadError}</p>
+    </div>
+  {:else if essays.length === 0}
     <div class="no-essays">
-      <p>No essays found. Please check your database connection or create some essays.</p>
-      <div class="debug-actions">
-        <button on:click={() => console.log('Essays data:', essays || 'None')}>
-          Debug Essays Data
-        </button>
-      </div>
+      <p>No essays found. Check back soon!</p>
     </div>
   {:else}
     {#each essays as essay}

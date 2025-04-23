@@ -20,7 +20,6 @@
       share_count?: number;
       view_count?: number;
     };
-    error?: string | null;
   }
   
   // Access the essay data loaded by the page.server.js file
@@ -29,8 +28,6 @@
   // Error handling state
   let essayError = false;
   let retryCount = 0;
-  let isLoadingContent = false;
-  let contentLoadError: string | null = null;
   const MAX_RETRIES = 2;
   
   // Scroll UI variables
@@ -50,48 +47,6 @@
         console.log(`Retry attempt ${retryCount} for Essay component`);
         essayError = false;
       }, 1000);
-    }
-  }
-  
-  // Function to load content on the client side if needed
-  async function loadContentClientSide() {
-    if (!data.essay || isLoadingContent) return;
-    
-    isLoadingContent = true;
-    contentLoadError = null;
-    
-    try {
-      console.log(`Loading content for ${data.essay.slug} on the client side`);
-      
-      // Fetch the essay's content from Supabase
-      const { supabase } = await import('$lib/supabase');
-      
-      const { data: essayData, error } = await supabase
-        .from('essays')
-        .select('content')
-        .eq('slug', data.essay.slug)
-        .single();
-      
-      if (error) {
-        throw new Error(`Failed to fetch content: ${error.message}`);
-      }
-      
-      if (!essayData || !essayData.content) {
-        throw new Error('No content available for this essay');
-      }
-      
-      console.log(`Content loaded, length: ${essayData.content.length}`);
-      
-      // Update the data object to include the content
-      data = {
-        ...data,
-        content: essayData.content
-      };
-    } catch (err: unknown) {
-      console.error('Error loading content on client side:', err);
-      contentLoadError = err instanceof Error ? err.message : 'Unknown error occurred';
-    } finally {
-      isLoadingContent = false;
     }
   }
   
@@ -254,110 +209,74 @@
         {/if}
       </p>
     </div>
-  {:else if data.error}
-    <div class="error-message">
-      <p>{data.error || "There was a problem loading this essay."}</p>
-      <p><a href="/writing">Return to essays</a></p>
-    </div>
   {:else}
-    <Essay 
+    <Essay
       slug={$page.params.slug}
       preloadedEssay={data.essay}
-      serverError={data.error}
       on:error={handleEssayError}
     />
   {/if}
 </div>
 
 <style>
-  /* Navigation Elements */
+  /* Back button styles */
   .back-button {
-    display: inline-block;
-    margin-bottom: 10px;
-    text-decoration: none;
-    color: var(--dark-70);
+    margin-bottom: 40px;
     font-size: 14px;
-    transition: color 0.3s ease;
-  }
-
-  .back-button:hover {
     color: var(--dark-80);
+    display: flex;
+    align-items: center;
   }
   
-  .back-button a {
-    color: inherit;
-    text-decoration: none;
-    transition: color 0.3s ease;
-  }
-
   .link-text {
+    margin-left: 5px;
     text-decoration: underline;
   }
   
+  /* Floating back button styles */
   .floating-back-button {
     position: fixed;
-    top: 10px;
-    left: 10px;
-    background-color: transparent;
-    color: var(--dark-70);
-    padding: 8px 0 8px 20px;
-    font-size: 14px;
+    top: 20px;
+    left: 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 30px;
+    padding: 10px 15px;
     text-decoration: none;
-    z-index: 50;
-    opacity: 0;
-    transition: opacity 1.5s ease, transform 0.3s ease, color 0.3s ease;
-    pointer-events: none;
+    color: var(--dark-80);
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 100;
   }
   
   .floating-back-button.visible {
     opacity: 1;
-    pointer-events: auto;
+    transform: translateY(0);
   }
   
   .floating-back-button.hidden {
     opacity: 0;
+    transform: translateY(-10px);
     pointer-events: none;
   }
   
-  /* Add this new class for immediate hiding */
   .floating-back-button.instant-hide {
-    transition: opacity 0s, transform 0.3s ease, color 0.3s ease;
-  }
-  
-  .floating-back-button:hover {
-    transform: scale(1.04);
-    color: var(--dark-80);
+    transition: none;
+    pointer-events: none;
   }
   
   .floating-back-button .arrow {
-    text-decoration: none;
+    font-weight: bold;
+    margin-right: 5px;
   }
   
-  .floating-back-button .floating-link-text {
-    text-decoration: underline;
-  }
-  
+  /* Error message styles */
   .error-message {
     padding: 20px;
     background-color: #fff8f8;
     border-left: 3px solid #ff7777;
     color: #333;
-  }
-  
-  /* Responsive Styles */
-  @media (max-width: 1150px) {
-    .floating-back-button {
-      display: none;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .container {
-      padding: 0 15px;
-    }
-
-    .back-button {
-      font-size: 12px;
-    }
+    margin: 20px 0;
   }
 </style>
