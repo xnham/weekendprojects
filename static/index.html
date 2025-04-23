@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Weekend Projects</title>
+  <script>
+    // Single Page Apps for GitHub Pages
+    // MIT License
+    // https://github.com/rafgraph/spa-github-pages
+    (function() {
+      // This works in combination with the 404.html file
+      // to redirect paths properly for single page applications
+      var l = window.location;
+      if (l.search[1] === '/') {
+        var decoded = l.search.slice(1).split('&').map(function(s) { 
+          return s.replace(/~and~/g, '&')
+        }).join('?');
+        window.history.replaceState(null, null,
+          l.pathname.slice(0, -1) + decoded + l.hash
+        );
+      }
+    })();
+  </script>
+  <!-- Note: The rest of your head content will be replaced by SvelteKit -->
+</head>
+<body>
+  <!-- Your SvelteKit app will be injected here -->
+</body>
+</html> 
