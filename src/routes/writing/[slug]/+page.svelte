@@ -60,7 +60,7 @@
     ? window.location.href 
     : `https://xnham.com/writing/${$page.params.slug}`;
   
-  // Generate Article-specific JSON-LD 
+  // Keep articleJsonLd for use in onMount
   $: articleJsonLd = data?.essay ? {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -83,6 +83,21 @@
       "@id": essayUrl
     }
   } : null;
+
+  // Add structured data programmatically
+  function addJsonLd() {
+    if (typeof window === 'undefined' || !articleJsonLd) return;
+    
+    // Remove any existing JSON-LD scripts to prevent duplicates
+    const existingScripts = document.querySelectorAll('script[type="application/ld+json"]');
+    existingScripts.forEach(script => script.remove());
+    
+    // Create new script element with proper JSON
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify(articleJsonLd);
+    document.head.appendChild(script);
+  }
 
   // Scroll handling logic
   function handleScroll() {
@@ -119,6 +134,9 @@
         type: "article",
         url: typeof window !== 'undefined' ? window.location.href : `https://xnham.com/writing/${$page.params.slug}`
       });
+      
+      // Add JSON-LD structured data programmatically
+      addJsonLd();
     } else {
       // Fallback metadata if no essay data
       metadata.set({
@@ -161,13 +179,6 @@
     <title>{data.essay.title} | Wendy Ham's Weekend Projects</title>
     <meta name="description" content={combinedDescription} />
     <link rel="canonical" href={`https://xnham.com/writing/${$page.params.slug}`} />
-    
-    <!-- Structured data -->
-    {#if articleJsonLd}
-      <script type="application/ld+json">
-        {JSON.stringify(articleJsonLd, null, 0)}
-      </script>
-    {/if}
     
     <!-- Open Graph -->
     <meta property="og:type" content="article" />
