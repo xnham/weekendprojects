@@ -13,6 +13,15 @@
   import InteractionButton from './shared/InteractionButton.svelte';
   import type { InteractionState } from '$lib/types/interactions';
   import type { Project as ContentProject } from '$lib/types/content';
+  // Import Font Awesome icons directly
+  import { 
+    faPerson, 
+    faHouseChimneyWindow, 
+    faBriefcase, 
+    faTreeCity,
+    faAngleLeft,
+    faAngleRight 
+  } from '@fortawesome/free-solid-svg-icons';
   
   // Accept preloaded projects from the server
   export let preloadedProjects: Project[] = [];
@@ -352,13 +361,13 @@
             <div class="dual-pill-label">
               <span class="beneficiary-side">
                 {#if project.beneficiary === "personal"}
-                  <FontAwesomeIcon icon={['fas', 'person']} size="sm" />
+                  <FontAwesomeIcon icon={faPerson} size="sm" />
                 {:else if project.beneficiary === "household"}
-                  <FontAwesomeIcon icon={['fas', 'house-chimney-window']} size="sm" />
+                  <FontAwesomeIcon icon={faHouseChimneyWindow} size="sm" />
                 {:else if project.beneficiary === "work/business"}
-                  <FontAwesomeIcon icon={['fas', 'briefcase']} size="sm" />
+                  <FontAwesomeIcon icon={faBriefcase} size="sm" />
                 {:else if project.beneficiary === "community"}
-                  <FontAwesomeIcon icon={['fas', 'tree-city']} size="sm" />
+                  <FontAwesomeIcon icon={faTreeCity} size="sm" />
                 {/if}
                 {project.beneficiary}
               </span>
@@ -393,7 +402,7 @@
                 on:click={() => goBack(project.id)}
                 disabled={currentSlides[project.id] === 0}
                 aria-label="Previous slide">
-                <FontAwesomeIcon icon={['fas', 'angle-left']} />
+                <FontAwesomeIcon icon={faAngleLeft} />
               </button>
               
               <!-- The slider wrapper without buttons -->
@@ -493,7 +502,7 @@
                 on:click={() => goForward(project.id, project)}
                 disabled={currentSlides[project.id] === (getTotalSlides(project) - 1)}
                 aria-label="Next slide">
-                <FontAwesomeIcon icon={['fas', 'angle-right']} />
+                <FontAwesomeIcon icon={faAngleRight} />
               </button>
             </div>
           </div>
