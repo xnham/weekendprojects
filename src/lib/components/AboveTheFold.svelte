@@ -3,9 +3,9 @@
   import { browser } from '$app/environment';
 
   // Array of rotating texts (copied from your original implementation)
-  const rotatingTexts = ['^Claude', '^Cursor', '^Vapi', '^Replit', '^ChatGPT'];
+  const rotatingTexts = ['^Claude', '^Cursor', '^Vapi', '^Replit'];
   // Set an initial value for server-side rendering
-  let rotatingText = "^AI";
+  let rotatingText = "^Cursor";
   let currentIndex = 0;
   let rotatingTextElement: HTMLElement | null = null;
   
