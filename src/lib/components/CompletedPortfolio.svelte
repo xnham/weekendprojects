@@ -596,7 +596,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;  /* This aligns children to the right */
-    gap: 0;
+    gap: 6px;
     box-sizing: border-box;
     font-size: 0; /* Hide the direct text node inside */
   }

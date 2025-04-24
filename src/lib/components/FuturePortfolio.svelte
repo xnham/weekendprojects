@@ -596,6 +596,7 @@
     display: flex;
     justify-content: column;
     gap: 28px;
+    padding: 0;
   }
   
   .future-project-counters {

@@ -230,6 +230,7 @@
   }
   
   .link-text {
+    color: var(--dark-80);
     margin-left: 5px;
     text-decoration: underline;
   }
@@ -239,16 +240,23 @@
     position: fixed;
     top: 20px;
     left: 20px;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 30px;
-    padding: 10px 15px;
+    background-color: transparent;
+    padding: 0 15px;
     text-decoration: none;
-    color: var(--dark-80);
     display: flex;
     align-items: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     transition: opacity 0.3s, transform 0.3s;
     z-index: 100;
+  }
+
+  .arrow {
+    color: var(--dark-70);
+  }
+
+  .floating-link-text {
+    text-decoration: underline;
+    color: var(--dark-80);
+    font-weight: 400;
   }
   
   .floating-back-button.visible {
@@ -279,5 +287,13 @@
     border-left: 3px solid #ff7777;
     color: #333;
     margin: 20px 0;
+  }
+
+  @media (max-width: 1100px) {
+    .floating-back-button {
+      display: none;
+    }
+    
+    
   }
 </style>
