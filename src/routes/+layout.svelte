@@ -182,8 +182,12 @@
   <meta name="twitter:creator" content="@xnham" />
   <meta name="twitter:image:alt" content="Software for one, for everyone." />
   
-  <!-- JSON-LD Structured Data -->
-  {@html `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`}
+  <!-- JSON-LD Structured Data - Only show on homepage and other pages without custom JSON-LD -->
+  {#if !($page.url.pathname.startsWith('/writing/') && $page.url.pathname !== '/writing/')}
+    <script type="application/ld+json">
+      {JSON.stringify(jsonLd)}
+    </script>
+  {/if}
 </svelte:head>
 
 <div class="site-wrapper">

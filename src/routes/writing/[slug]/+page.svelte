@@ -165,7 +165,7 @@
     <!-- Structured data -->
     {#if articleJsonLd}
       <script type="application/ld+json">
-        {JSON.stringify(articleJsonLd)}
+        {JSON.stringify(articleJsonLd, null, 0)}
       </script>
     {/if}
     
