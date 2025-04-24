@@ -233,15 +233,15 @@
 <style>
   /* Back button styles */
   .back-button {
-    margin-bottom: 40px;
+    margin-bottom: 10px;
     font-size: 14px;
-    color: var(--dark-80);
+    color: var(--dark-70);
     display: flex;
     align-items: center;
   }
   
   .link-text {
-    color: var(--dark-80);
+    color: var(--dark-70);
     margin-left: 5px;
     text-decoration: underline;
   }
@@ -262,12 +262,14 @@
 
   .arrow {
     color: var(--dark-70);
+    font-size: 14px;
   }
 
   .floating-link-text {
     text-decoration: underline;
-    color: var(--dark-80);
+    color: var(--dark-70);
     font-weight: 400;
+    font-size: 14px;
   }
   
   .floating-back-button.visible {
@@ -287,7 +289,6 @@
   }
   
   .floating-back-button .arrow {
-    font-weight: bold;
     margin-right: 5px;
   }
   
@@ -304,7 +305,5 @@
     .floating-back-button {
       display: none;
     }
-    
-    
   }
 </style>

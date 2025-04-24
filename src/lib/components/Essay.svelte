@@ -83,15 +83,18 @@
 
   // Helper functions for getting interaction counts
   function getEssayLikes() {
-    return isOptimistic ? optimisticLikeCount : (essay?.like_count || 0);
+    // Always use optimistic counts for immediate UI updates
+    return optimisticLikeCount;
   }
   
   function getEssayShares() {
-    return isOptimistic ? optimisticShareCount : (essay?.share_count || 0);
+    // Always use optimistic counts for immediate UI updates
+    return optimisticShareCount;
   }
   
   function getEssayViews() {
-    return isOptimistic ? optimisticViewCount : (essay?.view_count || 0);
+    // Always use optimistic counts for immediate UI updates
+    return optimisticViewCount;
   }
 
   // Function to load essay data from Supabase
@@ -204,6 +207,9 @@
     }
   }
 
+  // Reactive statement to track when counts change for UI updates
+  $: countUpdateTrigger = `${optimisticLikeCount}-${optimisticShareCount}-${optimisticViewCount}`;
+
   // Handle like button clicks
   async function handleLike() {
     if (!browser || !essay?.id) return;
@@ -213,12 +219,12 @@
       
       // Get current like state and calculate new optimistic count
       const currentlyLiked = likedByUser;
-      const oldCount = getEssayLikes();
+      const oldCount = optimisticLikeCount;
       const increment = currentlyLiked ? -1 : 1;
-      optimisticLikeCount = Math.max(0, oldCount + increment);
       
       // Update local state immediately for responsive UI
       likedByUser = !currentlyLiked;
+      optimisticLikeCount = Math.max(0, oldCount + increment);
       
       // Toggle like in the database
       const newLikeStatus = await toggleLike(essay.id);
@@ -231,7 +237,7 @@
         
         // Adjust count if needed
         const adjustment = newLikeStatus ? 1 : -1;
-        optimisticLikeCount = Math.max(0, getEssayLikes() + adjustment);
+        optimisticLikeCount = Math.max(0, optimisticLikeCount + adjustment);
       }
     } catch (error) {
       console.error(`Error toggling like for essay ${essay.id}:`, error);
@@ -241,7 +247,7 @@
       
       // Revert count
       const increment = likedByUser ? 1 : -1;
-      optimisticLikeCount = Math.max(0, getEssayLikes() - increment);
+      optimisticLikeCount = Math.max(0, optimisticLikeCount - increment);
       
       dispatch('error', error);
     }
@@ -259,25 +265,13 @@
       : `https://xnham.com/writing/${essay.slug}`;
     
     try {
-      // Try to use the Web Share API if available
-      if (navigator.share) {
-        await navigator.share({
-          title: essay.title,
-          text: essay.description || essay.excerpt || 'Check out this essay',
-          url: url
-        });
-        
-        console.log('Successfully shared via Web Share API');
-        copyFeedback = 'Shared!';
-      } else {
-        // Fall back to clipboard copy
-        await navigator.clipboard.writeText(url);
-        console.log('URL copied to clipboard');
-        copyFeedback = 'Link copied!';
-      }
+      // Always use clipboard copy for sharing
+      await navigator.clipboard.writeText(url);
+      console.log('URL copied to clipboard');
+      copyFeedback = 'Link copied!';
       
-      // Update optimistic count
-      optimisticShareCount = getEssayShares() + 1;
+      // Update optimistic count immediately for UI
+      optimisticShareCount = optimisticShareCount + 1;
       
       // Record the share in the database
       await recordShare(essay.id);
@@ -291,9 +285,9 @@
         copyFeedback = '';
       }, 2000);
     } catch (error) {
-      console.error('Error sharing essay:', error);
+      console.error('Error copying link:', error);
       
-      copyFeedback = 'Error sharing';
+      copyFeedback = 'Error copying link';
       
       // Clear feedback after a delay
       if (copyFeedbackTimeout) {
@@ -416,16 +410,6 @@
     <script type="application/ld+json">
       {JSON.stringify(articleJsonLd)}
     </script>
-
-    <!-- Open Graph -->
-    <meta property="og:type" content="article" />
-    <meta property="og:url" content={essayUrl} />
-    <meta
-      property="og:title"
-      content={`${essay.title} | Wendy Ham's Weekend Projects`}
-    />
-    <meta property="og:description" content={combinedDescription} />
-    <meta property="og:image" content="https://xnham.com/images/og-image.png" />
   {/if}
 </svelte:head>
 
@@ -477,13 +461,15 @@
 
     <div class="essay-stats">
       <span class="essay-stat"
-        >{getEssayLikes()} {getEssayLikes() === 1 ? "like" : "likes"}</span
+        >{optimisticLikeCount} {optimisticLikeCount === 1 ? "like" : "likes"}</span
       >
+      ·
       <span class="essay-stat"
-        >{getEssayShares()} {getEssayShares() === 1 ? "share" : "shares"}</span
+        >{optimisticShareCount} {optimisticShareCount === 1 ? "share" : "shares"}</span
       >
+      ·
       <span class="essay-stat"
-        >{getEssayViews()} {getEssayViews() === 1 ? "view" : "views"}</span
+        >{optimisticViewCount} {optimisticViewCount === 1 ? "view" : "views"}</span
       >
     </div>
 
@@ -557,8 +543,8 @@
   .essay-stats {
     display: flex;
     justify-content: flex-start;
-    gap: 20px;
-    color: var(--light-100);
+    gap: 4px;
+    color: var(--dark-80);
     font-size: 12px;
     margin-top: 4px;
   }
@@ -576,7 +562,7 @@
   /* Interactive Components */
   .essay-buttons {
     display: flex;
-    gap: 8px;
+    gap: 28px;
     padding-right: 4px;
     position: relative;
   }

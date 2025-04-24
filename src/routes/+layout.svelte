@@ -160,14 +160,16 @@
   <!-- Favicon -->
   <link rel="icon" href="/favicon.png" type="image/png">
   
-  <!-- Open Graph -->
-  <meta property="og:type" content={$metadata.type || "website"} />
-  <meta property="og:url" content={$metadata.url || "https://xnham.com"} />
-  <meta property="og:title" content={$metadata.title || "Wendy Ham | Software for One"} />
-  {#if $metadata.description}
-    <meta property="og:description" content={$metadata.description} />
+  <!-- Open Graph - Only show on pages that don't have their own OG tags -->
+  {#if !($page.url.pathname.startsWith('/writing/') && $page.url.pathname !== '/writing/')}
+    <meta property="og:type" content={$metadata.type || "website"} />
+    <meta property="og:url" content={$metadata.url || "https://xnham.com"} />
+    <meta property="og:title" content={$metadata.title || "Wendy Ham | Software for One"} />
+    {#if $metadata.description}
+      <meta property="og:description" content={$metadata.description} />
+    {/if}
+    <meta property="og:image" content="/images/og-image.png" />
   {/if}
-  <meta property="og:image" content="/images/og-image.png" />
   
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
