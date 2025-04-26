@@ -81,7 +81,7 @@
         <p>It's becoming completely normal for small businesses, families, and individuals to deploy bespoke software that's precisely tailored—even adaptive—to their needs.
         </p>
 
-        <p>Through Weekend Projects, I hope to expand and share my understanding of this exciting era of software long tail. About {yearPhrase} ago, empowered by Claude, Cursor, and other AI tools, I started building various pieces of 'software for one' to squash small yet pesky problems that were bugging me and my family.</p>
+        <p>Through Weekend Projects, I hope to gain a deeper understanding of this exciting era of the software long tail. About {yearPhrase} ago, empowered by Claude, Cursor, and other AI tools, I started building various pieces of 'software for one' to squash small yet pesky problems that were bugging me and my family.</p>
       </div>
 
       <div class="column">
