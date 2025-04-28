@@ -75,7 +75,7 @@
       <p>
           Please reach out if you have a collaboration idea, a tool I can
           help you build, or if you just feel like we have a common interest.
-          I will respond within 24 hours.
+          I will respond within 48 hours.
       </p>
       <p>
           Feel like chatting with my robot before sending me a message? Call Sunny <a href="/sunny?from=/contact" data-sunny-link>here</a>.
