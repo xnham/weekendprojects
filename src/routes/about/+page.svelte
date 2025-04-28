@@ -62,9 +62,7 @@
           complex and diverse behaviors, creating a '<a
             href="/writing/the-last-mile"
             class="essay-card-link">last mile</a
-          >' problem. This observation made me feel excited about AI's
-          potential to help us build software that adapts to humans, not the
-          other way around.
+          >' problem.
         </p>
       </div>
     </div>
