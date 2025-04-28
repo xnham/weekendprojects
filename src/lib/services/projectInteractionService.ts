@@ -1,6 +1,7 @@
 import { supabase } from '$lib/supabase';
 import { writable, get } from 'svelte/store';
 import { ContentType, type InteractionState, type FollowResult } from '$lib/types/interactions';
+import emailjs from '@emailjs/browser';
 
 // Re-export ContentType
 export { ContentType };
@@ -108,6 +109,36 @@ export const isFollowing = (contentType: ContentType, contentId: string): boolea
   return state.follows[key] || false;
 };
 
+// Add interface for interaction notification
+interface InteractionNotification {
+  type: 'like' | 'unlike' | 'follow' | 'unfollow';
+  projectId: string;
+  projectTitle: string;
+  timestamp: string;
+}
+
+// Function to send interaction notification via EmailJS
+async function sendInteractionNotification(notification: InteractionNotification) {
+  try {
+    const templateParams = {
+      to_email: 'wendyham@gmail.com', // Your email address
+      interaction_type: notification.type,
+      project_id: notification.projectId,
+      project_title: notification.projectTitle,
+      timestamp: notification.timestamp
+    };
+
+    await emailjs.send(
+      import.meta.env.VITE_EMAILJS_SERVICE_ID,
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      templateParams,
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+    );
+  } catch (error) {
+    console.error('Failed to send interaction notification:', error);
+  }
+}
+
 // Toggle like status for a project
 export const toggleLike = async (contentType: ContentType, contentId: string): Promise<boolean> => {
   try {
@@ -122,6 +153,21 @@ export const toggleLike = async (contentType: ContentType, contentId: string): P
       const newLikes = { ...state.likes };
       newLikes[key] = !isCurrentlyLiked;
       return { ...state, likes: newLikes };
+    });
+    
+    // Get project title for notification
+    const { data: project } = await supabase
+      .from('projects')
+      .select('title')
+      .eq('id', contentId)
+      .single();
+    
+    // Send notification
+    await sendInteractionNotification({
+      type: isCurrentlyLiked ? 'unlike' : 'like',
+      projectId: contentId,
+      projectTitle: project?.title || 'Unknown Project',
+      timestamp: new Date().toISOString()
     });
     
     console.log(`Toggling like for ${contentType}:${contentId} to ${!isCurrentlyLiked}`);
@@ -297,6 +343,21 @@ export const toggleFollow = async (
     // Get current state
     const currentState = get(interactionState);
     const isCurrentlyFollowing = currentState.follows[key] || false;
+    
+    // Get project title for notification
+    const { data: project } = await supabase
+      .from('projects')
+      .select('title')
+      .eq('id', contentId)
+      .single();
+    
+    // Send notification
+    await sendInteractionNotification({
+      type: isCurrentlyFollowing ? 'unfollow' : 'follow',
+      projectId: contentId,
+      projectTitle: project?.title || 'Unknown Project',
+      timestamp: new Date().toISOString()
+    });
     
     // Check if we need an email address
     if (!isCurrentlyFollowing && !email && !currentState.userEmail) {
