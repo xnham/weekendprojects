@@ -75,7 +75,7 @@
   <div class="intro-wrapper">
     <div class="intro-text two-columns">
       <div class="column">
-        <p>Building and maintaining software used to be expensive, which meant custom solutions were mainly accessible to large enterprises. That has changed. Now, pretty much anyone can create production-grade software using everyday language.
+        <p>Building and maintaining software used to be expensive, which meant custom solutions were mainly accessible to large enterprises. That has changed. Now, pretty much anyone can learn to create production-grade software using everyday language.
         </p>
           
         <p>It's becoming completely normal for small businesses, families, and individuals to deploy bespoke software that's precisely tailored—even adaptive—to their needs.
