@@ -24,6 +24,7 @@
     likes: number;
     follows: number;
     beneficiary: string;
+    anchor?: string;
   }
   
   // Accept preloaded projects from the server
@@ -376,6 +377,11 @@
   function focusOnMount(node: HTMLElement) {
     node.focus();
   }
+  
+  // Add function to generate URL-friendly ID
+  function getProjectAnchorId(project: Project): string {
+    return `project-${project.id}-${project.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+  }
 </script>
 
 <div class="future-projects" id="projectList">
@@ -385,7 +391,7 @@
     <div class="error-state">Error: {error}</div>
   {:else}
     {#each displayProjects as project (project.id)}
-      <div class="future-project-card">
+      <div class="future-project-card" id={project.anchor || `project-${project.id}`}>
         <div class="future-project-card-header">
           <div class="dual-pill-label">
             <span class="beneficiary-side">

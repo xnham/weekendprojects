@@ -46,6 +46,7 @@
     linkText?: string | null;
     beforeImpact?: string | null;
     afterImpact?: string | null;
+    anchor?: string;
     
     // Updated time saved structure
     timeSaved?: {
@@ -341,6 +342,11 @@
   function isProjectLiked(projectId: string): boolean {
     return projectLikedStatus[projectId] || false;
   }
+
+  // Add function to generate URL-friendly ID
+  function getProjectAnchorId(project: Project): string {
+    return `project-${project.id}-${project.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+  }
 </script>
 
 <div id="completed-projects" class="completed-projects">
@@ -354,7 +360,7 @@
     </div>
   {:else}
     {#each completedProjects as project (project.id)}
-      <div class="completed-project-card" data-project-id={project.id}>
+      <div class="completed-project-card" data-project-id={project.id} id={project.anchor || `project-${project.id}`}>
         <!-- Single unified header that works for both desktop and mobile -->
         <div class="completed-project-header">
           <div class="completed-project-header-left">
