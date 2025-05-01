@@ -109,7 +109,7 @@
         <p><span class="arrow">←</span> <span class="year">all that</span></p>
       </div>
       <div class="about-content">
-        <p>I grew up in Jakarta, Indonesia.</p>
+        <p>I grew up in Jakarta, Indonesia in a family that ran an egg business.</p>
       </div>
     </div>
   </div>
