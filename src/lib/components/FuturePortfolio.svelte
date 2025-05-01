@@ -877,7 +877,7 @@
   /* Tablet */
   @media (max-width: 768px) {
     .future-projects {
-      width: 85%;
+      width: 90%;
     }
     
     .future-project-modal-content {
