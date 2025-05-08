@@ -90,7 +90,7 @@
         <p>I'm curious: Have the economic forces now enabled, maybe even favored, hyperpersonal software creation? Can someone with my patchy technical background build software that's actually worth using?</p>
 
         <p>Btw, one of the things I made was an AI voice agent called Sunny, designed to help spark project ideas. If you'd love to streamline some aspects of your life, or just see what talking to a robot is like, 
-          <a href="/sunny?from=/" data-sunny-link>how about giving it a call</a>?
+          <a href="/sunny?from=/" data-sunny-link>how about giving Sunny a call</a>?
         </p>
 
       </div>
