@@ -37,6 +37,7 @@
     "@supabase/postgrest-js": "^1.8.5",
     "@supabase/supabase-js": "2.38.4",
     "@vapi-ai/web": "^2.2.6",
+    "cookie": "^0.7.2",
     "dotenv": "^16.4.7",
     "gray-matter": "^4.0.3",
     "marked": "^9.1.6",
