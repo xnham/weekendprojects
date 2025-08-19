@@ -72,13 +72,13 @@
         <p>It's becoming completely normal for small businesses, families, and individuals to deploy bespoke software that's precisely tailored—even adaptive—to their needs.
         </p>
 
-        <p>Through Weekend Projects, I hope to gain a deeper understanding of this exciting era of the software long tail. About {yearPhrase} ago, empowered by Claude, Cursor, and other AI tools, I started building various pieces of 'software for one' to squash small yet pesky problems that were bugging me and my family.</p>
+        <p>Software for One is my little project through which I hope to gain a deeper understanding of this exciting era of the software long tail. About {yearPhrase} ago, empowered by Claude, Cursor, and other AI tools, I started building various pieces of extremely targeted tiny software to squash small yet pesky problems that were bugging me and my family.</p>
       </div>
 
       <div class="column">
         <p>Before these powerful AI helpers came along, owing to my disjointed coding skills, I would've had to hire a developer or toil for months to build each piece of software, which would have been a silly use of resources.</p>
 
-        <p>I'm curious: Have the economic forces now enabled, maybe even favored, hyperpersonal software creation? Can someone with my patchy technical background build software that's actually worth using?</p>
+        <p>I'm curious... Have the economic forces now enabled, maybe even favored, hyperpersonal software creation? Can someone with my patchy technical background build software that's actually worth using?</p>
 
         <p>Btw, one of the things I made was an AI voice agent called Sunny, designed to help spark project ideas. If you'd love to streamline some aspects of your life, or just see what talking to a robot is like, 
           <a href="/sunny?from=/" data-sunny-link>how about giving Sunny a call</a>?
