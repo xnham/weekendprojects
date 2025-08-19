@@ -3,7 +3,7 @@
   import { browser } from '$app/environment';
 
   // Array of rotating texts (copied from your original implementation)
-  const rotatingTexts = ['^Claude', '^Cursor', '^Vapi', '^Replit'];
+  const rotatingTexts = ['^Claude', '^Cursor', '^Vapi'];
   // Set an initial value for server-side rendering
   let rotatingText = "^Cursor";
   let currentIndex = 0;
@@ -69,7 +69,7 @@
 
 <header>
   <h1 class="title">
-    <span class="title-part">Weekend</span> <span class="title-part">Projects</span><span class="rotating-text" bind:this={rotatingTextElement}>{rotatingText}</span>
+    <span class="title-part">Software</span> <span class="title-part">for One</span><!-- <span class="rotating-text" bind:this={rotatingTextElement}>{rotatingText}</span> -->
   </h1>
 
   <div class="intro-wrapper">
