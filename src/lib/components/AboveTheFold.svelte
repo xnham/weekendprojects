@@ -3,7 +3,7 @@
   import { browser } from '$app/environment';
 
   // Array of rotating texts (copied from your original implementation)
-  const rotatingTexts = ['| Claude', '| Cursor', '| Vapi'];
+  const rotatingTexts = ['∵ Claude', '∵ Cursor', '∵ Vapi'];
   // Set an initial value for server-side rendering
   let rotatingText = "^Cursor";
   let currentIndex = 0;
