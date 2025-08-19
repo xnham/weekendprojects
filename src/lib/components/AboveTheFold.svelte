@@ -69,7 +69,7 @@
 
 <header>
   <h1 class="title">
-    <span class="title-part">Software</span> <span class="title-part">for One</span><!-- <span class="rotating-text" bind:this={rotatingTextElement}>{rotatingText}</span> -->
+    <span class="title-part">Software</span> <span class="title-part">for One | </span><span class="rotating-text" bind:this={rotatingTextElement}>{rotatingText}</span>
   </h1>
 
   <div class="intro-wrapper">
