@@ -5,21 +5,12 @@
   // Array of rotating texts (copied from your original implementation)
   const rotatingTexts = ['∵ Claude', '∵ Cursor', '∵ Vapi'];
   // Set an initial value for server-side rendering
-  let rotatingText = "^Cursor";
+  let rotatingText = "∵ Claude";
   let currentIndex = 0;
   let rotatingTextElement: HTMLElement | null = null;
   
   // Initialize with a default value for server-side rendering
   let yearPhrase = calculateYearPhrase();
-
-  // Function to get random index different from current one
-  function getRandomIndex(currentIndex: number, arrayLength: number): number {
-    let newIndex;
-    do {
-      newIndex = Math.floor(Math.random() * arrayLength);
-    } while (newIndex === currentIndex);
-    return newIndex;
-  }
 
   // Function to update rotating text with fade effect
   function updateRotatingText(): void {
@@ -27,7 +18,7 @@
       rotatingTextElement.style.opacity = '0';
       
       setTimeout(() => {
-        currentIndex = getRandomIndex(currentIndex, rotatingTexts.length);
+        currentIndex = (currentIndex + 1) % rotatingTexts.length;
         rotatingText = rotatingTexts[currentIndex];
         if (rotatingTextElement) {
           rotatingTextElement.style.opacity = '1';
