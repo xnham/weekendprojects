@@ -3,9 +3,9 @@
   import { browser } from '$app/environment';
 
   // Array of rotating texts (copied from your original implementation)
-  const rotatingTexts = ['∵ Claude', '∵ Cursor', '∵ Vapi'];
+  const rotatingTexts = ['^Claude', '^Cursor', '^Vapi'];
   // Set an initial value for server-side rendering
-  let rotatingText = "∵ Claude";
+  let rotatingText = "^Claude";
   let currentIndex = 0;
   let rotatingTextElement: HTMLElement | null = null;
   
@@ -60,7 +60,7 @@
 
 <header>
   <h1 class="title">
-    <span class="title-part">Software</span> <span class="title-part">for One </span><span class="rotating-text" bind:this={rotatingTextElement}>{rotatingText}</span>
+    <span class="title-part">Weekend </span> <span class="title-part">Projects </span><span class="rotating-text" bind:this={rotatingTextElement}>{rotatingText}</span>
   </h1>
 
   <div class="intro-wrapper">
@@ -72,7 +72,7 @@
         <p>It's becoming completely normal for small businesses, families, and individuals to deploy bespoke software that's precisely tailored—even adaptive—to their needs.
         </p>
 
-        <p>Software for One is my little project through which I hope to gain a deeper understanding of this exciting era of the software long tail. About {yearPhrase} ago, empowered by Claude, Cursor, and other AI tools, I started building various pieces of extremely targeted tiny software to squash small yet pesky problems that were bugging me and my family.</p>
+        <p>Through Weekend Projects, I hope to gain a deeper understanding of this exciting era of the software long tail. About {yearPhrase} ago, empowered by various AI tools, I started building various pieces of "software for one" to squash small yet pesky problems that were bugging me and my family.</p>
       </div>
 
       <div class="column">
