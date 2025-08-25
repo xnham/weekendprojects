@@ -72,11 +72,11 @@
         <p>It's becoming completely normal for small businesses, families, and individuals to deploy bespoke software that's precisely tailored—even adaptive—to their needs.
         </p>
 
-        <p>Through Weekend Projects, I hope to gain a deeper understanding of this exciting era of the software long tail. About {yearPhrase} ago, empowered by various AI tools, I started building various pieces of "software for one" to squash small yet pesky problems that were bugging me and my family.</p>
+        <p>Through Weekend Projects, I hope to gain a deeper understanding of this exciting era of the software long tail. About {yearPhrase} ago, empowered by various AI tools, I started building (that is, vibe coding) various pieces of "software for one" to squash small yet pesky problems that were bugging me and my family.</p>
       </div>
 
       <div class="column">
-        <p>Before these powerful AI helpers came along, owing to my disjointed coding skills, I would've had to hire a developer or toil for months to build each piece of software, which would have been a silly use of resources.</p>
+        <p>Before the powerful AI helpers came along, owing to my disjointed coding skills, I would've had to hire a developer or toil for months to build each piece of software, which would have been a silly use of resources.</p>
 
         <p>I'm curious... Have the economic forces now enabled, maybe even favored, hyperpersonal software creation? Can someone with my patchy technical background build software that's actually worth using?</p>
 
